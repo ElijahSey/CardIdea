@@ -16,7 +16,8 @@
 
 ## Begeisterungsfaktoren
 - Als Nutzer möchte ich Bilder an meine Lernkarten anfügen, um meine Lernkarten zu veranschaulichen.
+- Als Nutzer möchte ich als Antwort Bilder malen können, um die Fragen mit Bildern beantworten zu können.
 - Als Nutzer möchte ich Lernkarten aus einer Datei importieren können.
 - Als Nutzer möchte ich an jede Lernkarte einen Hinweis anbringen können, um mir auf die Sprünge zu helfen.
 - Als Nutzer möchte ich, dass der Hinweis auf Knopfdruck einblendbar ist, damit ich ihn nicht gleich sehe.
-- Als Nutzer möchte ich nur die Lernkarten nochmal durchgehen, die ich falsch beantwortet habe, damit ich mich auf das fokussiere, was ich noch nicht so gut kann.
+- Als Nutzer möchte ich nur die Lernkarten nochmal durchgehen, die ich falsch bzw. noch gar nicht beantwortet habe, damit ich mich auf das fokussiere, was ich noch nicht so gut kann.
