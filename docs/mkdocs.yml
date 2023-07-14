@@ -1,4 +1,7 @@
 site_name: cardidea docs
+site_url: https://elijahsey.github.io/cardidea
+repo_name: cardidea
+repo_url: https://github.com/ElijahSey/cardidea
 
 theme:
   name: material
@@ -42,7 +45,11 @@ theme:
 
 nav:
   - Startseite: index.md
-  - Anforderungen: Anforderungen.md
+  - Anforderungen: 
+    - Funktional: requirements/functional.md
+    - Qualität: requirements/quality.md
+  - Architektur:
+    - Klassendiagramm: architecture/classDiagram.md
 
 markdown_extensions:
   - pymdownx.highlight:

@@ -1,4 +1,4 @@
-# Funktionale Anforderungen für cardidea
+# Funktionale Anforderungen
 
 ## Basisfaktoren
 - Grafische Benutzeroberfläche
