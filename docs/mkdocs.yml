@@ -1,10 +1,10 @@
 site_name: ideacards docs
 
 theme:
-  language: de
   name: material
-  features:
-    - navigation.instant
+  language: de
+  icon:
+    repo: simple/github
   palette:
 
     # Palette toggle for light mode
@@ -24,7 +24,25 @@ theme:
         name: Switch to light mode
       primary: black
       accent: white
+  
+  features:
+    - content.code.copy       # Kopierenbutton für Codeblöcke
+    - content.code.annotate   # Codeanmerkungen
+    - navigation.instant
+    - navigation.tracking     # die URL wird automatisch angepasst, wenn man herunterscrollt
+    - navigation.tabs         # Navigationstabs werden angezeigt
+    - navigation.tabs.sticky  # Navigationstabs bleiben dauerhaft sichtbar 
+    - navigation.path         
+    - navigation.indexes      
+    - toc.follow              # Table of contents folgt dem Scrollen             
+    - content.tooltips        # Enable tooltip functionality
+    - content.action.edit     # Bearbeiten-Button auf jeder Seite
+    - content.action.view     # Quellcode Anzeige auf jeder Seite
+    - navigation.top          # Zurück zum Seitenanfang
 
+nav:
+  - Startseite: index.md
+  - Anforderungen: Anforderungen.md
 
 markdown_extensions:
   - pymdownx.highlight:

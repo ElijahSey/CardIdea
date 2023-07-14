@@ -1,4 +1,4 @@
-# Funktionale Anforderungen für ideacards
+# Funktionale Anforderungen für cardidea
 
 ## Basisfaktoren
 - Grafische Benutzeroberfläche
