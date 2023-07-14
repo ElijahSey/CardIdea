@@ -34,5 +34,6 @@ jobs:
           pip install mkdocs-gen-files
           pip install mkdocs-material
           pip install Pygments
+          pip install mkdocs-build-plantuml-plugin
       - name: Deploy
         run: mkdocs gh-deploy --config-file docs/mkdocs.yml
