@@ -1,4 +1,5 @@
-@startuml Klassendiagramm
+@startuml classDiagram
+!include ../include/themes/light.puml
 abstract class AbstractList
 abstract AbstractCollection
 interface List

@@ -1,159 +1,141 @@
-!define BORDER_THICKNESS 3
+@startuml GeneralStyle
 
-skinparam Padding 4
-skinparam RoundCorner 4
-skinparam Shadowing false
+skinparam {
 
-skinparam Default {
-  'FontName "Open Sans Semibold"
-  FontColor FONT_COLOR
-  FontSize 12
+    Padding 4
+    RoundCorner 4
+    Shadowing false
+    BackgroundColor transparent
+    ArrowColor ARROW_COLOR
+
+    ' Text
+    
+    ActivityFontColor FONT_COLOR
+    ActivityDiamondFontColor FONT_COLOR
+    ActorFontColor FONT_COLOR
+    AgentFontColor FONT_COLOR
+    ArtifactFontColor FONT_COLOR
+    BoundaryFontColor FONT_COLOR
+    ClassFontColor FONT_COLOR
+    CloudFontColor FONT_COLOR
+    CollectionsFontColor FONT_COLOR
+    ComponentFontColor FONT_COLOR
+    ControlFontColor FONT_COLOR
+    DatabaseFontColor FONT_COLOR
+    EntityFontColor FONT_COLOR
+    FileFontColor FONT_COLOR
+    FolderFontColor FONT_COLOR
+    FrameFontColor FONT_COLOR
+    InterfaceFontColor FONT_COLOR
+    LegendFontColor FONT_COLOR
+    NodeFontColor FONT_COLOR
+    NoteFontColor FONT_COLOR
+    ObjectFontColor FONT_COLOR
+    PackageFontColor FONT_COLOR
+    ParticipantFontColor FONT_COLOR
+    PartitionFontColor FONT_COLOR
+    QueueFontColor FONT_COLOR
+    RectangleFontColor FONT_COLOR
+    SequenceBoxFontColor FONT_COLOR
+    SequenceDividerFontColor FONT_COLOR
+    SequenceGroupFontColor FONT_COLOR
+    SequenceLifeLineFontColor FONT_COLOR
+    SequenceReferenceFontColor FONT_COLOR
+    StackFontColor FONT_COLOR
+    StateFontColor FONT_COLOR
+    StorageFontColor FONT_COLOR
+    SwimlaneFontColor FONT_COLOR
+    UsecaseFontColor FONT_COLOR
+
+    ' Borders
+
+    ActivityBorderColor BORDER_COLOR
+    ActivityDiamondBorderColor BORDER_COLOR
+    ActorBorderColor BORDER_COLOR
+    AgentBorderColor BORDER_COLOR
+    ArtifactBorderColor BORDER_COLOR
+    BoundaryBorderColor BORDER_COLOR
+    ClassBorderColor BORDER_COLOR
+    CloudBorderColor BORDER_COLOR
+    CollectionsBorderColor BORDER_COLOR
+    ComponentBorderColor BORDER_COLOR
+    ControlBorderColor BORDER_COLOR
+    DatabaseBorderColor BORDER_COLOR
+    EntityBorderColor BORDER_COLOR
+    FileBorderColor BORDER_COLOR
+    FolderBorderColor BORDER_COLOR
+    FrameBorderColor BORDER_COLOR
+    InterfaceBorderColor BORDER_COLOR
+    LegendBorderColor BORDER_COLOR
+    NodeBorderColor BORDER_COLOR
+    NoteBorderColor BORDER_COLOR
+    ObjectBorderColor BORDER_COLOR
+    PackageBorderColor BORDER_COLOR
+    ParticipantBorderColor BORDER_COLOR
+    PartitionBorderColor BORDER_COLOR
+    QueueBorderColor BORDER_COLOR
+    RectangleBorderColor BORDER_COLOR
+    SequenceBoxBorderColor BORDER_COLOR
+    SequenceDividerBorderColor BORDER_COLOR
+    SequenceGroupBorderColor BORDER_COLOR
+    SequenceLifeLineBorderColor BORDER_COLOR
+    SequenceReferenceBorderColor BORDER_COLOR
+    StackBorderColor BORDER_COLOR
+    StateBorderColor BORDER_COLOR
+    StorageBorderColor BORDER_COLOR
+    SwimlaneBorderColor BORDER_COLOR
+    UsecaseBorderColor BORDER_COLOR
+
+    ' Backgrounds
+
+    ActivityBackgroundColor BG_COLOR
+    ActivityDiamondBackgroundColor BG_COLOR
+    ActorBackgroundColor BG_COLOR
+    AgentBackgroundColor BG_COLOR
+    ArtifactBackgroundColor BG_COLOR
+    BoundaryBackgroundColor BG_COLOR
+    ClassBackgroundColor BG_COLOR
+    ClassHeaderBackgroundColor BG_COLOR
+    CloudBackgroundColor BG_COLOR
+    CollectionsBackgroundColor BG_COLOR
+    ComponentBackgroundColor BG_COLOR
+    ControlBackgroundColor BG_COLOR
+    DatabaseBackgroundColor BG_COLOR
+    EntityBackgroundColor BG_COLOR
+    FileBackgroundColor BG_COLOR
+    FolderBackgroundColor BG_COLOR
+    FrameBackgroundColor BG_COLOR
+    IconPackageBackgroundColor BG_COLOR
+    IconPrivateBackgroundColor BG_COLOR
+    IconProtectedBackgroundColor BG_COLOR
+    IconPublicBackgroundColor BG_COLOR
+    InterfaceBackgroundColor BG_COLOR
+    LegendBackgroundColor BG_COLOR
+    NodeBackgroundColor BG_COLOR
+    NoteBackgroundColor BG_COLOR
+    ObjectBackgroundColor BG_COLOR
+    PackageBackgroundColor BG_COLOR
+    ParticipantBackgroundColor BG_COLOR
+    PartitionBackgroundColor BG_COLOR
+    QueueBackgroundColor BG_COLOR
+    RectangleBackgroundColor BG_COLOR
+    SequenceBoxBackgroundColor BG_COLOR
+    SequenceDividerBackgroundColor BG_COLOR
+    SequenceGroupBackgroundColor BG_COLOR
+    SequenceGroupBodyBackgroundColor BG_COLOR
+    SequenceLifeLineBackgroundColor BG_COLOR
+    SequenceReferenceBackgroundColor BG_COLOR
+    SequenceReferenceHeaderBackgroundColor BG_COLOR
+    StackBackgroundColor BG_COLOR
+    StateBackgroundColor BG_COLOR
+    StereotypeABackgroundColor BG_COLOR
+    StereotypeCBackgroundColor BG_COLOR
+    StereotypeEBackgroundColor BG_COLOR
+    StereotypeIBackgroundColor BG_COLOR
+    StereotypeNBackgroundColor BG_COLOR
+    StorageBackgroundColor BG_COLOR
+    TitleBackgroundColor BG_COLOR
+    UsecaseBackgroundColor BG_COLOR
 }
 
-skinparam Arrow {
-  Color FONT_COLOR
-  FontColor FONT_COLOR
-  FontStyle Bold
-}
-
-skinparam package {
-  FontColor FONT_COLOR
-  BackgroundColor BG_MAIN_COLOR
-  BorderColor BORDER_COLOR
-}
-skinparam node {
-  FontColor FONT_COLOR
-  BackgroundColor BG_PACKAGE_COLOR
-  BorderColor BORDER_COLOR
-}
-skinparam component {
-  BackgroundColor BG_MAIN_COLOR
-  BorderColor BORDER_COLOR
-  FontColor FONT_COLOR
-  Style uml2
-}
-
-skinparam database {
-  BackgroundColor BG_MAIN_COLOR
-  BorderColor BORDER_COLOR
-  FontColor FONT_COLOR
-}
-
-skinparam cloud {
-  BackgroundColor BG_MAIN_COLOR
-  BorderColor BORDER_COLOR
-  FontColor FONT_COLOR
-}
-
-skinparam collections {
-  BackgroundColor BG_MAIN_COLOR
-  BorderColor BORDER_COLOR
-  FontColor FONT_COLOR
-}
-skinparam Control {
-  BackgroundColor BG_MAIN_COLOR
-  BorderColor BORDER_COLOR
-  FontColor FONT_COLOR
-}
-skinparam Boundary {
-  BackgroundColor BG_MAIN_COLOR
-  BorderColor BORDER_COLOR
-  FontColor FONT_COLOR
-}
-skinparam Entity {
-  BackgroundColor BG_MAIN_COLOR
-  BorderColor BORDER_COLOR
-  FontColor FONT_COLOR
-}
-skinparam interface {
-  BackgroundColor BG_MAIN_COLOR
-  BorderColor BORDER_COLOR
-  FontColor FONT_COLOR
-}
-skinparam SequenceParticipantBorderThickness 3
-skinparam sequence {
-  ParticipantBackgroundColor BG_MAIN_COLOR
-  ParticipantBorderColor BORDER_COLOR
-  ParticipantFontStyle normal
-  ParticipantFontColor FONT_COLOR
-  LifeLineBorderColor BORDER_COLOR
-  LifeLineBackgroundColor BG_MAIN_COLOR
-  ArrowColor FONT_COLOR
-  ArrowBorderColor BORDER_COLOR
-  ArrowFontColor FONT_COLOR
-  ArrowThickness 3
-  ActorBackgroundColor BG_MAIN_COLOR
-  ActorBorderColor BORDER_COLOR
-  ActorFontColor FONT_COLOR
-}
-
-' C4 Styling
-' ##################################
-
-skinparam rectangle<<person>> {
-  StereotypeFontColor FONT_COLOR
-  FontColor FONT_COLOR
-  BackgroundColor BG_MAIN_COLOR
-  BorderColor BORDER_COLOR
-  BorderThickness BORDER_THICKNESS
-}
-
-skinparam rectangle<<external_person>> {
-  StereotypeFontColor FONT_COLOR
-  FontColor FONT_COLOR
-  BackgroundColor BG_SECONDARY_COLOR
-  BorderColor BORDER_COLOR
-  BorderThickness BORDER_THICKNESS
-}
-
-skinparam rectangle<<system>> {
-  StereotypeFontColor FONT_COLOR
-  FontColor FONT_COLOR
-  BackgroundColor BG_MAIN_COLOR
-  BorderColor BORDER_COLOR
-  BorderThickness BORDER_THICKNESS
-}
-
-skinparam rectangle<<external_system>> {
-  StereotypeFontColor FONT_COLOR
-  FontColor FONT_COLOR
-  BackgroundColor BG_SECONDARY_COLOR
-  BorderColor BORDER_COLOR
-  BorderThickness BORDER_THICKNESS
-}
-
-skinparam database<<system>> {
-  StereotypeFontColor FONT_COLOR
-  FontColor FONT_COLOR
-  BackgroundColor BG_MAIN_COLOR
-  BorderColor BORDER_COLOR
-  BorderThickness BORDER_THICKNESS
-}
-
-skinparam database<<external_system>> {
-  StereotypeFontColor FONT_COLOR
-  FontColor FONT_COLOR
-  BackgroundColor BG_SECONDARY_COLOR
-  BorderColor BORDER_COLOR
-  BorderThickness BORDER_THICKNESS
-}
-
-skinparam rectangle<<boundary>> {
-  Shadowing false
-  StereotypeFontSize 0
-  BackgroundColor BG_PACKAGE_COLOR
-  StereotypeFontColor FONT_COLOR
-  FontColor FONT_COLOR
-  BorderColor BORDER_COLOR
-  BorderStyle dashed
-  BorderThickness BORDER_THICKNESS
-}
-skinparam rectangle<<container>> {
-  Shadowing false
-  StereotypeFontSize 14
-  BackgroundColor BG_MAIN_COLOR
-  StereotypeFontColor FONT_COLOR
-  FontColor FONT_COLOR
-  BorderColor BORDER_COLOR
-  BorderThickness BORDER_THICKNESS
-}
+@enduml
