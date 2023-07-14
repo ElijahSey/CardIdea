@@ -1,0 +1,9 @@
+[data-md-color-scheme="cardidea"] {
+    --md-primary-fg-color:        #1c3585;
+    --md-primary-fg-color--light: #b9b95c;
+    --md-primary-fg-color--dark:  #90030C;
+}
+
+[data-md-color-scheme="slate"] {
+    --md-hue: 210;  
+}

@@ -59,6 +59,9 @@ markdown_extensions:
       anchor_linenums: true
   - pymdownx.superfences
 
+extra_css:
+  - style/extra.css
+
 plugins:
   - search
   - build_plantuml:
