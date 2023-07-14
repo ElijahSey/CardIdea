@@ -1,1 +1,1 @@
-# ideacards
+# cardidea
