@@ -1,6 +1,8 @@
 # Funktionale Anforderungen für ideacards
 
 ## Basisfaktoren
+- Grafische Benutzeroberfläche
+- persistente Speicherung des Fortschritts
 
 ## Leistungsfaktoren
 - Als Nutzer möchte ich Sets erstellen können, um meine Lernkarten nach Fach gruppieren zu können.
