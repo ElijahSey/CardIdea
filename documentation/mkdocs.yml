@@ -1,4 +1,4 @@
-site_name: cardidea docs
+site_name: CardIdea
 site_url: https://elijahsey.github.io/cardidea
 repo_name: cardidea
 repo_url: https://github.com/ElijahSey/cardidea
@@ -16,8 +16,8 @@ theme:
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-      primary: green
-      accent: black
+      primary: deep-purple
+      accent: deep-purple
 
     # Palette toggle for dark mode
     - media: "(prefers-color-scheme: dark)"
@@ -25,8 +25,8 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
-      primary: black
-      accent: green
+      primary: deep-purple
+      accent: deep-purple
   
   features:
     - content.code.copy       # Kopierenbutton für Codeblöcke

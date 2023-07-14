@@ -1,1 +1,1 @@
-# cardidea
+# CardIdea
