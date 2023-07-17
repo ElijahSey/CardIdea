@@ -1,0 +1,28 @@
+@startuml componentDiagram
+
+package Presentation {
+
+}
+
+Presentation .> Logic
+
+package Logic {
+
+}
+
+Logic .> DataAccess
+
+package DataAccess {
+    [DataManager] as DM
+    DM .d. Hibernate
+}
+
+DM .> H2 : Hibernate
+
+package Data {
+    database H2 {
+        [Card]
+    }
+}
+
+@enduml

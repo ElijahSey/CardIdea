@@ -1,27 +1,12 @@
 @startuml classDiagram
 !include ../include/themes/light.puml
-abstract class AbstractList
-abstract AbstractCollection
-interface List
-interface Collection
 
-List <|-- AbstractList
-Collection <|-- AbstractCollection
-
-Collection <|- List
-AbstractCollection <|- AbstractList
-AbstractList <|-- ArrayList
-
-class ArrayList {
-  Object[] elementData
-  size()
+class Card {
+  cardSet : String
+  topic : String
+  answer : String
+  solution : String
+  hint : String
 }
 
-enum TimeUnit {
-  DAYS
-  HOURS
-  MINUTES
-}
-
-annotation SuppressWarnings
 @enduml
