@@ -5,6 +5,9 @@
 # Maven
 /target/
 
+# Database
+*.db
+
 # Eclipse
 .settings/
 .project
