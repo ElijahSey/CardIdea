@@ -49,7 +49,9 @@ nav:
     - Funktional: requirements/functional.md
     - Qualität: requirements/quality.md
   - Architektur:
+    - Komponentendiagramm: architecture/componentDiagram.md
     - Klassendiagramm: architecture/classDiagram.md
+
 
 markdown_extensions:
   - pymdownx.highlight:
