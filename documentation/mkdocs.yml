@@ -50,6 +50,7 @@ nav:
     - Qualität: requirements/quality.md
   - Architektur:
     - Komponentendiagramm: architecture/componentDiagram.md
+    - Zustandsdiagramm: architecture/stateDiagram.md
     - Klassendiagramm: architecture/classDiagram.md
 
 
