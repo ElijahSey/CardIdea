@@ -1,28 +1,28 @@
 @startuml componentDiagram
 
 package Presentation {
-
+    [MainFrame] as MF
 }
-
-Presentation .> Logic
 
 package Logic {
-
+    [DataPreperator] as DP
 }
 
-Logic .> DataAccess
+MF -(0- DP
 
 package DataAccess {
     [DataManager] as DM
-    DM .d. Hibernate
 }
 
-DM .> H2 : Hibernate
+DP -(0-- DM
 
 package Data {
     database H2 {
         [Card]
+        [CardSet]
     }
 }
+
+DM -(0 H2 : Hibernate
 
 @enduml
