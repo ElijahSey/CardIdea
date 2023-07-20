@@ -37,5 +37,5 @@ jobs:
           pip install mkdocs-build-plantuml-plugin
       - name: Deploy
         run: |
-          mkdocs build -f documentation/mkdocs.yml
-          mkdocs gh-deploy -f documentation/mkdocs.yml
+          cd documentation
+          mkdocs gh-deploy -f mkdocs.yml
