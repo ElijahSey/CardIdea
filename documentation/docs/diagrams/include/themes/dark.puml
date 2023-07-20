@@ -1,10 +1,10 @@
 @startuml DarkStyle
 
 
-!define BG_COLOR #666
-!define BORDER_COLOR #000
-!define FONT_COLOR #111
-!define ARROW_COLOR #888
+!define BG_COLOR #555
+!define BORDER_COLOR #EEE
+!define FONT_COLOR #EEE
+!define ARROW_COLOR #AAA
 
 ' include the general skinparams for both, light and dark
 ' to overwrite with the given settings
