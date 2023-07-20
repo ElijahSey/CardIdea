@@ -4,17 +4,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
-@Table(name = "cards")
 public class Card {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	private String cardSet;
+	@ManyToOne
+	@JoinColumn(name = "cardset_id", referencedColumnName = "id", nullable = false)
+	private CardSet cardSet;
 
 	private String topic;
 
@@ -28,7 +30,7 @@ public class Card {
 
 	}
 
-	public Card(String cardSet, String topic, String question, String solution, String hint) {
+	public Card(CardSet cardSet, String topic, String question, String solution, String hint) {
 		super();
 		this.cardSet = cardSet;
 		this.topic = topic;
@@ -59,11 +61,11 @@ public class Card {
 		this.id = id;
 	}
 
-	public String getCardSet() {
+	public CardSet getCardSet() {
 		return cardSet;
 	}
 
-	public void setCardSet(String cardSet) {
+	public void setSet(CardSet cardSet) {
 		this.cardSet = cardSet;
 	}
 

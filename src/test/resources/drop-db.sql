@@ -1,3 +1,3 @@
 use testdb;
 
-drop database testdb;
+DROP ALL OBJECTS DELETE FILES;
