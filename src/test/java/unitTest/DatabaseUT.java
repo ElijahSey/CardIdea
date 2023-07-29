@@ -21,7 +21,6 @@ class DatabaseUT {
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		System.out.println("Hallo");
 		mgr = DataManager.getTestInstance();
 		mgr.insertTestData();
 	}
@@ -43,7 +42,7 @@ class DatabaseUT {
 		Card card = new Card(set, "Topic", "Question", "Solution", "Hint");
 		mgr.persist(card);
 		assertTrue(mgr.getEntityManager().contains(card));
-		mgr.detach(card);
+		mgr.remove(card);
 	}
 
 	@Test

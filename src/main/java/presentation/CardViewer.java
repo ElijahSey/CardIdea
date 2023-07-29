@@ -1,7 +1,10 @@
 package presentation;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
@@ -17,18 +20,17 @@ import entity.CardSet;
 
 public class CardViewer extends Screen {
 
-	private CardSet cardSet;
 	private JLabel question;
 	private JTextArea answer, solution;
 	private String hint;
 	private ListIterator<Card> iterator;
 
-	public CardViewer(JPanel mainPanel, CardSet cardSet) {
-		super(mainPanel);
-		this.cardSet = cardSet;
+	public CardViewer(ContentPanel mainPanel, JLabel header, CardSet cardSet) {
+		super(mainPanel, header);
 		List<Card> cards = dp.getCardsOfSet(cardSet);
 		Collections.shuffle(cards);
 		iterator = cards.listIterator();
+		header.setText(cardSet.getName());
 		addContent();
 		nextCard(0);
 	}
@@ -38,32 +40,32 @@ public class CardViewer extends Screen {
 		JPanel panel = new JPanel(new BorderLayout());
 
 		JPanel headerPanel = new JPanel();
-		headerPanel.add(new JLabel(cardSet.getName()));
+		question = new JLabel();
+		headerPanel.add(question);
 		panel.add(headerPanel, BorderLayout.NORTH);
 
-		question = new JLabel();
-		answer = new JTextArea();
-
-		solution = new JTextArea();
+		answer = gui.createTextArea();
+		solution = gui.createTextArea();
 		solution.setEditable(false);
 		solution.setVisible(false);
 
-		JPanel cardPanel = new JPanel(new BorderLayout());
+		JPanel center = new JPanel(new GridBagLayout());
 
-		cardPanel.add(question, BorderLayout.NORTH);
+		JPanel cardBody = new JPanel(new GridLayout(2, 1, 0, 10));
+		cardBody.add(gui.createScrollPane(answer));
+		cardBody.add(gui.createScrollPane(solution));
+		cardBody.setPreferredSize(new Dimension(400, 250));
 
-		JPanel cardBody = new JPanel(new GridLayout(2, 1));
-		cardBody.add(answer);
-		cardBody.add(solution);
-
-		cardPanel.add(cardBody, BorderLayout.CENTER);
+		center.add(cardBody);
+		panel.add(center, BorderLayout.CENTER);
 
 		JPanel buttonPanel = new JPanel();
 
 		JButton prev = gui.createButton("<");
 		prev.addActionListener(e -> prevCard());
 		JButton reveal = gui.createButton("reveal");
-		reveal.addActionListener(e -> toggleSolution());
+		reveal.addActionListener(this::toggleSolution);
+		reveal.setPreferredSize(new Dimension(75, 26));
 		JButton hint = gui.createButton("hint");
 		hint.addActionListener(e -> showHint());
 
@@ -85,11 +87,14 @@ public class CardViewer extends Screen {
 		buttonPanel.add(hint);
 		buttonPanel.add(nextPanel);
 
-		cardPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-		panel.add(cardPanel, BorderLayout.CENTER);
+		panel.add(buttonPanel, BorderLayout.SOUTH);
 
 		return panel;
+	}
+
+	@Override
+	protected void executeExitAction() {
+		System.out.println("Exit CardViewer");
 	}
 
 	private void updateContent(Card card) {
@@ -116,8 +121,15 @@ public class CardViewer extends Screen {
 		}
 	}
 
-	private void toggleSolution() {
-		solution.setVisible(!solution.isVisible());
+	private void toggleSolution(ActionEvent e) {
+		JButton b = (JButton) e.getSource();
+		boolean visible = solution.isVisible();
+		if (visible) {
+			b.setText("reveal");
+		} else {
+			b.setText("hide");
+		}
+		solution.setVisible(!visible);
 	}
 
 	private void showHint() {

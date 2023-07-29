@@ -3,9 +3,9 @@ package presentation;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -17,11 +17,11 @@ import entity.CardSet;
 public class Menu extends Screen {
 
 	private JList<CardSet> setList;
-
 	private JButton playBut, editBut, deleteBut;
 
-	public Menu(JPanel mainPanel) {
-		super(mainPanel);
+	public Menu(ContentPanel mainPanel, JLabel header) {
+		super(mainPanel, header);
+		header.setText("Menu");
 		addContent();
 	}
 
@@ -31,21 +31,21 @@ public class Menu extends Screen {
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridBagLayout());
 
-		List<CardSet> cardSets = dp.getAllSets();
-		setList = new JList<>(cardSets.toArray(new CardSet[] {}));
+		setList = gui.createList(dp.getAllSets(), new CardSet[0]);
+		setList.setFixedCellWidth(150);
 		setList.addListSelectionListener(new ListHasSelectionListener());
-		JScrollPane pane = new JScrollPane(setList);
+		JScrollPane pane = gui.createScrollPane(setList);
 
 		JButton newBut = gui.createButton("New");
 		newBut.addActionListener(e -> newSet());
 		playBut = gui.createButton("Play");
-		playBut.addActionListener(e -> playSet());
+		playBut.addActionListener(e -> playSet(setList.getSelectedValue()));
 		playBut.setEnabled(false);
 		editBut = gui.createButton("Edit");
-		editBut.addActionListener(e -> editSet());
+		editBut.addActionListener(e -> editSet(setList.getSelectedValue()));
 		editBut.setEnabled(false);
 		deleteBut = gui.createButton("Delete");
-		deleteBut.addActionListener(e -> deleteSet());
+		deleteBut.addActionListener(e -> deleteSet(setList.getSelectedValue()));
 		deleteBut.setEnabled(false);
 
 		JPanel buttonPanel = new JPanel(new GridBagLayout());
@@ -74,20 +74,28 @@ public class Menu extends Screen {
 		return panel;
 	}
 
-	private void playSet() {
-		new CardViewer(mainPanel, setList.getSelectedValue());
+	@Override
+	protected void executeExitAction() {
+		System.out.println("Exit Menu");
+	}
+
+	private void playSet(CardSet set) {
+		new CardViewer(mainPanel, header, set);
 	}
 
 	private void newSet() {
-		new CardEditor(mainPanel, null);
+		new CardEditor(mainPanel, header, null);
 	}
 
-	private void editSet() {
-		new CardEditor(mainPanel, setList.getSelectedValue());
+	private void editSet(CardSet set) {
+		new CardEditor(mainPanel, header, set);
 	}
 
-	private void deleteSet() {
-
+	private void deleteSet(CardSet set) {
+		if (set != null) {
+			dp.deleteSet(set);
+		}
+		reload();
 	}
 
 	private class ListHasSelectionListener implements ListSelectionListener {
@@ -99,5 +107,11 @@ public class Menu extends Screen {
 			editBut.setEnabled(isSelected);
 			deleteBut.setEnabled(isSelected);
 		}
+	}
+
+	@Override
+	protected void reload() {
+		setList.setListData(dp.getAllSets().toArray(new CardSet[0]));
+		super.reload();
 	}
 }

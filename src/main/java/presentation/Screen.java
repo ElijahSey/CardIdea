@@ -2,6 +2,7 @@ package presentation;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import logic.DataPreperator;
@@ -11,12 +12,19 @@ public abstract class Screen {
 
 	protected DataPreperator dp;
 	protected GuiFactory gui;
-	protected JPanel mainPanel;
+	protected ContentPanel mainPanel;
+	protected JLabel header;
 
-	public Screen(JPanel mainPanel) {
+	public Screen(ContentPanel mainPanel, JLabel header) {
 		dp = DataPreperator.getInstance();
 		gui = GuiFactory.getInstance();
 		this.mainPanel = mainPanel;
+		Screen activeScreen = mainPanel.getActiveScreen();
+		if (activeScreen != null) {
+			activeScreen.executeExitAction();
+		}
+		mainPanel.setActiveScreen(this);
+		this.header = header;
 		mainPanel.removeAll();
 		mainPanel.revalidate();
 		mainPanel.repaint();
@@ -29,5 +37,12 @@ public abstract class Screen {
 		mainPanel.repaint();
 	}
 
+	protected void reload() {
+		mainPanel.revalidate();
+		mainPanel.repaint();
+	}
+
 	protected abstract JPanel createContent();
+
+	protected abstract void executeExitAction();
 }

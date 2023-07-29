@@ -14,7 +14,7 @@ import jakarta.persistence.TypedQuery;
 
 public class DataManager implements AutoCloseable {
 
-	private final EntityManagerFactory emf;
+	private EntityManagerFactory emf;
 	@PersistenceContext
 	private final EntityManager em;
 	private static DataManager instance;
@@ -45,13 +45,19 @@ public class DataManager implements AutoCloseable {
 	}
 
 	public List<CardSet> retrieveAllSets() {
-		TypedQuery<CardSet> q = em.createQuery("select s from CardSet s", CardSet.class);
+		TypedQuery<CardSet> q = em.createQuery("SELECT s FROM CardSet s", CardSet.class);
 		return q.getResultList();
 	}
 
 	public List<Card> loadCardsOfSet(CardSet set) {
-		TypedQuery<Card> q = em.createQuery("SELECT c from Card c join c.cardSet s where s.name = ?1", Card.class);
-		q.setParameter(1, set.getName());
+		TypedQuery<Card> q = em.createQuery("SELECT c FROM Card c WHERE c.cardSet = ?1", Card.class);
+		q.setParameter(1, set);
+		return q.getResultList();
+	}
+
+	public List<String> loadTopicsOfSet(CardSet set) {
+		TypedQuery<String> q = em.createQuery("SELECT DISTINCT c.topic FROM Card c WHERE c.cardSet = ?1", String.class);
+		q.setParameter(1, set);
 		return q.getResultList();
 	}
 
@@ -71,10 +77,26 @@ public class DataManager implements AutoCloseable {
 		et.commit();
 	}
 
-	public void detach(Object entity) {
+	public void update(Object entity, Update update) {
 		EntityTransaction et = em.getTransaction();
 		et.begin();
-		em.detach(entity);
+		update.update(entity);
+		et.commit();
+	}
+
+	public void remove(Object entity) {
+		EntityTransaction et = em.getTransaction();
+		et.begin();
+		em.remove(entity);
+		et.commit();
+	}
+
+	public void removeAll(List<?> entities) {
+		EntityTransaction et = em.getTransaction();
+		et.begin();
+		for (Object e : entities) {
+			em.remove(e);
+		}
 		et.commit();
 	}
 

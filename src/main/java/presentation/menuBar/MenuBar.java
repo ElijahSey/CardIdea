@@ -1,34 +1,49 @@
 package presentation.menuBar;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import presentation.ContentPanel;
 import presentation.Menu;
 
 public class MenuBar {
 
-	private JPanel panel, mainPanel;
+	private JPanel panel;
 	private static final int HEIGHT = 40;
 
-	public MenuBar(JPanel mainPanel) {
-		this.mainPanel = mainPanel;
-		panel = createContent();
-		panel.setSize(100, HEIGHT);
-		panel.setBackground(new Color(150, 200, 255));
+	public MenuBar(ContentPanel contentArea, JLabel header) {
+		panel = createContent(contentArea, header);
 	}
 
-	private JPanel createContent() {
-		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JButton home = createButton("Home");
-		home.addActionListener(e -> new Menu(mainPanel));
-		JButton settings = createButton("Settings");
-		settings.addActionListener(e -> new Settings(mainPanel));
+	protected JPanel createContent(ContentPanel contentArea, JLabel header) {
+		JPanel panel = new JPanel(new BorderLayout());
 
-		panel.add(home);
-		panel.add(settings);
+		panel.setSize(100, HEIGHT);
+		panel.setBackground(new Color(150, 200, 255));
+
+		JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 5));
+		left.setOpaque(false);
+		JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 5));
+		right.setOpaque(false);
+
+		JButton home = createButton("Home");
+		home.addActionListener(e -> new Menu(contentArea, header));
+
+		JButton settings = createButton("Settings");
+		settings.addActionListener(e -> new Settings(contentArea, header));
+
+		left.add(home);
+		left.add(header);
+
+		right.add(settings);
+
+		panel.add(left, BorderLayout.WEST);
+		panel.add(right, BorderLayout.EAST);
 		return panel;
 	}
 

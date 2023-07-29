@@ -3,6 +3,7 @@ package logic;
 import java.util.List;
 
 import dataAccess.DataManager;
+import dataAccess.Update;
 import entity.Card;
 import entity.CardSet;
 
@@ -13,6 +14,7 @@ public class DataPreperator implements AutoCloseable {
 
 	private DataPreperator() {
 		dm = DataManager.getInstance();
+//		dm.insertTestData();
 	}
 
 	public List<CardSet> getAllSets() {
@@ -21,6 +23,27 @@ public class DataPreperator implements AutoCloseable {
 
 	public List<Card> getCardsOfSet(CardSet set) {
 		return dm.loadCardsOfSet(set);
+	}
+
+	public List<String> getTopicsOfSet(CardSet set) {
+		return dm.loadTopicsOfSet(set);
+	}
+
+	public void insert(Object entity) {
+		dm.persist(entity);
+	}
+
+	public void update(Object entity, Update update) {
+		dm.update(entity, update);
+	}
+
+	public void deleteCard(Card card) {
+		dm.remove(card);
+	}
+
+	public void deleteSet(CardSet set) {
+		dm.removeAll(getCardsOfSet(set));
+		dm.remove(set);
 	}
 
 	public static DataPreperator getInstance() {

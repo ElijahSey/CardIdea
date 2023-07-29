@@ -9,6 +9,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import logic.DataPreperator;
 import presentation.menuBar.MenuBar;
@@ -18,35 +19,46 @@ public class MainFrame {
 
 	protected DataPreperator dp;
 	protected GuiFactory gui;
+	private JFrame frame;
 	private JPanel mainPanel;
+	private final Object lock = new Object();
 
 	public MainFrame() {
 
 		createFrame();
 		dp = DataPreperator.getInstance();
-		gui = GuiFactory.createDefaultGuiFactory();
+		synchronized (lock) {
+			lock.notify();
+		}
 
-		JPanel center = new JPanel();
-		JPanel topBar = new MenuBar(center).getPanel();
+		SwingUtilities.invokeLater(() -> {
+			gui = GuiFactory.createDefaultGuiFactory();
 
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.setLayout(new BorderLayout());
-		panel.add(topBar, BorderLayout.NORTH);
-		panel.add(center, BorderLayout.CENTER);
-		new Menu(center);
-		mainPanel.removeAll();
-		update(mainPanel);
-		mainPanel.setLayout(new BorderLayout());
-		mainPanel.add(panel);
-		update(mainPanel);
+			JPanel panel = new JPanel(new BorderLayout());
+			panel.setLayout(new BorderLayout());
+
+			JLabel header = new JLabel();
+			ContentPanel center = new ContentPanel();
+			JPanel topBar = new MenuBar(center, header).getPanel();
+
+			panel.add(topBar, BorderLayout.NORTH);
+			panel.add(center, BorderLayout.CENTER);
+
+			new Menu(center, header);
+			mainPanel.removeAll();
+			update(mainPanel);
+			mainPanel.setLayout(new BorderLayout());
+			mainPanel.add(panel);
+			update(mainPanel);
+		});
 	}
 
 	public void createFrame() {
 
-		JFrame frame = new JFrame();
+		frame = new JFrame();
 		frame.setSize(800, 500);
 		frame.setLocationRelativeTo(null);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.addWindowListener(new WindowCloseListener());
 
 		mainPanel = new JPanel(new GridBagLayout());
@@ -63,7 +75,19 @@ public class MainFrame {
 	private class WindowCloseListener extends WindowAdapter {
 		@Override
 		public void windowClosing(WindowEvent we) {
-			dp.close();
+
+			frame.dispose();
+			try {
+				synchronized (lock) {
+					if (dp == null) { // if window is closed while connecting to db
+						lock.wait();
+					}
+					dp.close();
+					System.exit(0);
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

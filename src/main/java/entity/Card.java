@@ -41,7 +41,7 @@ public class Card {
 
 	@Override
 	public String toString() {
-		return "Topic: %s, Question: %s, Solution: %s".formatted(topic, question, solution);
+		return question;
 	}
 
 	@Override
