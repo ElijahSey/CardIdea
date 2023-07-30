@@ -43,8 +43,11 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.1.2</version>
 				<configuration>
+					<includes>
+						<include>**UT**</include>
+					</includes>
 					<excludes>
-						<exclude>**IntegrationTest**</exclude>
+						<exclude>**IT**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
@@ -55,7 +58,7 @@
 				<version>3.1.2</version>
 				<configuration>
 					<includes>
-						<include>**IntegrationTest**</include>
+						<include>**IT**</include>
 					</includes>
 				</configuration>
 			</plugin>
