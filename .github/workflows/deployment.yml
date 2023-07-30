@@ -1,0 +1,30 @@
+name: Continuous Deployment Workflow
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file
+        cache: 'maven'
+        check-latest: true # Always download the latest java version
+
+    - name: Publish to GitHub Packages Apache Maven
+      run: mvn deploy -Dmaven.test.skip=true -s $GITHUB_WORKSPACE/settings.xml 
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
