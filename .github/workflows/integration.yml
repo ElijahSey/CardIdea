@@ -25,7 +25,7 @@ jobs:
 
     - name: Check JRE
       run: |
-        ls -la
+        java --version
     
     - name: Maven Build
       run: mvn resources:resources compiler:compile resources:testResources compiler:testCompile
