@@ -21,11 +21,11 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: maven
+        cache: 'maven'
 
     - name: Check JRE
       run: |
-        ls
+        ls -la
     
     - name: Maven Build
       run: mvn resources:resources compiler:compile resources:testResources compiler:testCompile
