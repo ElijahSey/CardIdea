@@ -26,6 +26,10 @@ jobs:
     - name: Check JRE
       run: |
         java --version
+        which java
+        whereis java
+        locate openjdk
+        find / -iname "*openjdk-*"
     
     - name: Maven Build
       run: mvn resources:resources compiler:compile resources:testResources compiler:testCompile
