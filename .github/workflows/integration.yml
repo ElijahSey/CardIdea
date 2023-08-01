@@ -25,9 +25,7 @@ jobs:
 
     - name: Check JRE
       run: |
-        ls /usr/bin/java
-        ls /usr/share/java
-        ls /usr/lib/jvm/temurin-17-jdk-amd64/bin/java
+        ls -la /usr/lib/jvm/temurin-17-jdk-amd64
     
     - name: Maven Build
       run: mvn resources:resources compiler:compile resources:testResources compiler:testCompile
