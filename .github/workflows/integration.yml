@@ -25,11 +25,9 @@ jobs:
 
     - name: Check JRE
       run: |
-        java --version
-        which java
-        whereis java
-        locate openjdk
-        find / -iname "*openjdk-*"
+        ls /usr/bin/java
+        ls /usr/share/java
+        ls /usr/lib/jvm/temurin-17-jdk-amd64/bin/java
     
     - name: Maven Build
       run: mvn resources:resources compiler:compile resources:testResources compiler:testCompile
