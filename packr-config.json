@@ -1,0 +1,7 @@
+{
+    "useZgcIfSupportedOs": true,
+    "executable": "cardidea",
+    "mainclass": "presentation.CardIdea",
+    "resources": "src/main/resources",
+    "minimizejre": "soft"
+}
