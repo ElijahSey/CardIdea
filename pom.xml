@@ -2,9 +2,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>elijahsey</groupId>
+	<groupId>com.elijahsey</groupId>
 	<artifactId>cardidea</artifactId>
-	<version>1.0.0</version>
+	<version>0.1.0</version>
 	<packaging>jar</packaging>
 	<name>CardIdea</name>
 
@@ -63,6 +63,7 @@
 					</includes>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -85,13 +86,11 @@
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
 							</descriptorRefs>
-							<descriptors>
-								<descriptor>assembly.xml</descriptor>
-							</descriptors>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -104,5 +103,14 @@
 				</executions>
 			</plugin>
 		</plugins>
+
 	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/ElijahSey/CardIdea</url>
+		</repository>
+	</distributionManagement>
+
 </project>
