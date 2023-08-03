@@ -28,8 +28,8 @@ jobs:
         with:
           draft: false
           prerelease: false
-          release_name: ${{ github.event.inputs.tag }}
-          tag_name: ${{ github.event.inputs.tag }}
+          release_name: v${{ github.event.inputs.tag }}
+          tag_name: v${{ github.event.inputs.tag }}
           body_path: CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -67,6 +67,8 @@ jobs:
     - name: Download Packr
       run: |
         wget https://github.com/libgdx/packr/releases/download/4.0.0/packr-all-4.0.0.jar
+        wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.8%2B7/OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip
+        wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.8%2B7/OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz
         chmod +x packr-all-4.0.0.jar
 
     - name: Package for Windows
@@ -74,7 +76,6 @@ jobs:
 
     - name: Package for Mac
       run: java -jar packr-all-4.0.0.jar --platform mac --jdk OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz --classpath cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-mac-x64-${{ github.event.inputs.tag }} packr-config.json
-
 
     - name: Package for Linux
       run: java -jar packr-all-4.0.0.jar --platform linux64 --jdk /usr/lib/jvm/temurin-17-jdk-amd64 --classpath cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-linux-x64-${{ github.event.inputs.tag }} packr-config.json
