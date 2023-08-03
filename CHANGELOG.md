@@ -1,0 +1,11 @@
+First Release containing the most basic features:
+- Creating a new card set
+- Adding cards manually to the card set
+- Viewing existing card sets
+  - Display of the topic and question
+  - A text area to write the answer into
+  - A button revealing the solution
+  - A button showing a hint
+  - Buttons to show previous and next card
+- Editing existing card sets
+- Deleting existing card sets

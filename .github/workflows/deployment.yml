@@ -1,19 +1,51 @@
 name: Continuous Deployment Workflow
 
 on:
-  release:
-    types: [created]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'New tag name'
+        required: true
 
 jobs:
+
+  prepare-release:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+    steps:
+
+      - name: Checkout Project
+        uses: actions/checkout@v3
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ github.event.inputs.tag }}
+          tag_name: ${{ github.event.inputs.tag }}
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+  
   build:
 
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
-    - uses: actions/checkout@v3
+
+    - name: Checkout Project
+      uses: actions/checkout@v3
+
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
@@ -24,7 +56,76 @@ jobs:
         cache: 'maven'
         check-latest: true # Always download the latest java version
 
+    - name: Setting Maven Version
+      run: mvn -B versions:set -DnewVersion=${{ github.event.inputs.tag }} -DgenerateBackupPoms=false
+
     - name: Publish to GitHub Packages Apache Maven
-      run: mvn deploy -Dmaven.test.skip=true -s $GITHUB_WORKSPACE/settings.xml 
+      run: mvn -B deploy -Dmaven.test.skip=true -s $GITHUB_WORKSPACE/settings.xml 
       env:
         GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Download Packr
+      run: |
+        wget https://github.com/libgdx/packr/releases/download/4.0.0/packr-all-4.0.0.jar
+        chmod +x packr-all-4.0.0.jar
+
+    - name: Package for Windows
+      run: java -jar packr-all.jar \
+        --platform windows64 \
+        --jdk OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip \
+        --useZgcIfSupportedOs \
+        --executable cardidea \
+        --classpath cardidea-${{ github.event.inputs.tag }}.jar \
+        --mainclass presentation.CardIdea \
+        --resources src/main/resources \
+        --output cardidea-windows-x64-${{ github.event.inputs.tag }}
+
+    - name: Package for Mac
+      run: java -jar packr-all.jar \
+        --platform mac \
+        --jdk OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz \
+        --useZgcIfSupportedOs \
+        --executable cardidea \
+        --classpath cardidea-${{ github.event.inputs.tag }}.jar \
+        --mainclass presentation.CardIdea \
+        --resources src/main/resources \
+        --output cardidea-mac-x64-${{ github.event.inputs.tag }}
+
+    - name: Package for Linux
+      run: java -jar packr-all.jar \
+        --platform linux64 \
+        --jdk /usr/lib/jvm/temurin-17-jdk-amd64 \
+        --useZgcIfSupportedOs \
+        --executable cardidea \
+        --classpath cardidea-${{ github.event.inputs.tag }}.jar \
+        --mainclass presentation.CardIdea \
+        --resources src/main/resources \
+        --output cardidea-linux-x64-${{ github.event.inputs.tag }}
+
+  attach-assets:
+
+    runs-on: ubuntu-latest
+    needs: prepare-release
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        os: [windows, mac, linux]
+    env:
+      DIR_NAME: cardidea-${{ matrix.os }}-x64-${{ github.event.inputs.tag }}
+
+    steps:
+
+    - name: Create Archive
+      run: zip $DIR_NAME.zip $DIR_NAME
+
+    - name: Attach Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ needs.prepare-release.outputs.upload_url }}
+        asset_path: ./$DIR_NAME.zip
+        asset_name: $DIR_NAME.zip
+        asset_content_type: application/zip
+
