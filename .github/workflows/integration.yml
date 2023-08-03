@@ -32,7 +32,7 @@ jobs:
       run: mvn surefire:test
 
     - name: Maven Package
-      run: mvn assembly:single
+      run: mvn jar:jar
       
     - name: Maven Integration Test
       run: mvn failsafe:integration-test
