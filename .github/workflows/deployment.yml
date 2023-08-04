@@ -80,8 +80,14 @@ jobs:
     - name: Package for Linux
       run: java -jar packr-all-4.0.0.jar --platform linux64 --jdk /usr/lib/jvm/temurin-17-jdk-amd64 --classpath cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-linux-x64-${{ github.event.inputs.tag }} packr-config.json
 
-    - name: Check Dir
-      run: ls -la
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: assets
+        path: |
+          ./cardidea-windows-x64-${{ github.event.inputs.tag }}
+          ./cardidea-mac-x64-${{ github.event.inputs.tag }}
+          ./cardidea-linux-x64-${{ github.event.inputs.tag }}
 
   attach-assets:
 
@@ -97,8 +103,11 @@ jobs:
 
     steps:
 
-    - name: Check Dir
-      run: ls -la
+    - name: Download Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: assets
+        path: .
 
     - name: Create Archive
       run: zip -r $DIR_NAME.zip $DIR_NAME
