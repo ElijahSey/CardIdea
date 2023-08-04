@@ -80,6 +80,9 @@ jobs:
     - name: Package for Linux
       run: java -jar packr-all-4.0.0.jar --platform linux64 --jdk /usr/lib/jvm/temurin-17-jdk-amd64 --classpath cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-linux-x64-${{ github.event.inputs.tag }} packr-config.json
 
+    - name: Check Dir
+      run: ls -la
+
   attach-assets:
 
     runs-on: ubuntu-latest
@@ -93,6 +96,9 @@ jobs:
       DIR_NAME: cardidea-${{ matrix.os }}-x64-${{ github.event.inputs.tag }}
 
     steps:
+
+    - name: Check Dir
+      run: ls -la
 
     - name: Create Archive
       run: zip -r $DIR_NAME.zip $DIR_NAME
