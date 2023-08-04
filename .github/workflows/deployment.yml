@@ -110,7 +110,7 @@ jobs:
         path: .
 
     - name: Create Archive
-      run: zip -r $DIR_NAME.zip $DIR_NAME
+      run: zip -r ${{env.DIR_NAME}}.zip ${{env.DIR_NAME}}
 
     - name: Attach Asset
       uses: actions/upload-release-asset@v1
@@ -118,7 +118,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ needs.prepare-release.outputs.upload_url }}
-        asset_path: ./$DIR_NAME.zip
-        asset_name: $DIR_NAME.zip
+        asset_path: ./${{env.DIR_NAME}}.zip
+        asset_name: ${{env.DIR_NAME}}.zip
         asset_content_type: application/zip
 
