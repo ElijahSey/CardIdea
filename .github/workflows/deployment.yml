@@ -95,7 +95,7 @@ jobs:
     steps:
 
     - name: Create Archive
-      run: zip $DIR_NAME.zip $DIR_NAME
+      run: zip -r $DIR_NAME.zip $DIR_NAME
 
     - name: Attach Asset
       uses: actions/upload-release-asset@v1
