@@ -99,11 +99,10 @@ jobs:
     - name: Download Packr
       run: |
         wget https://github.com/libgdx/packr/releases/download/4.0.0/packr-all-4.0.0.jar
-        wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.8%2B7/${{ matrix.var.jre }}
         chmod +x packr-all-4.0.0.jar
 
     - name: Package
-      run: java -jar packr-all-4.0.0.jar --platform ${{ matrix.var.platform }} --jdk ${{ matrix.var.jre }} --classpath cardidea-${{ github.event.inputs.tag }}.jar  --output ${{env.DIR_NAME}} packr-config.json
+      run: java -jar packr-all-4.0.0.jar --platform ${{ matrix.var.platform }} --jdk https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.8%2B7/${{ matrix.var.jre }} --classpath cardidea-${{ github.event.inputs.tag }}.jar  --output ${{env.DIR_NAME}} packr-config.json
 
     - name: Create Archive
       run: zip -r ${{env.DIR_NAME}}.zip ${{env.DIR_NAME}}
