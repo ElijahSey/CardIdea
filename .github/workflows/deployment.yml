@@ -60,34 +60,15 @@ jobs:
       run: mvn -B versions:set -DnewVersion=${{ github.event.inputs.tag }} -DgenerateBackupPoms=false
 
     - name: Publish to GitHub Packages Apache Maven
-      run: mvn -B deploy -Dmaven.test.skip=true -s $GITHUB_WORKSPACE/settings.xml 
+      run: mvn -B package -Dmaven.test.skip=true
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
-    - name: Download Packr
-      run: |
-        wget https://github.com/libgdx/packr/releases/download/4.0.0/packr-all-4.0.0.jar
-        wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.8%2B7/OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip
-        wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.8%2B7/OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz
-        chmod +x packr-all-4.0.0.jar
-
-    - name: Package for Windows
-      run: java -jar packr-all-4.0.0.jar --platform windows64 --jdk OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip --classpath ./target/cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-windows-x64-${{ github.event.inputs.tag }} packr-config.json
-
-    - name: Package for Mac
-      run: java -jar packr-all-4.0.0.jar --platform mac --jdk OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz --classpath ./target/cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-mac-x64-${{ github.event.inputs.tag }} packr-config.json
-
-    - name: Package for Linux
-      run: java -jar packr-all-4.0.0.jar --platform linux64 --jdk /usr/lib/jvm/temurin-17-jdk-amd64 --classpath ./target/cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-linux-x64-${{ github.event.inputs.tag }} packr-config.json
-
-    - name: Upload Artifacts
+    - name: Upload Jar
       uses: actions/upload-artifact@v3
       with:
-        name: assets
-        path: |
-          ./cardidea-windows-x64-${{ github.event.inputs.tag }}
-          ./cardidea-mac-x64-${{ github.event.inputs.tag }}
-          ./cardidea-linux-x64-${{ github.event.inputs.tag }}
+        name: target
+        path: ./target/cardidea-${{ github.event.inputs.tag }}.jar
 
   attach-assets:
 
@@ -97,17 +78,32 @@ jobs:
       contents: write
     strategy:
       matrix:
-        os: [windows, mac, linux]
+        var: [
+          {os: windows, platform: windows64, jdk: OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip},
+          {os: mac, platform: mac, jdk: OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz},
+          {os: linux, platform: linux64, jdk: OpenJDK17U-jre_x64_linux_hotspot_17.0.8_7.tar.gz}]
     env:
-      DIR_NAME: cardidea-${{ matrix.os }}-x64-${{ github.event.inputs.tag }}
+      DIR_NAME: cardidea-${{ matrix.var.os }}-x64-${{ github.event.inputs.tag }}
 
     steps:
 
-    - name: Download Artifacts
+    - name: Checkout Project
+      uses: actions/checkout@v3
+
+    - name: Download Jar
       uses: actions/download-artifact@v3
       with:
-        name: assets
+        name: target
         path: .
+
+    - name: Package
+      run: java -jar packr-all-4.0.0.jar --platform ${{ matrix.var.platform }} --jdk ${{ matrix.var.jdk }} --classpath ./target/cardidea-${{ github.event.inputs.tag }}.jar  --output ${{env.DIR_NAME}} packr-config.json
+
+    - name: Download Packr
+      run: |
+        wget https://github.com/libgdx/packr/releases/download/4.0.0/packr-all-4.0.0.jar
+        wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.8%2B7/${{ matrix.var.jre }}
+        chmod +x packr-all-4.0.0.jar
 
     - name: Create Archive
       run: zip -r ${{env.DIR_NAME}}.zip ${{env.DIR_NAME}}
