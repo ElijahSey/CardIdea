@@ -12,9 +12,9 @@
 			<property
 				name="jakarta.persistence.schema-generation.scripts.update-script-source"
 				value="create-db.sql" />
-			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />
-			<property name="javax.persistence.jdbc.url"
-				value="jdbc:h2:file:./src/main/resources/data/cardideadb" />
+			<property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver" />
+			<property name="jakarta.persistence.jdbc.url"
+				value="jdbc:h2:file:~/data/cardideadb" />
 			<property name="jakarta.persistence.jdbc.user" value="dbadmin" />
 			<property name="jakarta.persistence.jdbc.password" value="password" />
 

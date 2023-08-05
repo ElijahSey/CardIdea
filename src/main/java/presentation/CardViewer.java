@@ -133,6 +133,6 @@ public class CardViewer extends Screen {
 	}
 
 	private void showHint() {
-		JOptionPane.showMessageDialog(mainPanel, hint);
+		JOptionPane.showMessageDialog(mainPanel, hint, "Hint", JOptionPane.INFORMATION_MESSAGE);
 	}
 }
