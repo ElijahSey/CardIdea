@@ -79,9 +79,9 @@ jobs:
     strategy:
       matrix:
         var: [
-          {os: windows, platform: windows64, jdk: OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip},
-          {os: mac, platform: mac, jdk: OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz},
-          {os: linux, platform: linux64, jdk: OpenJDK17U-jre_x64_linux_hotspot_17.0.8_7.tar.gz}]
+          {os: windows, platform: windows64, jre: OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip},
+          {os: mac, platform: mac, jre: OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz},
+          {os: linux, platform: linux64, jre: OpenJDK17U-jre_x64_linux_hotspot_17.0.8_7.tar.gz}]
     env:
       DIR_NAME: cardidea-${{ matrix.var.os }}-x64-${{ github.event.inputs.tag }}
 
@@ -103,7 +103,7 @@ jobs:
         chmod +x packr-all-4.0.0.jar
 
     - name: Package
-      run: java -jar packr-all-4.0.0.jar --platform ${{ matrix.var.platform }} --jdk ${{ matrix.var.jdk }} --classpath ./target/cardidea-${{ github.event.inputs.tag }}.jar  --output ${{env.DIR_NAME}} packr-config.json
+      run: java -jar packr-all-4.0.0.jar --platform ${{ matrix.var.platform }} --jdk ${{ matrix.var.jre }} --classpath ./target/cardidea-${{ github.event.inputs.tag }}.jar  --output ${{env.DIR_NAME}} packr-config.json
 
     - name: Create Archive
       run: zip -r ${{env.DIR_NAME}}.zip ${{env.DIR_NAME}}
