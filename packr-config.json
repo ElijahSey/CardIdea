@@ -2,6 +2,5 @@
     "useZgcIfSupportedOs": true,
     "executable": "CardIdea",
     "mainclass": "presentation.CardIdea",
-    "resources": [],
-    "minimizejre": "soft"
+    "resources": []
 }
