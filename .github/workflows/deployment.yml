@@ -98,6 +98,8 @@ jobs:
 
     - name: Download Packr
       run: |
+        ls -la
+        ls -la target
         wget https://github.com/libgdx/packr/releases/download/4.0.0/packr-all-4.0.0.jar
         wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.8%2B7/${{ matrix.var.jre }}
         chmod +x packr-all-4.0.0.jar
