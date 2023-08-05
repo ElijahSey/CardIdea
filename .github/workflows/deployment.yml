@@ -72,13 +72,13 @@ jobs:
         chmod +x packr-all-4.0.0.jar
 
     - name: Package for Windows
-      run: java -jar packr-all-4.0.0.jar --platform windows64 --jdk OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip --classpath cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-windows-x64-${{ github.event.inputs.tag }} packr-config.json
+      run: java -jar packr-all-4.0.0.jar --platform windows64 --jdk OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip --classpath ./target/cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-windows-x64-${{ github.event.inputs.tag }} packr-config.json
 
     - name: Package for Mac
-      run: java -jar packr-all-4.0.0.jar --platform mac --jdk OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz --classpath cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-mac-x64-${{ github.event.inputs.tag }} packr-config.json
+      run: java -jar packr-all-4.0.0.jar --platform mac --jdk OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz --classpath ./target/cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-mac-x64-${{ github.event.inputs.tag }} packr-config.json
 
     - name: Package for Linux
-      run: java -jar packr-all-4.0.0.jar --platform linux64 --jdk /usr/lib/jvm/temurin-17-jdk-amd64 --classpath cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-linux-x64-${{ github.event.inputs.tag }} packr-config.json
+      run: java -jar packr-all-4.0.0.jar --platform linux64 --jdk /usr/lib/jvm/temurin-17-jdk-amd64 --classpath ./target/cardidea-${{ github.event.inputs.tag }}.jar  --output cardidea-linux-x64-${{ github.event.inputs.tag }} packr-config.json
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
