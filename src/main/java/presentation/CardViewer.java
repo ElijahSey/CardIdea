@@ -20,18 +20,18 @@ import entity.CardSet;
 
 public class CardViewer extends Screen {
 
+	private CardSet cardSet;
 	private JLabel question;
 	private JTextArea answer, solution;
 	private String hint;
 	private ListIterator<Card> iterator;
 
-	public CardViewer(ContentPanel mainPanel, JLabel header, CardSet cardSet) {
-		super(mainPanel, header);
+	public CardViewer(ContentPanel mainPanel, CardSet cardSet) {
+		super(mainPanel);
+		this.cardSet = cardSet;
 		List<Card> cards = dp.getCardsOfSet(cardSet);
 		Collections.shuffle(cards);
 		iterator = cards.listIterator();
-		header.setText(cardSet.getName());
-		addContent();
 		nextCard(0);
 	}
 
@@ -92,11 +92,6 @@ public class CardViewer extends Screen {
 		return panel;
 	}
 
-	@Override
-	protected void executeExitAction() {
-		System.out.println("Exit CardViewer");
-	}
-
 	private void updateContent(Card card) {
 
 		solution.setVisible(false);
@@ -134,5 +129,10 @@ public class CardViewer extends Screen {
 
 	private void showHint() {
 		JOptionPane.showMessageDialog(mainPanel, hint, "Hint", JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	@Override
+	protected String getHeader() {
+		return cardSet.getName();
 	}
 }

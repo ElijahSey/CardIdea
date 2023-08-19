@@ -1,8 +1,6 @@
 package presentation;
 
-import java.awt.BorderLayout;
-
-import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import logic.DataPreperator;
@@ -13,28 +11,12 @@ public abstract class Screen {
 	protected DataPreperator dp;
 	protected GuiFactory gui;
 	protected ContentPanel mainPanel;
-	protected JLabel header;
+	protected JPanel panel;
 
-	public Screen(ContentPanel mainPanel, JLabel header) {
+	public Screen(ContentPanel mainPanel) {
 		dp = DataPreperator.getInstance();
 		gui = GuiFactory.getInstance();
 		this.mainPanel = mainPanel;
-		Screen activeScreen = mainPanel.getActiveScreen();
-		if (activeScreen != null) {
-			activeScreen.executeExitAction();
-		}
-		mainPanel.setActiveScreen(this);
-		this.header = header;
-		mainPanel.removeAll();
-		mainPanel.revalidate();
-		mainPanel.repaint();
-		mainPanel.setLayout(new BorderLayout());
-	}
-
-	protected void addContent() {
-		mainPanel.add(createContent());
-		mainPanel.revalidate();
-		mainPanel.repaint();
 	}
 
 	protected void reload() {
@@ -44,5 +26,25 @@ public abstract class Screen {
 
 	protected abstract JPanel createContent();
 
-	protected abstract void executeExitAction();
+	protected abstract String getHeader();
+
+	protected void executeExitAction() {
+
+	}
+
+	public void rebuild() {
+		panel = createContent();
+		reload();
+	}
+
+	public JPanel getPanel() {
+		if (panel == null) {
+			panel = createContent();
+		}
+		return panel;
+	}
+
+	protected void error(String message) {
+		JOptionPane.showMessageDialog(mainPanel, message, "Error", JOptionPane.ERROR_MESSAGE);
+	}
 }

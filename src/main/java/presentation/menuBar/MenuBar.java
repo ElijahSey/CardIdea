@@ -9,7 +9,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import presentation.ContentPanel;
-import presentation.Menu;
 
 public class MenuBar {
 
@@ -31,12 +30,16 @@ public class MenuBar {
 		JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 5));
 		right.setOpaque(false);
 
+		JButton back = createButton("Back");
+		back.addActionListener(e -> contentArea.back());
+
 		JButton home = createButton("Home");
-		home.addActionListener(e -> new Menu(contentArea, header));
+		home.addActionListener(e -> contentArea.home());
 
 		JButton settings = createButton("Settings");
-		settings.addActionListener(e -> new Settings(contentArea, header));
+		settings.addActionListener(e -> contentArea.openScreen(new Settings(contentArea)));
 
+		left.add(back);
 		left.add(home);
 		left.add(header);
 

@@ -1,11 +1,11 @@
 package presentation;
 
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -19,22 +19,21 @@ public class Menu extends Screen {
 	private JList<CardSet> setList;
 	private JButton playBut, editBut, deleteBut;
 
-	public Menu(ContentPanel mainPanel, JLabel header) {
-		super(mainPanel, header);
-		header.setText("Menu");
-		addContent();
+	public Menu(ContentPanel mainPanel) {
+		super(mainPanel);
 	}
 
 	@Override
 	protected JPanel createContent() {
 
-		JPanel panel = new JPanel();
-		panel.setLayout(new GridBagLayout());
+		JPanel panel = new JPanel(new GridBagLayout());
+
+		JPanel innerPanel = new JPanel(new BorderLayout(20, 0));
 
 		setList = gui.createList(dp.getAllSets(), new CardSet[0]);
 		setList.setFixedCellWidth(150);
 		setList.addListSelectionListener(new ListHasSelectionListener());
-		JScrollPane pane = gui.createScrollPane(setList);
+		JScrollPane scrollPane = gui.createScrollPane(setList);
 
 		JButton newBut = gui.createButton("New");
 		newBut.addActionListener(e -> newSet());
@@ -64,31 +63,25 @@ public class Menu extends Screen {
 		buttonPanel.add(editBut, c);
 		c.gridy++;
 		buttonPanel.add(deleteBut, c);
-		c.insets = new Insets(0, 0, 0, 20);
-		c.gridy = 0;
-		c.fill = GridBagConstraints.NONE;
-		panel.add(pane, c);
-		c.gridx++;
-		panel.add(buttonPanel, c);
+
+		innerPanel.add(scrollPane, BorderLayout.CENTER);
+		innerPanel.add(buttonPanel, BorderLayout.EAST);
+
+		panel.add(innerPanel);
 
 		return panel;
 	}
 
-	@Override
-	protected void executeExitAction() {
-		System.out.println("Exit Menu");
-	}
-
 	private void playSet(CardSet set) {
-		new CardViewer(mainPanel, header, set);
+		mainPanel.openScreen(new CardViewer(mainPanel, set));
 	}
 
 	private void newSet() {
-		new CardEditor(mainPanel, header, null);
+		mainPanel.openScreen(new CardEditor(mainPanel, null));
 	}
 
 	private void editSet(CardSet set) {
-		new CardEditor(mainPanel, header, set);
+		mainPanel.openScreen(new CardEditor(mainPanel, set));
 	}
 
 	private void deleteSet(CardSet set) {
@@ -113,5 +106,10 @@ public class Menu extends Screen {
 	protected void reload() {
 		setList.setListData(dp.getAllSets().toArray(new CardSet[0]));
 		super.reload();
+	}
+
+	@Override
+	protected String getHeader() {
+		return "Menu";
 	}
 }

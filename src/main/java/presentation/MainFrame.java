@@ -38,13 +38,13 @@ public class MainFrame {
 			panel.setLayout(new BorderLayout());
 
 			JLabel header = new JLabel();
-			ContentPanel center = new ContentPanel();
+			ContentPanel center = new ContentPanel(header);
 			JPanel topBar = new MenuBar(center, header).getPanel();
 
 			panel.add(topBar, BorderLayout.NORTH);
 			panel.add(center, BorderLayout.CENTER);
 
-			new Menu(center, header);
+			center.openScreen(new Menu(center));
 			mainPanel.removeAll();
 			update(mainPanel);
 			mainPanel.setLayout(new BorderLayout());
