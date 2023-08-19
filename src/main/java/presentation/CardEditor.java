@@ -27,28 +27,27 @@ public class CardEditor extends Screen {
 	private JComboBox<String> topic;
 	private JTextField cardSetName, question;
 	private JTextArea solution, hint;
-	private JButton delBut, newBut, saveBut;
+	private JButton delBut;
 
-	public CardEditor(ContentPanel mainPanel, JLabel header, CardSet cardSet) {
-		super(mainPanel, header);
+	private boolean cardListChanged;
+
+	public CardEditor(ContentPanel mainPanel, CardSet cardSet) {
+		super(mainPanel);
+		cardListChanged = false;
 		if (cardSet == null) {
 			this.cardSet = new CardSet();
 			this.cardSet.setName("");
-			cards = new ArrayList<>();
 			dp.insert(this.cardSet);
-			header.setText("New");
+			cards = new ArrayList<>();
 		} else {
 			this.cardSet = cardSet;
 			cards = dp.getCardsOfSet(cardSet);
-			header.setText(cardSet.getName());
 		}
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		addContent();
-		updateCard(null);
 	}
 
 	@Override
-	public JPanel createContent() {
+	protected JPanel createContent() {
 
 		initializeGuiElements();
 
@@ -65,6 +64,8 @@ public class CardEditor extends Screen {
 		JPanel center = createNCPanel(cardHeader, cardBody);
 		JPanel south = createButtonPanel();
 
+		updateTextFields(null);
+
 		JPanel panel = new JPanel(new BorderLayout(10, 10));
 		panel.add(west, BorderLayout.WEST);
 		panel.add(center, BorderLayout.CENTER);
@@ -74,15 +75,15 @@ public class CardEditor extends Screen {
 
 	@Override
 	protected void executeExitAction() {
-		dp.update(cardSet, e -> {
-			((CardSet) e).setName(cardSetName.getText());
-		});
+		if (cardSet.getName().isBlank() && cardSetName.getText().isBlank()) {
+			dp.deleteSet(cardSet);
+		}
 	}
 
 	private void initializeGuiElements() {
 		list = gui.createList(cards, new Card[0]);
 		list.setFixedCellWidth(150);
-		list.addListSelectionListener(e -> updateCard(list.getSelectedValue()));
+		list.addListSelectionListener(e -> updateTextFields(list.getSelectedValue()));
 		topic = gui.createComboBox(dp.getTopicsOfSet(cardSet), new String[0]);
 		topic.setEditable(true);
 		question = gui.createTextField();
@@ -90,7 +91,7 @@ public class CardEditor extends Screen {
 		hint = gui.createTextArea();
 	}
 
-	private void updateCard(Card card) {
+	private void updateTextFields(Card card) {
 		if (card == null) {
 			card = new Card();
 			delBut.setEnabled(false);
@@ -124,13 +125,20 @@ public class CardEditor extends Screen {
 		JPanel panel = new JPanel();
 		delBut = gui.createButton("Delete");
 		delBut.addActionListener(e -> deleteCard(list.getSelectedValue()));
-		newBut = gui.createButton("New");
-		newBut.addActionListener(e -> list.clearSelection());
-		saveBut = gui.createButton("Save");
-		saveBut.addActionListener(e -> saveCard(list.getSelectedValue()));
+		JButton importBut = gui.createButton("Import");
+		importBut.setToolTipText("Import Cards from a File");
+		importBut.addActionListener(e -> importCards());
+		JButton clearBut = gui.createButton("Clear");
+		clearBut.addActionListener(e -> list.clearSelection());
+		JButton addBut = gui.createButton("Add");
+		addBut.addActionListener(e -> saveCard(list.getSelectedValue()));
+		JButton saveBut = gui.createButton("Save");
+		saveBut.addActionListener(e -> saveSet());
 
 		panel.add(delBut);
-		panel.add(newBut);
+		panel.add(importBut);
+		panel.add(clearBut);
+		panel.add(addBut);
 		panel.add(saveBut);
 		return panel;
 	}
@@ -150,6 +158,7 @@ public class CardEditor extends Screen {
 			});
 		}
 		reload();
+		cardListChanged = true;
 	}
 
 	public void deleteCard(Card card) {
@@ -157,13 +166,43 @@ public class CardEditor extends Screen {
 			dp.deleteCard(card);
 			reload();
 		}
+		cardListChanged = true;
+	}
+
+	public void saveSet() {
+		String name = cardSetName.getText();
+		if (cardSet.getName().equals(name) && !cardListChanged) {
+			return;
+		}
+		if (name.isBlank()) {
+			super.error("Der Name des Sets ist leer!");
+		} else if (!dp.isUniqueName(cardSet, name)) {
+			super.error("Dieser Name existiert bereits!");
+		} else {
+			dp.update(cardSet, e -> {
+				((CardSet) e).setName(name);
+			});
+			cardListChanged = false;
+		}
+	}
+
+	private void importCards() {
+		mainPanel.openScreen(new CardSetImport(mainPanel));
 	}
 
 	@Override
 	protected void reload() {
 		cards = dp.getCardsOfSet(cardSet);
 		list.setListData(cards.toArray(new Card[0]));
-		updateCard(null);
+		updateTextFields(null);
 		super.reload();
+	}
+
+	@Override
+	protected String getHeader() {
+		if (cardSet.getName().isBlank()) {
+			return "New";
+		}
+		return cardSet.getName();
 	}
 }

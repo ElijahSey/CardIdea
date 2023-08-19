@@ -29,6 +29,19 @@ public class DataPreperator implements AutoCloseable {
 		return dm.loadTopicsOfSet(set);
 	}
 
+	public boolean isUniqueName(CardSet set, String newName) {
+		if (set.getName().equals(newName)) {
+			return true;
+		}
+		List<CardSet> sets = dm.retrieveAllSets();
+		for (CardSet s : sets) {
+			if (s.getName().equals(newName)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public void insert(Object entity) {
 		dm.persist(entity);
 	}
