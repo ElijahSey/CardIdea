@@ -37,7 +37,7 @@ public class MenuBar {
 		home.addActionListener(e -> contentArea.home());
 
 		JButton settings = createButton("Settings");
-		settings.addActionListener(e -> contentArea.openScreen(new Settings(contentArea)));
+		settings.addActionListener(e -> contentArea.addScreen(new Settings(contentArea)));
 
 		left.add(back);
 		left.add(home);

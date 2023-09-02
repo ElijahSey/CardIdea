@@ -187,7 +187,7 @@ public class CardEditor extends Screen {
 	}
 
 	private void importCards() {
-		mainPanel.openScreen(new CardSetImport(mainPanel));
+		mainPanel.addScreen(new CardSetImport(mainPanel, cardSet));
 	}
 
 	@Override

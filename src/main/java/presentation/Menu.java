@@ -73,15 +73,15 @@ public class Menu extends Screen {
 	}
 
 	private void playSet(CardSet set) {
-		mainPanel.openScreen(new CardViewer(mainPanel, set));
+		mainPanel.addScreen(new CardViewer(mainPanel, set));
 	}
 
 	private void newSet() {
-		mainPanel.openScreen(new CardEditor(mainPanel, null));
+		mainPanel.addScreen(new CardEditor(mainPanel, null));
 	}
 
 	private void editSet(CardSet set) {
-		mainPanel.openScreen(new CardEditor(mainPanel, set));
+		mainPanel.addScreen(new CardEditor(mainPanel, set));
 	}
 
 	private void deleteSet(CardSet set) {

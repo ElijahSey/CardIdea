@@ -18,32 +18,32 @@ public class ContentPanel extends JPanel {
 		setLayout(new BorderLayout());
 	}
 
-	public void openScreen(Screen screen) {
+	public void addScreen(Screen screen) {
 
 		if (!screens.isEmpty()) {
 			screens.peek().executeExitAction();
 		}
 		screens.push(screen);
-		addScreen(screen);
+		displayScreen(screen);
 	}
 
 	public void back() {
 		if (screens.size() < 2) {
+			getActiveScreen().rebuild();
 			return;
 		}
 		screens.pop();
-		addScreen(screens.peek());
+		displayScreen(screens.peek());
 	}
 
 	public void home() {
 		Screen home = screens.firstElement();
-		home.rebuild();
-		openScreen(home);
 		screens.clear();
-		screens.push(home);
+		home.rebuild();
+		addScreen(home);
 	}
 
-	private void addScreen(Screen screen) {
+	private void displayScreen(Screen screen) {
 		removeAll();
 		repaint();
 		header.setText(screen.getHeader());
@@ -51,7 +51,14 @@ public class ContentPanel extends JPanel {
 		repaint();
 	}
 
+	public void refreshScreen() {
+		Screen screen = getActiveScreen();
+		screen.rebuild();
+		displayScreen(screen);
+	}
+
 	public Screen getActiveScreen() {
+		System.out.println("Aktiver Screen: " + screens.peek().getHeader());
 		return screens.peek();
 	}
 

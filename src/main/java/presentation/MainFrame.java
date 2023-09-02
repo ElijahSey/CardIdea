@@ -44,7 +44,7 @@ public class MainFrame {
 			panel.add(topBar, BorderLayout.NORTH);
 			panel.add(center, BorderLayout.CENTER);
 
-			center.openScreen(new Menu(center));
+			center.addScreen(new Menu(center));
 			mainPanel.removeAll();
 			update(mainPanel);
 			mainPanel.setLayout(new BorderLayout());
