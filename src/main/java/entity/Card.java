@@ -39,6 +39,14 @@ public class Card {
 		this.hint = hint;
 	}
 
+	public Card(String topic, String question, String solution, String hint) {
+		this(null, topic, question, solution, hint);
+	}
+
+	public Card(String topic, String question, String solution) {
+		this(topic, question, solution, "");
+	}
+
 	@Override
 	public String toString() {
 		return question;
@@ -65,7 +73,7 @@ public class Card {
 		return cardSet;
 	}
 
-	public void setSet(CardSet cardSet) {
+	public void setCardSet(CardSet cardSet) {
 		this.cardSet = cardSet;
 	}
 
