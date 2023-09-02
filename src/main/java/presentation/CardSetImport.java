@@ -35,9 +35,9 @@ public class CardSetImport extends Screen {
 		parsers.setFixedCellWidth(150);
 		JScrollPane scrollPane = gui.createScrollPane(parsers);
 		panel.add(scrollPane);
-		JButton newParser = gui.createButton("New");
-		newParser.addActionListener(e -> mainPanel.addScreen(new ParserCreator(mainPanel)));
-		panel.add(newParser);
+//		JButton newParser = gui.createButton("New");
+//		newParser.addActionListener(e -> mainPanel.addScreen(new ParserCreator(mainPanel)));
+//		panel.add(newParser);
 		JButton importCards = gui.createButton("Import");
 		importCards.addActionListener(e -> importCards());
 		panel.add(importCards);
