@@ -1,19 +1,26 @@
 package logic;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import dataAccess.DataManager;
 import dataAccess.Update;
 import entity.Card;
 import entity.CardSet;
+import logic.parsers.CardParser;
+import logic.parsers.MarkdownParser;
 
 public class DataPreperator implements AutoCloseable {
 
 	private DataManager dm;
 	private static DataPreperator instance;
 
+	private List<CardParser> parsers;
+
 	private DataPreperator() {
 		dm = DataManager.getInstance();
+		parsers = new ArrayList<>();
+		parsers.add(new MarkdownParser("Markdown"));
 //		dm.insertTestData();
 	}
 
@@ -46,6 +53,10 @@ public class DataPreperator implements AutoCloseable {
 		dm.persist(entity);
 	}
 
+	public void insertAll(Iterable<?> entities) {
+		dm.persistAll(entities);
+	}
+
 	public void update(Object entity, Update update) {
 		dm.update(entity, update);
 	}
@@ -57,6 +68,14 @@ public class DataPreperator implements AutoCloseable {
 	public void deleteSet(CardSet set) {
 		dm.removeAll(getCardsOfSet(set));
 		dm.remove(set);
+	}
+
+	public void addParser(CardParser p) {
+		parsers.add(p);
+	}
+
+	public List<CardParser> getParsers() {
+		return parsers;
 	}
 
 	public static DataPreperator getInstance() {
