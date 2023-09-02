@@ -74,12 +74,15 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-        name: [win, mac, linux]
+        var: [
+          {os: windows-latest, name: win},
+          {os: macos-latest, name: mac},
+          {os: ubuntu-latest, name: linux}
+        ]
     env:
-      DIR_NAME: cardidea-${{matrix.name}}-x64-${{ github.event.inputs.tag }}
+      DIR_NAME: cardidea-${{matrix.var.name}}-x64-${{ github.event.inputs.tag }}
 
-    runs-on: ${{matrix.os}}
+    runs-on: ${{matrix.var.os}}
     needs: [prepare-release, build]
     permissions:
       contents: write
@@ -99,11 +102,11 @@ jobs:
         run: jpackage --name ${{env.DIR_NAME}} --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar
 
       - name: Create Windows Archive
-        if: ${{matrix.os == 'windows-latest'}}
+        if: ${{matrix.var.os == 'windows-latest'}}
         run: powershell Compress-Archive ${{env.DIR_NAME}} ${{env.DIR_NAME}}.zip
 
       - name: Create UNIX Archive
-        if: ${{matrix.os != 'windows-latest'}}
+        if: ${{matrix.var.os != 'windows-latest'}}
         run: zip -r ${{env.DIR_NAME}}.zip ${{env.DIR_NAME}}
   
       - name: Attach Asset
