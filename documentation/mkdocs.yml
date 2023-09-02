@@ -52,7 +52,9 @@ nav:
     - Komponentendiagramm: architecture/componentDiagram.md
     - Zustandsdiagramm: architecture/stateDiagram.md
     - Klassendiagramm: architecture/classDiagram.md
-
+  - CI/CD:
+    - Continuous Integration: ci_cd/ci.md
+    - Continuous Deployment: ci_cd/cd.md
 
 markdown_extensions:
   - pymdownx.highlight:
