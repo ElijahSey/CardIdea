@@ -68,7 +68,7 @@ public class DataManager implements AutoCloseable {
 		et.commit();
 	}
 
-	public void persistAll(List<?> entities) {
+	public void persistAll(Iterable<?> entities) {
 		EntityTransaction et = em.getTransaction();
 		et.begin();
 		for (Object o : entities) {
