@@ -70,7 +70,7 @@ jobs:
         name: target
         path: ./target/cardidea-${{ github.event.inputs.tag }}.jar
 
-  win-asset:
+  attach-assets:
 
     strategy:
       matrix:
@@ -96,7 +96,7 @@ jobs:
           path: .
 
       - name: Create Package
-        run: jpackage --name ${{env.DIR_NAME}} --input ./target --main-jar cardidea-0.1.0.jar
+        run: jpackage --name ${{env.DIR_NAME}} --input ./target --main-jar cardidea-${{ github.event.inputs.tag }}.jar
 
       - name: Create Windows Archive
         if: ${{matrix.os == 'windows-latest'}}
