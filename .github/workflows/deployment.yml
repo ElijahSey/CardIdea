@@ -70,50 +70,96 @@ jobs:
         name: target
         path: ./target/cardidea-${{ github.event.inputs.tag }}.jar
 
-  attach-assets:
+  win-asset:
 
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+        name: [win, mac, linux]
+    env:
+      DIR_NAME: cardidea-${{matrix.name}}-x64-${{ github.event.inputs.tag }}
+
+    runs-on: ${{matrix.os}}
     needs: [prepare-release, build]
     permissions:
       contents: write
-    strategy:
-      matrix:
-        var: [
-          {os: windows, platform: windows64, jre: OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip},
-          {os: mac, platform: mac, jre: OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz},
-          {os: linux, platform: linux64, jre: OpenJDK17U-jre_x64_linux_hotspot_17.0.8_7.tar.gz}]
-    env:
-      DIR_NAME: cardidea-${{ matrix.var.os }}-x64-${{ github.event.inputs.tag }}
 
     steps:
 
-    - name: Checkout Project
-      uses: actions/checkout@v3
+      - name: Checkout Project
+        uses: actions/checkout@v3
 
-    - name: Download Jar
-      uses: actions/download-artifact@v3
-      with:
-        name: target
-        path: .
+      - name: Download Jar
+        uses: actions/download-artifact@v3
+        with:
+          name: target
+          path: .
 
-    - name: Download Packr
-      run: |
-        wget https://github.com/libgdx/packr/releases/download/4.0.0/packr-all-4.0.0.jar
-        chmod +x packr-all-4.0.0.jar
+      - name: Create Package
+        run: jpackage --name ${{env.DIR_NAME}} --input ./target --main-jar cardidea-0.1.0.jar
 
-    - name: Package
-      run: java -jar packr-all-4.0.0.jar --platform ${{ matrix.var.platform }} --jdk https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.8%2B7/${{ matrix.var.jre }} --classpath cardidea-${{ github.event.inputs.tag }}.jar  --output ${{env.DIR_NAME}} packr-config.json
+      - name: Create Windows Archive
+        if: ${{matrix.os == 'windows-latest'}}
+        run: powershell Compress-Archive ${{env.DIR_NAME}} ${{env.DIR_NAME}}.zip
 
-    - name: Create Archive
-      run: zip -r ${{env.DIR_NAME}}.zip ${{env.DIR_NAME}}
+      - name: Create UNIX Archive
+        if: ${{matrix.os != 'windows-latest'}}
+        run: zip -r ${{env.DIR_NAME}}.zip ${{env.DIR_NAME}}
+  
+      - name: Attach Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ needs.prepare-release.outputs.upload_url }}
+          asset_path: ./${{env.DIR_NAME}}.zip
+          asset_name: ${{env.DIR_NAME}}.zip
+          asset_content_type: application/zip
 
-    - name: Attach Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ needs.prepare-release.outputs.upload_url }}
-        asset_path: ./${{env.DIR_NAME}}.zip
-        asset_name: ${{env.DIR_NAME}}.zip
-        asset_content_type: application/zip
+  # attach-assets:
+
+  #   runs-on: ubuntu-latest
+  #   needs: [prepare-release, build]
+  #   permissions:
+  #     contents: write
+  #   strategy:
+  #     matrix:
+  #       var: [
+  #         {os: windows, platform: windows64, jre: OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip},
+  #         {os: mac, platform: mac, jre: OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz},
+  #         {os: linux, platform: linux64, jre: OpenJDK17U-jre_x64_linux_hotspot_17.0.8_7.tar.gz}]
+  #   env:
+  #     DIR_NAME: cardidea-${{ matrix.var.os }}-x64-${{ github.event.inputs.tag }}
+
+  #   steps:
+
+  #   - name: Checkout Project
+  #     uses: actions/checkout@v3
+
+  #   - name: Download Jar
+  #     uses: actions/download-artifact@v3
+  #     with:
+  #       name: target
+  #       path: .
+
+  #   - name: Download Packr
+  #     run: |
+  #       wget https://github.com/libgdx/packr/releases/download/4.0.0/packr-all-4.0.0.jar
+  #       chmod +x packr-all-4.0.0.jar
+
+  #   - name: Package
+  #     run: java -jar packr-all-4.0.0.jar --platform ${{ matrix.var.platform }} --jdk https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.8%2B7/${{ matrix.var.jre }} --classpath cardidea-${{ github.event.inputs.tag }}.jar  --output ${{env.DIR_NAME}} packr-config.json
+
+  #   - name: Create Archive
+  #     run: zip -r ${{env.DIR_NAME}}.zip ${{env.DIR_NAME}}
+
+  #   - name: Attach Asset
+  #     uses: actions/upload-release-asset@v1
+  #     env:
+  #       GITHUB_TOKEN: ${{ github.token }}
+  #     with:
+  #       upload_url: ${{ needs.prepare-release.outputs.upload_url }}
+  #       asset_path: ./${{env.DIR_NAME}}.zip
+  #       asset_name: ${{env.DIR_NAME}}.zip
+  #       asset_content_type: application/zip
 
