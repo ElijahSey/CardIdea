@@ -77,7 +77,7 @@ jobs:
         var: [
           {os: windows-latest, name: win, suffix: exe},
           {os: macos-latest, name: mac, suffix: dmg},
-          {os: ubuntu-latest, name: linux, suffix: deb}
+          {os: ubuntu-latest, name: linux, suffix: rpm}
         ]
     env:
       DIR_NAME: cardidea-${{ github.event.inputs.tag }}.${{matrix.var.suffix}}
@@ -111,6 +111,7 @@ jobs:
       - name: Create Package
         run: |
           jpackage --name cardidea --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar --app-version ${{ github.event.inputs.tag }}
+          ls
   
       - name: Attach Asset
         uses: actions/upload-release-asset@v1
