@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'New tag name'
+        description: 'Version'
         required: true
 
 jobs:
@@ -50,9 +50,9 @@ jobs:
     strategy:
       matrix:
         var: [
-          {os: windows-latest, name: win, suffix: exe},
-          {os: macos-latest, name: mac, suffix: dmg},
-          {os: ubuntu-latest, name: linux, suffix: deb}
+          {os: windows-latest, name: win, suffix: exe, options: --win-dir-chooser --win-shortcut-prompt --win-menu},
+          {os: macos-latest, name: mac, suffix: dmg, options: },
+          {os: ubuntu-latest, name: linux, suffix: deb, options: --linux-shortcut}
         ]
     env:
       INST_NAME: cardidea-${{ github.event.inputs.tag }}-${{matrix.var.name}}.${{matrix.var.suffix}}
@@ -84,9 +84,7 @@ jobs:
           path: .
 
       - name: Create Package
-        run: |
-          jpackage --name cardIdea --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar
-          ls
+        run: jpackage --name cardIdea --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar --icon cardidea.ico ${{matrix.var.options}}
 
       - name: Rename Package
         run: mv card*.${{matrix.var.suffix}} ${{env.INST_NAME}}
