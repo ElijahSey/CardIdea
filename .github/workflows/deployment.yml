@@ -80,7 +80,7 @@ jobs:
           {os: ubuntu-latest, name: linux, suffix: rpm}
         ]
     env:
-      DIR_NAME: cardidea-${{ github.event.inputs.tag }}.${{matrix.var.suffix}}
+      DIR_NAME: cardidea-${{matrix.var.name}}-${{ github.event.inputs.tag }}.${{matrix.var.suffix}}
 
     runs-on: ${{matrix.var.os}}
     needs: [prepare-release, build]
