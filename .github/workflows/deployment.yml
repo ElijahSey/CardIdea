@@ -92,6 +92,16 @@ jobs:
       - name: Checkout Project
         uses: actions/checkout@v3
 
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+          settings-path: ${{ github.workspace }} # location for the settings.xml file
+          cache: 'maven'
+          check-latest: true # Always download the latest java version
+
       - name: Download Jar
         uses: actions/download-artifact@v3
         with:
