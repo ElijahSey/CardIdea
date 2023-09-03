@@ -1,6 +1,0 @@
-{
-    "useZgcIfSupportedOs": true,
-    "executable": "CardIdea",
-    "mainclass": "presentation.CardIdea",
-    "resources": []
-}
