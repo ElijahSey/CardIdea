@@ -110,7 +110,7 @@ jobs:
 
       - name: Create Package
         run: |
-          jpackage --name cardidea --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar --app-version ${{ github.event.inputs.tag }}
+          jpackage --name cardidea-${{matrix.var.name}} --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar --app-version ${{ github.event.inputs.tag }}
           ls
   
       - name: Attach Asset
