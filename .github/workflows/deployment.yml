@@ -75,12 +75,12 @@ jobs:
     strategy:
       matrix:
         var: [
-          {os: windows-latest, name: win, suffix: exe},
-          {os: macos-latest, name: mac, suffix: dmg},
-          {os: ubuntu-latest, name: linux, suffix: rpm}
+          {os: windows-latest, name: win, suffix: .exe},
+          {os: macos-latest, name: mac, suffix: .dmg},
+          {os: ubuntu-latest, name: linux, suffix: -1_amd64.deb}
         ]
     env:
-      DIR_NAME: cardidea-${{matrix.var.name}}-${{ github.event.inputs.tag }}.${{matrix.var.suffix}}
+      DIR_NAME: cardidea-${{matrix.var.name}}-${{ github.event.inputs.tag }}${{matrix.var.suffix}}
 
     runs-on: ${{matrix.var.os}}
     needs: [prepare-release, build]
