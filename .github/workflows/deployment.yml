@@ -8,31 +8,6 @@ on:
         required: true
 
 jobs:
-
-  prepare-release:
-
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-
-    steps:
-
-      - name: Checkout Project
-        uses: actions/checkout@v3
-
-      - name: Create Release
-        uses: actions/create-release@v1
-        id: create_release
-        with:
-          draft: false
-          prerelease: false
-          release_name: v${{ github.event.inputs.tag }}
-          tag_name: v${{ github.event.inputs.tag }}
-          body_path: CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
   
   build:
 
@@ -70,7 +45,7 @@ jobs:
         name: target
         path: ./target/cardidea-${{ github.event.inputs.tag }}.jar
 
-  attach-assets:
+  create-installers:
 
     strategy:
       matrix:
@@ -80,10 +55,10 @@ jobs:
           {os: ubuntu-latest, name: linux, suffix: deb}
         ]
     env:
-      DIR_NAME: cardidea_${{ github.event.inputs.tag }}_${{matrix.var.name}}.${{matrix.var.suffix}}
+      INST_NAME: cardidea-${{ github.event.inputs.tag }}-${{matrix.var.name}}.${{matrix.var.suffix}}
 
     runs-on: ${{matrix.var.os}}
-    needs: [prepare-release, build]
+    needs: [build]
     permissions:
       contents: write
 
@@ -114,62 +89,39 @@ jobs:
           ls
 
       - name: Rename Package
-        run: mv card*.${{matrix.var.suffix}} ${{env.DIR_NAME}}
-  
-      - name: Attach Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        run: mv card*.${{matrix.var.suffix}} ${{env.INST_NAME}}
+
+      - name: Upload Jar
+        uses: actions/upload-artifact@v3
         with:
-          upload_url: ${{ needs.prepare-release.outputs.upload_url }}
-          asset_path: ./${{env.DIR_NAME}}
-          asset_name: ${{env.DIR_NAME}}
-          asset_content_type: application/octet-stream
+          name: ${{matrix.var.name}}-asset
+          path: ./${{env.INST_NAME}}
 
-  # attach-assets:
+  create-release:
 
-  #   runs-on: ubuntu-latest
-  #   needs: [prepare-release, build]
-  #   permissions:
-  #     contents: write
-  #   strategy:
-  #     matrix:
-  #       var: [
-  #         {os: windows, platform: windows64, jre: OpenJDK17U-jre_x64_windows_hotspot_17.0.8_7.zip},
-  #         {os: mac, platform: mac, jre: OpenJDK17U-jre_x64_mac_hotspot_17.0.8_7.tar.gz},
-  #         {os: linux, platform: linux64, jre: OpenJDK17U-jre_x64_linux_hotspot_17.0.8_7.tar.gz}]
-  #   env:
-  #     DIR_NAME: cardidea-${{ matrix.var.os }}-x64-${{ github.event.inputs.tag }}
+    runs-on: ubuntu-latest
+    needs: [create-installers]
 
-  #   steps:
+    permissions:
+      contents: write
 
-  #   - name: Checkout Project
-  #     uses: actions/checkout@v3
+    steps:
 
-  #   - name: Download Jar
-  #     uses: actions/download-artifact@v3
-  #     with:
-  #       name: target
-  #       path: .
+      - name: Checkout Project
+        uses: actions/checkout@v3
 
-  #   - name: Download Packr
-  #     run: |
-  #       wget https://github.com/libgdx/packr/releases/download/4.0.0/packr-all-4.0.0.jar
-  #       chmod +x packr-all-4.0.0.jar
+      - name: Download Assets
+        uses: actions/download-artifact@v3
+        with:
+          path: .
 
-  #   - name: Package
-  #     run: java -jar packr-all-4.0.0.jar --platform ${{ matrix.var.platform }} --jdk https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.8%2B7/${{ matrix.var.jre }} --classpath cardidea-${{ github.event.inputs.tag }}.jar  --output ${{env.DIR_NAME}} packr-config.json
-
-  #   - name: Create Archive
-  #     run: zip -r ${{env.DIR_NAME}}.zip ${{env.DIR_NAME}}
-
-  #   - name: Attach Asset
-  #     uses: actions/upload-release-asset@v1
-  #     env:
-  #       GITHUB_TOKEN: ${{ github.token }}
-  #     with:
-  #       upload_url: ${{ needs.prepare-release.outputs.upload_url }}
-  #       asset_path: ./${{env.DIR_NAME}}.zip
-  #       asset_name: ${{env.DIR_NAME}}.zip
-  #       asset_content_type: application/zip
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.event.inputs.tag }}
+          body_path: CHANGELOG.md
+          files: |
+            win-asset/cardidea-${{ github.event.inputs.tag }}-win.exe
+            mac-asset/cardidea-${{ github.event.inputs.tag }}-mac.dmg
+            linux-asset/cardidea-${{ github.event.inputs.tag }}-linux.deb
 
