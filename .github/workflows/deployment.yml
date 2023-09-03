@@ -109,7 +109,9 @@ jobs:
           path: .
 
       - name: Create Package
-        run: jpackage --name CardIdea --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar
+        run: |
+          jpackage --name CardIdea --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar
+          ls
 
       - name: Create Windows Archive
         if: ${{matrix.var.os == 'windows-latest'}}
