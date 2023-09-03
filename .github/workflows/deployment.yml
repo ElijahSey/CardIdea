@@ -75,12 +75,12 @@ jobs:
     strategy:
       matrix:
         var: [
-          {os: windows-latest, name: win, suffix: .exe},
-          {os: macos-latest, name: mac, suffix: .dmg},
-          {os: ubuntu-latest, name: linux, suffix: -1_amd64.deb}
+          {os: windows-latest, name: win, suffix: exe},
+          {os: macos-latest, name: mac, suffix: dmg},
+          {os: ubuntu-latest, name: linux, suffix: deb}
         ]
     env:
-      DIR_NAME: cardidea-${{matrix.var.name}}-${{ github.event.inputs.tag }}${{matrix.var.suffix}}
+      DIR_NAME: cardidea_${{ github.event.inputs.tag }}_${{matrix.var.name}}.${{matrix.var.suffix}}
 
     runs-on: ${{matrix.var.os}}
     needs: [prepare-release, build]
@@ -110,8 +110,11 @@ jobs:
 
       - name: Create Package
         run: |
-          jpackage --name cardidea-${{matrix.var.name}} --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar --app-version ${{ github.event.inputs.tag }}
+          jpackage --name cardidea --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar --app-version ${{ github.event.inputs.tag }}
           ls
+          
+      - name: Rename Package
+        run: mv cardidea* ${{env.DIR_NAME}}
   
       - name: Attach Asset
         uses: actions/upload-release-asset@v1
