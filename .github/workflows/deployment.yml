@@ -75,12 +75,12 @@ jobs:
     strategy:
       matrix:
         var: [
-          {os: windows-latest, name: win},
-          {os: macos-latest, name: mac},
-          {os: ubuntu-latest, name: linux}
+          {os: windows-latest, name: win, suffix: exe},
+          {os: macos-latest, name: mac, suffix: dmg},
+          {os: ubuntu-latest, name: linux, suffix: deb}
         ]
     env:
-      DIR_NAME: cardidea-${{matrix.var.name}}-x64-${{ github.event.inputs.tag }}
+      DIR_NAME: cardidea-${{ github.event.inputs.tag }}.${{matrix.var.suffix}}
 
     runs-on: ${{matrix.var.os}}
     needs: [prepare-release, build]
@@ -110,16 +110,7 @@ jobs:
 
       - name: Create Package
         run: |
-          jpackage --name CardIdea --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar
-          ls
-
-      - name: Create Windows Archive
-        if: ${{matrix.var.os == 'windows-latest'}}
-        run: powershell Compress-Archive CardIdea ${{env.DIR_NAME}}.zip
-
-      - name: Create UNIX Archive
-        if: ${{matrix.var.os != 'windows-latest'}}
-        run: zip -r ${{env.DIR_NAME}}.zip CardIdea
+          jpackage --name cardidea --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar --app-version ${{ github.event.inputs.tag }}
   
       - name: Attach Asset
         uses: actions/upload-release-asset@v1
@@ -127,9 +118,9 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ needs.prepare-release.outputs.upload_url }}
-          asset_path: ./${{env.DIR_NAME}}.zip
-          asset_name: ${{env.DIR_NAME}}.zip
-          asset_content_type: application/zip
+          asset_path: ./${{env.DIR_NAME}}
+          asset_name: ${{env.DIR_NAME}}
+          asset_content_type: application/octet-stream
 
   # attach-assets:
 
