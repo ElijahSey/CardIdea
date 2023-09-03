@@ -98,7 +98,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-          settings-path: ${{ github.workspace }} # location for the settings.xml file
+          settings-path: ${{ github.workspace }} # location of the settings.xml file
           cache: 'maven'
           check-latest: true # Always download the latest java version
 
@@ -110,11 +110,11 @@ jobs:
 
       - name: Create Package
         run: |
-          jpackage --name cardidea --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar --app-version ${{ github.event.inputs.tag }}
+          jpackage --name CardIdea --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar
           ls
-          
+
       - name: Rename Package
-        run: mv cardidea* ${{env.DIR_NAME}}
+        run: mv CardIdea*.${{matrix.var.suffix}} ${{env.DIR_NAME}}
   
       - name: Attach Asset
         uses: actions/upload-release-asset@v1
