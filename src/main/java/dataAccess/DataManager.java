@@ -5,6 +5,7 @@ import java.util.List;
 
 import entity.Card;
 import entity.CardSet;
+import entity.Topic;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -36,8 +37,9 @@ public class DataManager implements AutoCloseable {
 			CardSet set = new CardSet(setName);
 			persist(set);
 			for (int i = 0; i < 5; i++) {
+				Topic topic = new Topic(setName + "Topic" + i, set);
 				for (int j = 1; j < 3; j++) {
-					cards.add(new Card(set, setName + "Topic" + i, "Question" + j, "Solution" + j, "Hint" + j));
+					cards.add(new Card(topic, "Question" + j, "Solution" + j, "Hint" + j));
 				}
 			}
 		}
@@ -49,15 +51,21 @@ public class DataManager implements AutoCloseable {
 		return q.getResultList();
 	}
 
-	public List<Card> loadCardsOfSet(CardSet set) {
-		TypedQuery<Card> q = em.createQuery("SELECT c FROM Card c WHERE c.cardSet = ?1", Card.class);
+	public List<Topic> loadTopicsOfSet(CardSet set) {
+		TypedQuery<Topic> q = em.createQuery("SELECT t FROM Topic t WHERE t.cardSet = ?1", Topic.class);
 		q.setParameter(1, set);
 		return q.getResultList();
 	}
 
-	public List<String> loadTopicsOfSet(CardSet set) {
-		TypedQuery<String> q = em.createQuery("SELECT DISTINCT c.topic FROM Card c WHERE c.cardSet = ?1", String.class);
+	public List<Card> loadCardsOfSet(CardSet set) {
+		TypedQuery<Card> q = em.createQuery("SELECT c FROM Card c JOIN c.topic t ON t.cardSet = ?1", Card.class);
 		q.setParameter(1, set);
+		return q.getResultList();
+	}
+
+	public List<Card> loadCardsOfTopic(Topic topic) {
+		TypedQuery<Card> q = em.createQuery("SELECT c FROM Card c WHERE c.topic = ?1", Card.class);
+		q.setParameter(1, topic);
 		return q.getResultList();
 	}
 
