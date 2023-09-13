@@ -9,9 +9,6 @@
 			<property
 				name="jakarta.persistence.schema-generation.database.action"
 				value="update" />
-			<property
-				name="jakarta.persistence.schema-generation.scripts.update-script-source"
-				value="create-db.sql" />
 			<property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver" />
 			<property name="jakarta.persistence.jdbc.url"
 				value="jdbc:h2:file:~/.cardidea/data/cardideadb" />

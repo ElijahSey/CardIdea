@@ -5,18 +5,10 @@
 	version="3.0">
 	<persistence-unit name="test">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-		<class>entity.Card</class>
-		<class>entity.CardSet</class>
 		<properties>
 			<property
 				name="jakarta.persistence.schema-generation.database.action"
 				value="drop-and-create" />
-			<property
-				name="jakarta.persistence.schema-generation.scripts.create-script-source"
-				value="create-db.sql" />
-			<property
-				name="jakarta.persistence.schema-generation.scripts.drop-script-source"
-				value="drop-db.sql" />
 			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />
 			<property name="javax.persistence.jdbc.url"
 				value="jdbc:h2:file:./src/test/resources/data/testdb" />
