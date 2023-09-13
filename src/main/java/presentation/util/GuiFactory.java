@@ -9,6 +9,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
@@ -32,6 +33,8 @@ public abstract class GuiFactory {
 	public abstract <T> JList<T> createList(Collection<T> data, T[] type);
 
 	public abstract JScrollPane createScrollPane(Component view);
+
+	public abstract JSplitPane createSplitPane(int orientation, Component c1, Component c2);
 
 	public static GuiFactory createDefaultGuiFactory() {
 		instance = new DefaultGuiFactory();

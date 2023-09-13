@@ -1,4 +1,4 @@
-package logic;
+package logic.data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,7 @@ import dataAccess.DataManager;
 import dataAccess.Update;
 import entity.Card;
 import entity.CardSet;
+import entity.Topic;
 import logic.parsers.CardParser;
 import logic.parsers.MarkdownParser;
 
@@ -20,7 +21,7 @@ public class DataPreperator implements AutoCloseable {
 	private DataPreperator() {
 		dm = DataManager.getInstance();
 		parsers = new ArrayList<>();
-		parsers.add(new MarkdownParser("Markdown"));
+		parsers.add(new MarkdownParser("Markdown", this));
 //		dm.insertTestData();
 	}
 
@@ -32,7 +33,7 @@ public class DataPreperator implements AutoCloseable {
 		return dm.loadCardsOfSet(set);
 	}
 
-	public List<String> getTopicsOfSet(CardSet set) {
+	public List<Topic> getTopicsOfSet(CardSet set) {
 		return dm.loadTopicsOfSet(set);
 	}
 
@@ -67,6 +68,7 @@ public class DataPreperator implements AutoCloseable {
 
 	public void deleteSet(CardSet set) {
 		dm.removeAll(getCardsOfSet(set));
+		dm.removeAll(getTopicsOfSet(set));
 		dm.remove(set);
 	}
 

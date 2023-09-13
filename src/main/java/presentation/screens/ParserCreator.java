@@ -1,4 +1,4 @@
-package presentation;
+package presentation.screens;
 
 import java.awt.BorderLayout;
 
@@ -8,7 +8,10 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import logic.parsers.GenericParser;
+import presentation.basic.ContentPanel;
+import presentation.basic.Screen;
 
+@Deprecated
 public class ParserCreator extends Screen {
 
 	private JTextField name;
@@ -41,7 +44,7 @@ public class ParserCreator extends Screen {
 	}
 
 	public void save() {
-		dp.addParser(new GenericParser(name.getText(), exampleString.getText()));
+		dp.addParser(new GenericParser(name.getText(), exampleString.getText(), dp));
 		mainPanel.back();
 		mainPanel.refreshScreen();
 	}

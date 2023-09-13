@@ -1,4 +1,4 @@
-package presentation;
+package presentation.screens;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +15,8 @@ import javax.swing.JTextField;
 import entity.Card;
 import entity.CardSet;
 import logic.parsers.CardParser;
+import presentation.basic.ContentPanel;
+import presentation.basic.Screen;
 
 public class CardSetImport extends Screen {
 
@@ -73,10 +75,7 @@ public class CardSetImport extends Screen {
 		if (file.exists() && file.isFile() && file.canRead()) {
 			List<Card> cards = null;
 			try {
-				cards = parser.parse(Files.readString(file.toPath()));
-				for (Card c : cards) {
-					c.setCardSet(cardSet);
-				}
+				cards = parser.parse(Files.readString(file.toPath()), cardSet);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

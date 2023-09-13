@@ -2,8 +2,8 @@ package presentation.menuBar;
 
 import javax.swing.JPanel;
 
-import presentation.ContentPanel;
-import presentation.Screen;
+import presentation.basic.ContentPanel;
+import presentation.basic.Screen;
 
 public class Settings extends Screen {
 

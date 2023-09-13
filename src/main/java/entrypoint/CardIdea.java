@@ -1,4 +1,6 @@
-package presentation;
+package entrypoint;
+
+import presentation.basic.MainFrame;
 
 public class CardIdea {
 

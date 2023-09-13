@@ -8,7 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import presentation.ContentPanel;
+import presentation.basic.ContentPanel;
 
 public class MenuBar {
 

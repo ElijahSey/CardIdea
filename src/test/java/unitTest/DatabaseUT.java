@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import dataAccess.DataManager;
 import entity.Card;
 import entity.CardSet;
+import entity.Topic;
 
 class DatabaseUT {
 
@@ -31,18 +32,17 @@ class DatabaseUT {
 	}
 
 	@Test
-	void persistCardSetTest() {
-
-	}
-
-	@Test
 	void persistCardTest() {
 		CardSet set = new CardSet("Python");
 		mgr.persist(set);
-		Card card = new Card(set, "Topic", "Question", "Solution", "Hint");
+		Topic topic = new Topic("Topic", set);
+		mgr.persist(topic);
+		Card card = new Card(topic, "Question", "Solution", "Hint");
 		mgr.persist(card);
 		assertTrue(mgr.getEntityManager().contains(card));
 		mgr.remove(card);
+		mgr.remove(topic);
+		mgr.remove(set);
 	}
 
 	@Test

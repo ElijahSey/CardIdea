@@ -1,4 +1,4 @@
-package presentation;
+package presentation.screens;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -17,6 +18,8 @@ import javax.swing.JTextArea;
 
 import entity.Card;
 import entity.CardSet;
+import presentation.basic.ContentPanel;
+import presentation.basic.Screen;
 
 public class CardViewer extends Screen {
 
@@ -25,10 +28,12 @@ public class CardViewer extends Screen {
 	private JTextArea answer, solution;
 	private String hint;
 	private ListIterator<Card> iterator;
+	private List<Integer> scores;
 
 	public CardViewer(ContentPanel mainPanel, CardSet cardSet) {
 		super(mainPanel);
 		this.cardSet = cardSet;
+		scores = new LinkedList<>();
 		List<Card> cards = dp.getCardsOfSet(cardSet);
 		Collections.shuffle(cards);
 		iterator = cards.listIterator();
@@ -110,7 +115,7 @@ public class CardViewer extends Screen {
 
 	private void nextCard(int score) {
 
-		// TODO Score speichern
+		scores.add(score);
 		if (iterator.hasNext()) {
 			updateContent(iterator.next());
 		}

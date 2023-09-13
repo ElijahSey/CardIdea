@@ -7,7 +7,11 @@ import java.util.Map;
 import java.util.Scanner;
 
 import entity.Card;
+import entity.CardSet;
+import entity.Topic;
+import logic.data.DataPreperator;
 
+@Deprecated
 public class GenericParser extends CardParser {
 
 	private static final String TOPIC_STUB = "<topic>";
@@ -17,9 +21,9 @@ public class GenericParser extends CardParser {
 
 	private LinkedHashMap<String, String> delimiters;
 
-	public GenericParser(String name, String exampleText) {
+	public GenericParser(String name, String exampleText, DataPreperator dp) {
 
-		super(name);
+		super(name, dp);
 		delimiters = new LinkedHashMap<>();
 
 		List<String> stubs = new ArrayList<>();
@@ -48,7 +52,7 @@ public class GenericParser extends CardParser {
 	}
 
 	@Override
-	public List<Card> parse(String text) {
+	public List<Card> parse(String text, CardSet cardSet) {
 
 		List<Card> cards = new ArrayList<>();
 
@@ -61,7 +65,7 @@ public class GenericParser extends CardParser {
 					String snippet = sc.findWithinHorizon(entry.getValue(), 0);
 					switch (entry.getKey()) {
 					case TOPIC_STUB:
-						c.setTopic(snippet);
+						c.setTopic(new Topic(snippet, cardSet));
 						break;
 					case QUESTION_STUB:
 						c.setQuestion(snippet);

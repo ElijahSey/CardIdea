@@ -2,6 +2,7 @@ package presentation.util;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.util.Collection;
 
 import javax.swing.BorderFactory;
@@ -9,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -23,7 +25,8 @@ public class DefaultGuiFactory extends GuiFactory {
 
 	@Override
 	public JTextField createTextField() {
-		JTextField t = new JTextField(16);
+		JTextField t = new JTextField();
+		t.setMinimumSize(new Dimension(50, 20));
 		return t;
 	}
 
@@ -33,6 +36,7 @@ public class DefaultGuiFactory extends GuiFactory {
 		t.setLineWrap(true);
 		t.setWrapStyleWord(true);
 		t.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+		t.setMinimumSize(new Dimension(50, 20));
 		return t;
 	}
 
@@ -51,6 +55,12 @@ public class DefaultGuiFactory extends GuiFactory {
 	@Override
 	public JScrollPane createScrollPane(Component view) {
 		JScrollPane s = new JScrollPane(view);
+		return s;
+	}
+
+	@Override
+	public JSplitPane createSplitPane(int orientation, Component c1, Component c2) {
+		JSplitPane s = new JSplitPane(orientation, c1, c2);
 		return s;
 	}
 }

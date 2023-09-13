@@ -1,4 +1,4 @@
-package presentation;
+package presentation.basic;
 
 import java.awt.BorderLayout;
 import java.util.Stack;
@@ -20,9 +20,6 @@ public class ContentPanel extends JPanel {
 
 	public void addScreen(Screen screen) {
 
-		if (!screens.isEmpty()) {
-			screens.peek().executeExitAction();
-		}
 		screens.push(screen);
 		displayScreen(screen);
 	}
@@ -32,11 +29,12 @@ public class ContentPanel extends JPanel {
 			getActiveScreen().rebuild();
 			return;
 		}
-		screens.pop();
+		screens.pop().executeExitAction();
 		displayScreen(screens.peek());
 	}
 
 	public void home() {
+		screens.peek().executeExitAction();
 		Screen home = screens.firstElement();
 		screens.clear();
 		home.rebuild();
@@ -48,6 +46,7 @@ public class ContentPanel extends JPanel {
 		repaint();
 		header.setText(screen.getHeader());
 		add(screen.getPanel());
+		screen.executeOpenAction();
 		repaint();
 	}
 
@@ -58,7 +57,6 @@ public class ContentPanel extends JPanel {
 	}
 
 	public Screen getActiveScreen() {
-		System.out.println("Aktiver Screen: " + screens.peek().getHeader());
 		return screens.peek();
 	}
 

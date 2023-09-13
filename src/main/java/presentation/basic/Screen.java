@@ -1,9 +1,8 @@
-package presentation;
+package presentation.basic;
 
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import logic.DataPreperator;
+import logic.data.DataPreperator;
 import presentation.util.GuiFactory;
 
 public abstract class Screen {
@@ -28,6 +27,10 @@ public abstract class Screen {
 
 	protected abstract String getHeader();
 
+	protected void executeOpenAction() {
+
+	}
+
 	protected void executeExitAction() {
 
 	}
@@ -42,9 +45,5 @@ public abstract class Screen {
 			panel = createContent();
 		}
 		return panel;
-	}
-
-	protected void error(String message) {
-		JOptionPane.showMessageDialog(mainPanel, message, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 }

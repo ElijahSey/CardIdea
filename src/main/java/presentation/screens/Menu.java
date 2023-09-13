@@ -1,6 +1,7 @@
-package presentation;
+package presentation.screens;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -9,10 +10,13 @@ import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import entity.CardSet;
+import presentation.basic.ContentPanel;
+import presentation.basic.Screen;
 
 public class Menu extends Screen {
 
@@ -31,9 +35,10 @@ public class Menu extends Screen {
 		JPanel innerPanel = new JPanel(new BorderLayout(20, 0));
 
 		setList = gui.createList(dp.getAllSets(), new CardSet[0]);
-		setList.setFixedCellWidth(150);
+		setList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setList.addListSelectionListener(new ListHasSelectionListener());
 		JScrollPane scrollPane = gui.createScrollPane(setList);
+		scrollPane.setPreferredSize(new Dimension(200, 0));
 
 		JButton newBut = gui.createButton("New");
 		newBut.addActionListener(e -> newSet());
@@ -70,6 +75,11 @@ public class Menu extends Screen {
 		panel.add(innerPanel);
 
 		return panel;
+	}
+
+	@Override
+	protected void executeOpenAction() {
+		reload();
 	}
 
 	private void playSet(CardSet set) {

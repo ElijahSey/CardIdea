@@ -6,15 +6,18 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import entity.Card;
+import entity.CardSet;
+import entity.Topic;
+import logic.data.DataPreperator;
 
 public class MarkdownParser extends CardParser {
 
-	public MarkdownParser(String name) {
-		super(name);
+	public MarkdownParser(String name, DataPreperator dp) {
+		super(name, dp);
 	}
 
 	@Override
-	public List<Card> parse(String text) {
+	public List<Card> parse(String text, CardSet cardSet) {
 
 		List<Card> cards = new ArrayList<>();
 
@@ -30,10 +33,12 @@ public class MarkdownParser extends CardParser {
 			String topicString = topicArr[i];
 			String[] topicSplit = Pattern.compile("\\R").split(topicString, 2);
 			String[] cardArr = Pattern.compile("^" + CARD_PRE, Pattern.MULTILINE).split(topicSplit[1].trim());
+			Topic topic = new Topic(topicSplit[0], cardSet);
+			dp.insert(topic);
 			for (int k = 1; k < cardArr.length; k++) {
 				String cardString = cardArr[k];
 				String[] cardSplit = Pattern.compile("\\R").split(cardString, 2);
-				cards.add(new Card(topicSplit[0], cardSplit[0], cardSplit[1], ""));
+				cards.add(new Card(topic, cardSplit[0], cardSplit[1], ""));
 			}
 		}
 		return cards;
@@ -46,10 +51,9 @@ public class MarkdownParser extends CardParser {
 		while (sc.hasNextLine()) {
 			String line = sc.nextLine();
 			if (line.startsWith("#")) {
-				if (hashtags == line.indexOf(" ")) {
-					break;
+				if (hashtags < line.indexOf(" ")) {
+					hashtags = line.indexOf(" ");
 				}
-				hashtags = line.indexOf(" ");
 			}
 		}
 		return hashtags;
