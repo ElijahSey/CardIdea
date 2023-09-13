@@ -1,5 +1,6 @@
 package entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,36 +16,34 @@ public class Card {
 	private long id;
 
 	@ManyToOne
-	@JoinColumn(name = "cardset_id", referencedColumnName = "id", nullable = false)
-	private CardSet cardSet;
+	@JoinColumn(name = "topic_id", referencedColumnName = "id", nullable = false)
+	private Topic topic;
 
-	private String topic;
-
+	@Column(length = 127)
 	private String question;
 
+	@Column(length = 511)
 	private String solution;
 
+	@Column(length = 255)
 	private String hint;
 
-	public Card() {
+	@Column(nullable = true)
+	private int score;
 
+	public Card() {
 	}
 
-	public Card(CardSet cardSet, String topic, String question, String solution, String hint) {
+	public Card(Topic topic, String question, String solution) {
+		this(topic, question, solution, "");
+	}
+
+	public Card(Topic topic, String question, String solution, String hint) {
 		super();
-		this.cardSet = cardSet;
 		this.topic = topic;
 		this.question = question;
 		this.solution = solution;
 		this.hint = hint;
-	}
-
-	public Card(String topic, String question, String solution, String hint) {
-		this(null, topic, question, solution, hint);
-	}
-
-	public Card(String topic, String question, String solution) {
-		this(topic, question, solution, "");
 	}
 
 	@Override
@@ -69,19 +68,11 @@ public class Card {
 		this.id = id;
 	}
 
-	public CardSet getCardSet() {
-		return cardSet;
-	}
-
-	public void setCardSet(CardSet cardSet) {
-		this.cardSet = cardSet;
-	}
-
-	public String getTopic() {
+	public Topic getTopic() {
 		return topic;
 	}
 
-	public void setTopic(String topic) {
+	public void setTopic(Topic topic) {
 		this.topic = topic;
 	}
 
@@ -107,5 +98,13 @@ public class Card {
 
 	public void setHint(String hint) {
 		this.hint = hint;
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
 	}
 }
