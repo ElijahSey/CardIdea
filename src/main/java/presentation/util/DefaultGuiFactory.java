@@ -25,7 +25,7 @@ public class DefaultGuiFactory extends GuiFactory {
 
 	@Override
 	public JTextField createTextField() {
-		JTextField t = new JTextField();
+		JTextField t = new JTextField(16);
 		t.setMinimumSize(new Dimension(50, 20));
 		return t;
 	}

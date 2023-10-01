@@ -1,25 +1,38 @@
 package logic.parsers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import entity.Card;
 import entity.CardSet;
-import logic.data.DataPreperator;
+import entity.Topic;
 
 public abstract class CardParser {
 
 	private String name;
-	protected DataPreperator dp;
+	protected List<Topic> topics;
+	protected List<Card> cards;
 
-	public CardParser(String name, DataPreperator dp) {
+	public CardParser(String name) {
 		this.name = name;
-		this.dp = dp;
+		topics = new ArrayList<>();
+		cards = new ArrayList<>();
 	}
 
-	public abstract List<Card> parse(String text, CardSet cardSet);
+	public abstract void parse(String text, CardSet cardSet);
+
+	public abstract CardParser newInstance();
 
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	public List<Topic> getTopics() {
+		return topics;
+	}
+
+	public List<Card> getCards() {
+		return cards;
 	}
 }
