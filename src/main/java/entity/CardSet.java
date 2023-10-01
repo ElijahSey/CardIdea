@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class CardSet {
+public class CardSet implements DBEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +22,11 @@ public class CardSet {
 	public CardSet(String name) {
 		super();
 		this.name = name;
+	}
+
+	@Override
+	public void update() {
+		setName(name);
 	}
 
 	@Override

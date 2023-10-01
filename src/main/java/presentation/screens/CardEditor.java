@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -30,6 +31,7 @@ public class CardEditor extends Screen {
 
 	private CardSet cardSet;
 	private List<Card> cards;
+	private List<Topic> topics;
 	private JList<Card> cardList;
 	private JList<Topic> topicList;
 	private JTextField cardSetName, question;
@@ -44,10 +46,11 @@ public class CardEditor extends Screen {
 		if (cardSet == null) {
 			this.cardSet = new CardSet();
 			this.cardSet.setName("");
-			dp.insert(this.cardSet);
+			topics = new ArrayList<>();
 			cards = new ArrayList<>();
 		} else {
 			this.cardSet = cardSet;
+			topics = dp.getTopicsOfSet(cardSet);
 			cards = dp.getCardsOfSet(cardSet);
 		}
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -97,10 +100,26 @@ public class CardEditor extends Screen {
 	}
 
 	@Override
-	protected void executeExitAction() {
-		if (cardSet.getName().isBlank() && cardSetName.getText().isBlank()) {
+	protected void afterOpening() {
+		revalidate();
+	}
+
+	@Override
+	protected boolean afterClosing() {
+		if (cardSet.getName().isBlank() && cardSetName.getText().isBlank() && topics.isEmpty() && cards.isEmpty()) {
 			dp.deleteSet(cardSet);
+		} else if (cardListChanged) {
+			int opt = JOptionPane.showConfirmDialog(mainPanel, "Do you want to save the card set before exiting?",
+					"Save", JOptionPane.YES_NO_CANCEL_OPTION);
+			switch (opt) {
+			case 0:
+				saveSet();
+				break;
+			case 2:
+				return false;
+			}
 		}
+		return true;
 	}
 
 	private void initializeGuiElements() {
@@ -136,16 +155,20 @@ public class CardEditor extends Screen {
 	private JPanel createButtonPanel() {
 
 		JPanel panel = new JPanel();
-		delBut = gui.createButton("Delete");
+		delBut = gui.createButton(i18n.getString("delete"));
+		delBut.setToolTipText(i18n.getString("CardEditor.delete.tooltip"));
 		delBut.addActionListener(e -> deleteCard(cardList.getSelectedValue()));
-		JButton importBut = gui.createButton("Import");
-		importBut.setToolTipText("Import Cards from a File");
+		JButton importBut = gui.createButton(i18n.getString("import"));
+		importBut.setToolTipText(i18n.getString("CardEditor.import.tooltip"));
 		importBut.addActionListener(e -> importCards());
-		JButton clearBut = gui.createButton("Clear");
+		JButton clearBut = gui.createButton(i18n.getString("clear"));
+		clearBut.setToolTipText(i18n.getString("CardEditor.clear.tooltip"));
 		clearBut.addActionListener(e -> cardList.clearSelection());
-		JButton addBut = gui.createButton("Add");
-		addBut.addActionListener(e -> saveCard(cardList.getSelectedValue()));
-		JButton saveBut = gui.createButton("Save");
+		JButton addBut = gui.createButton(i18n.getString("add"));
+		addBut.setToolTipText(i18n.getString("CardEditor.add.tooltip"));
+		addBut.addActionListener(e -> addCard(cardList.getSelectedValue()));
+		JButton saveBut = gui.createButton(i18n.getString("save"));
+		saveBut.setToolTipText(i18n.getString("CardEditor.save.tooltip"));
 		saveBut.addActionListener(e -> saveSet());
 
 		panel.add(delBut);
@@ -156,52 +179,43 @@ public class CardEditor extends Screen {
 		return panel;
 	}
 
-	public void saveCard(Card card) {
+	public void addCard(Card card) {
 		if (topicList.isSelectionEmpty()) {
 			throw new VisualException(mainPanel, "Please select a topic when adding or updating a card.");
 		}
 		if (card == null) {
-			card = new Card(topicList.getSelectedValue(), question.getText(), solution.getText(), hint.getText());
-			dp.insert(card);
+			cards.add(new Card(topicList.getSelectedValue(), question.getText(), solution.getText(), hint.getText()));
 		} else {
-			dp.update(card, e -> {
-				Card c = (Card) e;
-				c.setTopic(topicList.getSelectedValue());
-				c.setQuestion(question.getText());
-				c.setSolution(solution.getText());
-				c.setHint(hint.getText());
-			});
+			card.setTopic(topicList.getSelectedValue());
+			card.setQuestion(question.getText());
+			card.setSolution(solution.getText());
+			card.setHint(hint.getText());
 		}
-		reload();
+		revalidate();
 		cardListChanged = true;
 	}
 
 	public void deleteCard(Card card) {
-		if (card != null) {
-			dp.deleteCard(card);
-			reload();
-		}
+		cards.remove(card);
+		revalidate();
 		cardListChanged = true;
 	}
 
 	public void saveSet() {
 
-		// Hier erst alles in die Datenbank schieben, vorher alles in Memory speichern
-
 		String name = cardSetName.getText();
-		if (cardSet.getName().equals(name) && !cardListChanged) {
-			return;
-		}
 		try {
 			if (name.isBlank()) {
 				throw new InvalidNameException("The name of the card set cannot be empty.");
 			}
+			if (name.equals(cardSet.getName()) && !cardListChanged) {
+				return;
+			}
 			if (!dp.isUniqueName(cardSet, name)) {
 				throw new NameAlreadyBoundException("The name of the card set already exists.");
 			}
-			dp.update(cardSet, e -> {
-				((CardSet) e).setName(name);
-			});
+			cardSet.setName(name);
+			dp.updateSet(cardSet, topics, cards);
 			cardListChanged = false;
 		} catch (Exception e) {
 			throw new VisualException(mainPanel, e);
@@ -209,21 +223,21 @@ public class CardEditor extends Screen {
 	}
 
 	private void importCards() {
-		mainPanel.addScreen(new CardSetImport(mainPanel, cardSet));
+		mainPanel.addScreen(new CardImport(mainPanel, cardSet, topics, cards));
 	}
 
 	@Override
-	protected void reload() {
-		cards = dp.getCardsOfSet(cardSet);
+	protected void revalidate() {
+		topicList.setListData(topics.toArray(new Topic[0]));
 		cardList.setListData(cards.toArray(new Card[0]));
 		updateTextFields(null);
-		super.reload();
+		super.revalidate();
 	}
 
 	@Override
 	protected String getHeader() {
-		if (cardSet.getName().isBlank()) {
-			return "New";
+		if (cardSet.getName() == null || cardSet.getName().isBlank()) {
+			return i18n.getString("new");
 		}
 		return cardSet.getName();
 	}

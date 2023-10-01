@@ -9,7 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
-public class Topic {
+public class Topic implements DBEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +29,12 @@ public class Topic {
 		super();
 		setName(name);
 		this.cardSet = cardSet;
+	}
+
+	@Override
+	public void update() {
+		setName(name);
+		setCardSet(cardSet);
 	}
 
 	@Override

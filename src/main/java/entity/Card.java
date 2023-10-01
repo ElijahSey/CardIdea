@@ -9,7 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
-public class Card {
+public class Card implements DBEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,8 +28,12 @@ public class Card {
 	@Column(length = 255)
 	private String hint;
 
-	@Column(nullable = true)
 	private int score;
+
+	public static final int CORRECT = 1;
+	public static final int DEFAULT = 0;
+	public static final int SKIP = -1;
+	public static final int WRONG = -2;
 
 	public Card() {
 	}
@@ -44,6 +48,16 @@ public class Card {
 		this.question = question;
 		this.solution = solution;
 		this.hint = hint;
+		score = 0;
+	}
+
+	@Override
+	public void update() {
+		setTopic(topic);
+		setQuestion(question);
+		setSolution(solution);
+		setHint(hint);
+		setScore(score);
 	}
 
 	@Override

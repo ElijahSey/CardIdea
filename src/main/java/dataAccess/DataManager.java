@@ -1,11 +1,10 @@
 package dataAccess;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import entity.Card;
 import entity.CardSet;
-import entity.Topic;
+import entity.DBEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -20,53 +19,41 @@ public class DataManager implements AutoCloseable {
 	private final EntityManager em;
 	private static DataManager instance;
 
-	private static final String PRODUCTION = "prod";
-	private static final String TESTING = "test";
-
 	private DataManager(String unit) {
 
 		emf = Persistence.createEntityManagerFactory(unit);
 		em = emf.createEntityManager();
 	}
 
-	public void insertTestData() {
-		List<Card> cards = new ArrayList<>();
-		List<String> sets = List.of("Testing", "Architektur", "PVS", "Betriebssysteme", "Agile");
-
-		for (String setName : sets) {
-			CardSet set = new CardSet(setName);
-			persist(set);
-			for (int i = 0; i < 5; i++) {
-				Topic topic = new Topic(setName + "Topic" + i, set);
-				for (int j = 1; j < 3; j++) {
-					cards.add(new Card(topic, "Question" + j, "Solution" + j, "Hint" + j));
-				}
-			}
-		}
-		persistAll(cards);
+	public int countProperties() {
+		final TypedQuery<Number> query = em.createQuery("SELECT COUNT(p) FROM Property p", Number.class);
+		return query.getSingleResult().intValue();
 	}
 
-	public List<CardSet> retrieveAllSets() {
-		TypedQuery<CardSet> q = em.createQuery("SELECT s FROM CardSet s", CardSet.class);
+	public <T extends DBEntity> T find(Class<T> entity, Object pk) {
+		return em.find(entity, pk);
+	}
+
+	public <T extends DBEntity> List<T> findAll(Class<T> entity) {
+		TypedQuery<T> q = em.createQuery("SELECT e FROM %s e".formatted(entity.getSimpleName()), entity);
 		return q.getResultList();
 	}
 
-	public List<Topic> loadTopicsOfSet(CardSet set) {
-		TypedQuery<Topic> q = em.createQuery("SELECT t FROM Topic t WHERE t.cardSet = ?1", Topic.class);
-		q.setParameter(1, set);
+	public <T extends DBEntity, P extends DBEntity> List<T> findEntitiesOf(Class<T> entity, String fk, P parent) {
+		String query = "SELECT e FROM %s e WHERE e.%s = ?1".formatted(entity.getSimpleName(), fk);
+		TypedQuery<T> q = em.createQuery(query, entity);
+		q.setParameter(1, parent);
 		return q.getResultList();
 	}
 
-	public List<Card> loadCardsOfSet(CardSet set) {
+	public List<Card> findCardsOfSet(CardSet set) {
 		TypedQuery<Card> q = em.createQuery("SELECT c FROM Card c JOIN c.topic t ON t.cardSet = ?1", Card.class);
 		q.setParameter(1, set);
 		return q.getResultList();
 	}
 
-	public List<Card> loadCardsOfTopic(Topic topic) {
-		TypedQuery<Card> q = em.createQuery("SELECT c FROM Card c WHERE c.topic = ?1", Card.class);
-		q.setParameter(1, topic);
-		return q.getResultList();
+	public boolean contains(Object entity) {
+		return em.contains(entity);
 	}
 
 	public void persist(Object entity) {
@@ -85,10 +72,23 @@ public class DataManager implements AutoCloseable {
 		et.commit();
 	}
 
-	public void update(Object entity, Update update) {
+	public <T extends DBEntity> void update(T entity) {
 		EntityTransaction et = em.getTransaction();
 		et.begin();
-		update.update(entity);
+		entity.update();
+		et.commit();
+	}
+
+	public void updateAll(Iterable<? extends DBEntity> entities) {
+		EntityTransaction et = em.getTransaction();
+		et.begin();
+		for (DBEntity entity : entities) {
+			if (!em.contains(entity)) {
+				em.persist(entity);
+			} else {
+				entity.update();
+			}
+		}
 		et.commit();
 	}
 
@@ -114,20 +114,21 @@ public class DataManager implements AutoCloseable {
 
 	@Override
 	public void close() {
+		instance = null;
 		em.close();
 		emf.close();
 	}
 
 	public static DataManager getInstance() {
 		if (instance == null) {
-			instance = new DataManager(PRODUCTION);
+			instance = new DataManager("prod");
 		}
 		return instance;
 	}
 
 	public static DataManager getTestInstance() {
 		if (instance == null) {
-			instance = new DataManager(TESTING);
+			instance = new DataManager("test");
 		}
 		return instance;
 	}

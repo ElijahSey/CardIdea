@@ -14,19 +14,24 @@ import javax.swing.JTextField;
 
 import entity.Card;
 import entity.CardSet;
+import entity.Topic;
 import logic.parsers.CardParser;
 import presentation.basic.ContentPanel;
 import presentation.basic.Screen;
 
-public class CardSetImport extends Screen {
+public class CardImport extends Screen {
 
 	private JList<CardParser> parsers;
 	private JTextField path;
 	private CardSet cardSet;
+	private List<Topic> topics;
+	private List<Card> cards;
 
-	public CardSetImport(ContentPanel mainPanel, CardSet cardSet) {
+	public CardImport(ContentPanel mainPanel, CardSet cardSet, List<Topic> topics, List<Card> cards) {
 		super(mainPanel);
 		this.cardSet = cardSet;
+		this.topics = topics;
+		this.cards = cards;
 	}
 
 	@Override
@@ -73,21 +78,16 @@ public class CardSetImport extends Screen {
 		}
 		File file = new File(path.getText());
 		if (file.exists() && file.isFile() && file.canRead()) {
-			List<Card> cards = null;
+
 			try {
-				cards = parser.parse(Files.readString(file.toPath()), cardSet);
+				parser.parse(Files.readString(file.toPath()), cardSet);
+				topics.addAll(parser.getTopics());
+				cards.addAll(parser.getCards());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			dp.insertAll(cards);
 			mainPanel.back();
-			mainPanel.refreshScreen();
+			mainPanel.rebuildActiveScreen();
 		}
-
-	}
-
-	@Override
-	protected String getHeader() {
-		return "Import Cards";
 	}
 }
