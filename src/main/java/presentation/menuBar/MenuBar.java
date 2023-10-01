@@ -9,17 +9,25 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import presentation.basic.ContentPanel;
+import presentation.util.GuiFactory;
+import presentation.util.LanguageManager;
 
 public class MenuBar {
 
 	private JPanel panel;
+	private ContentPanel contentArea;
+	private JLabel header;
+	private LanguageManager i18n;
 	private static final int HEIGHT = 40;
 
 	public MenuBar(ContentPanel contentArea, JLabel header) {
-		panel = createContent(contentArea, header);
+		this.contentArea = contentArea;
+		this.header = header;
+		i18n = LanguageManager.getInstance();
+		rebuild();
 	}
 
-	protected JPanel createContent(ContentPanel contentArea, JLabel header) {
+	protected JPanel createContent() {
 		JPanel panel = new JPanel(new BorderLayout());
 
 		panel.setSize(100, HEIGHT);
@@ -30,13 +38,16 @@ public class MenuBar {
 		JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 5));
 		right.setOpaque(false);
 
-		JButton back = createButton("Back");
+		JButton back = createButton(i18n.getString("back"));
+		back.setToolTipText(i18n.getString("MenuBar.back.tooltip"));
 		back.addActionListener(e -> contentArea.back());
 
-		JButton home = createButton("Home");
+		JButton home = createButton(i18n.getString("home"));
+		home.setToolTipText(i18n.getString("MenuBar.home.tooltip"));
 		home.addActionListener(e -> contentArea.home());
 
-		JButton settings = createButton("Settings");
+		JButton settings = createButton(i18n.getString("settings"));
+		settings.setToolTipText(i18n.getString("MenuBar.settings.tooltip"));
 		settings.addActionListener(e -> contentArea.addScreen(new Settings(contentArea)));
 
 		left.add(back);
@@ -50,10 +61,14 @@ public class MenuBar {
 		return panel;
 	}
 
+	public void rebuild() {
+		panel = createContent();
+		panel.revalidate();
+		panel.repaint();
+	}
+
 	private JButton createButton(String text) {
-		JButton b = new JButton(text);
-		b.setFocusPainted(false);
-		return b;
+		return GuiFactory.getInstance().createButton(text);
 	}
 
 	public JPanel getPanel() {

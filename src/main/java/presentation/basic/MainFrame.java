@@ -18,6 +18,7 @@ import logic.data.DataPreperator;
 import presentation.menuBar.MenuBar;
 import presentation.screens.Menu;
 import presentation.util.GuiFactory;
+import presentation.util.LanguageManager;
 
 public class MainFrame {
 
@@ -26,6 +27,8 @@ public class MainFrame {
 	private JFrame frame;
 	private JPanel mainPanel;
 	private Image icon;
+
+	private LanguageManager lm;
 
 	public MainFrame() {
 
@@ -43,6 +46,7 @@ public class MainFrame {
 	private void init() {
 		try {
 			icon = ImageIO.read(getClass().getResourceAsStream("/images/card_logo.png"));
+			lm = LanguageManager.getInstance();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -52,7 +56,7 @@ public class MainFrame {
 
 		SplashScreen splash = SplashScreen.getSplashScreen();
 		if (splash == null) {
-			System.out.println("Splashscreen image not found.");
+			System.err.println(lm.getString("splashErr"));
 		}
 		return splash;
 	}
@@ -72,13 +76,15 @@ public class MainFrame {
 		panel.setLayout(new BorderLayout());
 
 		JLabel header = new JLabel();
-		ContentPanel center = new ContentPanel(header);
-		JPanel topBar = new MenuBar(center, header).getPanel();
+		ContentPanel contentPanel = new ContentPanel(header);
+		MenuBar menuBar = new MenuBar(contentPanel, header);
+		JPanel topBar = menuBar.getPanel();
+		contentPanel.addReloadListener(() -> rebuildMenuBar(menuBar, panel));
 
 		panel.add(topBar, BorderLayout.NORTH);
-		panel.add(center, BorderLayout.CENTER);
+		panel.add(contentPanel, BorderLayout.CENTER);
 
-		center.addScreen(new Menu(center));
+		contentPanel.addScreen(new Menu(contentPanel));
 		mainPanel.removeAll();
 		update(mainPanel);
 		mainPanel.setLayout(new BorderLayout());
@@ -91,6 +97,16 @@ public class MainFrame {
 	private void update(JComponent c) {
 		c.revalidate();
 		c.repaint();
+	}
+
+	private void rebuildMenuBar(MenuBar bar, JPanel parent) {
+		parent.remove(bar.getPanel());
+		parent.revalidate();
+		parent.repaint();
+		bar.rebuild();
+		parent.add(bar.getPanel(), BorderLayout.NORTH);
+		parent.revalidate();
+		parent.repaint();
 	}
 
 	private class WindowCloseListener extends WindowAdapter {
