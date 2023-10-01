@@ -6,7 +6,6 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -28,16 +27,14 @@ public class CardViewer extends Screen {
 	private JTextArea answer, solution;
 	private String hint;
 	private ListIterator<Card> iterator;
-	private List<Integer> scores;
+	private Card currentCard;
 
 	public CardViewer(ContentPanel mainPanel, CardSet cardSet) {
 		super(mainPanel);
 		this.cardSet = cardSet;
-		scores = new LinkedList<>();
 		List<Card> cards = dp.getCardsOfSet(cardSet);
 		Collections.shuffle(cards);
 		iterator = cards.listIterator();
-		nextCard(0);
 	}
 
 	@Override
@@ -77,11 +74,11 @@ public class CardViewer extends Screen {
 		JPanel nextPanel = new JPanel(new GridLayout(0, 1));
 
 		JButton correct = gui.createButton("correct");
-		correct.addActionListener(e -> nextCard(1));
-		JButton skip = gui.createButton("unshure");
-		skip.addActionListener(e -> nextCard(0));
+		correct.addActionListener(e -> nextCard(Card.CORRECT));
+		JButton skip = gui.createButton("skip");
+		skip.addActionListener(e -> nextCard(Card.SKIP));
 		JButton wrong = gui.createButton("wrong");
-		wrong.addActionListener(e -> nextCard(-1));
+		wrong.addActionListener(e -> nextCard(Card.WRONG));
 
 		nextPanel.add(correct);
 		nextPanel.add(skip);
@@ -97,10 +94,15 @@ public class CardViewer extends Screen {
 		return panel;
 	}
 
+	@Override
+	public void afterOpening() {
+		nextCard();
+	}
+
 	private void updateContent(Card card) {
 
+		currentCard = card;
 		solution.setVisible(false);
-
 		question.setText(card.getQuestion());
 		solution.setText(card.getSolution());
 		answer.setText("");
@@ -115,7 +117,12 @@ public class CardViewer extends Screen {
 
 	private void nextCard(int score) {
 
-		scores.add(score);
+		currentCard.setScore(score);
+		dp.update(currentCard);
+		nextCard();
+	}
+
+	private void nextCard() {
 		if (iterator.hasNext()) {
 			updateContent(iterator.next());
 		}

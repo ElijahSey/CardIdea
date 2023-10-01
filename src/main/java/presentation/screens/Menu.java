@@ -17,11 +17,13 @@ import javax.swing.event.ListSelectionListener;
 import entity.CardSet;
 import presentation.basic.ContentPanel;
 import presentation.basic.Screen;
+import presentation.inner.StatisticPanel;
 
 public class Menu extends Screen {
 
 	private JList<CardSet> setList;
 	private JButton playBut, editBut, deleteBut;
+	private JPanel statisticsPanel;
 
 	public Menu(ContentPanel mainPanel) {
 		super(mainPanel);
@@ -32,7 +34,7 @@ public class Menu extends Screen {
 
 		JPanel panel = new JPanel(new GridBagLayout());
 
-		JPanel innerPanel = new JPanel(new BorderLayout(20, 0));
+		JPanel innerPanel = new JPanel(new BorderLayout(20, 10));
 
 		setList = gui.createList(dp.getAllSets(), new CardSet[0]);
 		setList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -40,19 +42,24 @@ public class Menu extends Screen {
 		JScrollPane scrollPane = gui.createScrollPane(setList);
 		scrollPane.setPreferredSize(new Dimension(200, 0));
 
-		JButton newBut = gui.createButton("New");
+		JButton newBut = gui.createButton(i18n.getString("new"));
+		newBut.setToolTipText(i18n.getString("Menu.new.tooltip"));
 		newBut.addActionListener(e -> newSet());
-		playBut = gui.createButton("Play");
+		playBut = gui.createButton(i18n.getString("start"));
+		playBut.setToolTipText(i18n.getString("Menu.start.tooltip"));
 		playBut.addActionListener(e -> playSet(setList.getSelectedValue()));
 		playBut.setEnabled(false);
-		editBut = gui.createButton("Edit");
+		editBut = gui.createButton(i18n.getString("edit"));
+		editBut.setToolTipText(i18n.getString("Menu.edit.tooltip"));
 		editBut.addActionListener(e -> editSet(setList.getSelectedValue()));
 		editBut.setEnabled(false);
-		deleteBut = gui.createButton("Delete");
+		deleteBut = gui.createButton(i18n.getString("delete"));
+		deleteBut.setToolTipText(i18n.getString("Menu.delete.tooltip"));
 		deleteBut.addActionListener(e -> deleteSet(setList.getSelectedValue()));
 		deleteBut.setEnabled(false);
 
 		JPanel buttonPanel = new JPanel(new GridBagLayout());
+		statisticsPanel = new JPanel(new BorderLayout());
 
 		GridBagConstraints c = new GridBagConstraints();
 
@@ -71,6 +78,7 @@ public class Menu extends Screen {
 
 		innerPanel.add(scrollPane, BorderLayout.CENTER);
 		innerPanel.add(buttonPanel, BorderLayout.EAST);
+		innerPanel.add(statisticsPanel, BorderLayout.SOUTH);
 
 		panel.add(innerPanel);
 
@@ -78,8 +86,8 @@ public class Menu extends Screen {
 	}
 
 	@Override
-	protected void executeOpenAction() {
-		reload();
+	protected void afterOpening() {
+		revalidate();
 	}
 
 	private void playSet(CardSet set) {
@@ -98,7 +106,7 @@ public class Menu extends Screen {
 		if (set != null) {
 			dp.deleteSet(set);
 		}
-		reload();
+		revalidate();
 	}
 
 	private class ListHasSelectionListener implements ListSelectionListener {
@@ -109,17 +117,18 @@ public class Menu extends Screen {
 			playBut.setEnabled(isSelected);
 			editBut.setEnabled(isSelected);
 			deleteBut.setEnabled(isSelected);
+			statisticsPanel.removeAll();
+			if (isSelected) {
+				statisticsPanel.add(new StatisticPanel(setList.getSelectedValue(), 20));
+			}
+			statisticsPanel.revalidate();
+			statisticsPanel.repaint();
 		}
 	}
 
 	@Override
-	protected void reload() {
+	protected void revalidate() {
 		setList.setListData(dp.getAllSets().toArray(new CardSet[0]));
-		super.reload();
-	}
-
-	@Override
-	protected String getHeader() {
-		return "Menu";
+		super.revalidate();
 	}
 }
