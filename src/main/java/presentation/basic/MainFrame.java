@@ -56,7 +56,7 @@ public class MainFrame {
 
 		SplashScreen splash = SplashScreen.getSplashScreen();
 		if (splash == null) {
-			System.err.println(lm.getString("splashErr"));
+			System.err.println("Image for splashscreen not found");
 		}
 		return splash;
 	}

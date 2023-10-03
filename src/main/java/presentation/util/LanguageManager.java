@@ -26,7 +26,7 @@ public class LanguageManager {
 	}
 
 	private ResourceBundle getBundle(Locale language) {
-		return ResourceBundle.getBundle("i18n.i18n", language);
+		return ResourceBundle.getBundle("internationalization.i18n", language);
 	}
 
 	public static LanguageManager getInstance() {

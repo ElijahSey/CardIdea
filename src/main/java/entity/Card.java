@@ -28,6 +28,7 @@ public class Card implements DBEntity {
 	@Column(length = 255)
 	private String hint;
 
+	@Column(columnDefinition = "integer default 0")
 	private int score;
 
 	public static final int CORRECT = 1;
