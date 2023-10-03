@@ -43,7 +43,9 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: target
-        path: ./target/cardidea-${{ github.event.inputs.tag }}.jar
+        path: |
+          ./target/cardidea-${{ github.event.inputs.tag }}.jar
+          ./target/lib/
 
   create-installers:
 
@@ -56,6 +58,7 @@ jobs:
         ]
     env:
       INST_NAME: cardidea-${{ github.event.inputs.tag }}-${{matrix.var.name}}.${{matrix.var.suffix}}
+      PACKAGE_DIR: ./package-dir
 
     runs-on: ${{matrix.var.os}}
     needs: [build]
@@ -81,10 +84,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: target
-          path: .
+          path: ${{ env.PACKAGE_DIR}}
 
       - name: Create Package
-        run: jpackage --name cardIdea --input . --main-jar cardidea-${{ github.event.inputs.tag }}.jar --icon src/main/resources/cardidea.ico ${{matrix.var.options}}
+        run: jpackage --name cardIdea --input ${{ env.PACKAGE_DIR}} --main-jar cardidea-${{ github.event.inputs.tag }}.jar --icon src/main/resources/cardidea.ico ${{matrix.var.options}}
 
       - name: Rename Package
         run: mv card*.${{matrix.var.suffix}} ${{env.INST_NAME}}

@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: entrypoint.CardIdea
-SplashScreen-Image: images/card_logo.png
