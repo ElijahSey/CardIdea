@@ -3,6 +3,10 @@ package presentation.util;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import javax.swing.JOptionPane;
+
+import com.ibm.icu.text.MessageFormat;
+
 public class LanguageManager {
 
 	private ResourceBundle bundle;
@@ -16,9 +20,15 @@ public class LanguageManager {
 		return bundle.getString(key);
 	}
 
-	public void setLanguage(Locale language) {
+	public String getString(String key, int magnitude) {
+		MessageFormat message = new MessageFormat(bundle.getString(key), bundle.getLocale());
+		return message.format(new Object[] { magnitude });
+	}
 
-		bundle = getBundle(language);
+	public void setLanguage(Locale locale) {
+
+		bundle = getBundle(locale);
+		JOptionPane.setDefaultLocale(locale);
 	}
 
 	public void setLanguage(String language) {
