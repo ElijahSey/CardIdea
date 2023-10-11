@@ -1,7 +1,17 @@
 package logic.parsers;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.regex.Pattern;
+
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import entity.Card;
 import entity.CardSet;
@@ -14,14 +24,16 @@ public class MarkdownParser extends CardParser {
 	}
 
 	@Override
-	public void parse(String text, CardSet cardSet) {
+	public void read(File file, CardSet cardSet, List<Topic> topics, List<Card> cards) throws IOException {
 
 		int maxDepth = 0;
-		try (Scanner sc = new Scanner(text)) {
+		try (Scanner sc = new Scanner(file)) {
 			maxDepth = checkDepth(sc);
 		}
 		final String TOPIC_PRE = "#".repeat(maxDepth - 1) + " ";
 		final String CARD_PRE = "#".repeat(maxDepth) + " ";
+
+		String text = Files.readString(file.toPath());
 
 		String[] topicArr = Pattern.compile("^" + TOPIC_PRE, Pattern.MULTILINE).split(text);
 		for (int i = 1; i < topicArr.length; i++) {
@@ -38,6 +50,29 @@ public class MarkdownParser extends CardParser {
 		}
 	}
 
+	@Override
+	public void write(File file, CardSet cardSet, Map<String, List<Card>> cards) throws IOException {
+
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+			writer.write("# " + cardSet.getName());
+			Set<String> topics = cards.keySet();
+			for (String topic : topics) {
+				writer.newLine();
+				writer.newLine();
+				writer.write("## " + topic);
+				for (Card card : cards.get(topic)) {
+					writer.newLine();
+					writer.newLine();
+					writer.write("### " + card.getQuestion());
+					writer.newLine();
+					writer.newLine();
+					writer.write(card.getSolution());
+				}
+			}
+			writer.flush();
+		}
+	}
+
 	private int checkDepth(Scanner sc) {
 
 		int hashtags = -1;
@@ -51,6 +86,11 @@ public class MarkdownParser extends CardParser {
 			}
 		}
 		return hashtags;
+	}
+
+	@Override
+	public FileNameExtensionFilter createFileFilter() {
+		return new FileNameExtensionFilter("Markdown Files (.md)", "md");
 	}
 
 	@Override
