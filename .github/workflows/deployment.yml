@@ -46,6 +46,7 @@ jobs:
         path: |
           ./target/cardidea-${{ github.event.inputs.tag }}.jar
           ./target/lib/
+          ./cardidea.ico
 
   create-installers:
 
@@ -87,7 +88,7 @@ jobs:
           path: ${{ env.PACKAGE_DIR}}
 
       - name: Create Package
-        run: jpackage --name cardIdea --input ${{ env.PACKAGE_DIR}} --main-jar cardidea-${{ github.event.inputs.tag }}.jar --icon src/main/resources/cardidea.ico ${{matrix.var.options}}
+        run: jpackage --name cardIdea --input ${{ env.PACKAGE_DIR}} --main-jar cardidea-${{ github.event.inputs.tag }}.jar --icon cardidea.ico ${{matrix.var.options}}
 
       - name: Rename Package
         run: mv card*.${{matrix.var.suffix}} ${{env.INST_NAME}}
