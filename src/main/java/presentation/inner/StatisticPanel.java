@@ -26,7 +26,11 @@ public class StatisticPanel extends IntegratedPanel {
 	public StatisticPanel(CardSet set, int height) {
 		super();
 		this.height = height;
-		cards = dp.getCardsOfSet(set);
+		if (set != null) {
+			cards = dp.getCardsOfSet(set);
+		} else {
+			cards = List.of(new Card());
+		}
 		super.reload();
 	}
 

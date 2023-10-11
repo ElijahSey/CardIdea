@@ -9,6 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import presentation.basic.ContentPanel;
+import presentation.popup.Settings;
 import presentation.util.GuiFactory;
 import presentation.util.LanguageManager;
 
@@ -48,7 +49,7 @@ public class MenuBar {
 
 		JButton settings = createButton(i18n.getString("settings"));
 		settings.setToolTipText(i18n.getString("MenuBar.settings.tooltip"));
-		settings.addActionListener(e -> contentArea.addScreen(new Settings(contentArea)));
+		settings.addActionListener(e -> new Settings(contentArea).show());
 
 		left.add(back);
 		left.add(home);

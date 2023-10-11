@@ -37,6 +37,7 @@ public class Card implements DBEntity {
 	public static final int WRONG = -2;
 
 	public Card() {
+		score = 0;
 	}
 
 	public Card(Topic topic, String question, String solution) {

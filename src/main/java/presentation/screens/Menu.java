@@ -42,24 +42,25 @@ public class Menu extends Screen {
 		JScrollPane scrollPane = gui.createScrollPane(setList);
 		scrollPane.setPreferredSize(new Dimension(200, 0));
 
-		JButton newBut = gui.createButton(i18n.getString("new"));
-		newBut.setToolTipText(i18n.getString("Menu.new.tooltip"));
+		JButton newBut = gui.createButton(lm.getString("new"));
+		newBut.setToolTipText(lm.getString("Menu.new.tooltip"));
 		newBut.addActionListener(e -> newSet());
-		playBut = gui.createButton(i18n.getString("start"));
-		playBut.setToolTipText(i18n.getString("Menu.start.tooltip"));
+		playBut = gui.createButton(lm.getString("start"));
+		playBut.setToolTipText(lm.getString("Menu.start.tooltip"));
 		playBut.addActionListener(e -> playSet(setList.getSelectedValue()));
 		playBut.setEnabled(false);
-		editBut = gui.createButton(i18n.getString("edit"));
-		editBut.setToolTipText(i18n.getString("Menu.edit.tooltip"));
+		editBut = gui.createButton(lm.getString("edit"));
+		editBut.setToolTipText(lm.getString("Menu.edit.tooltip"));
 		editBut.addActionListener(e -> editSet(setList.getSelectedValue()));
 		editBut.setEnabled(false);
-		deleteBut = gui.createButton(i18n.getString("delete"));
-		deleteBut.setToolTipText(i18n.getString("Menu.delete.tooltip"));
+		deleteBut = gui.createButton(lm.getString("delete"));
+		deleteBut.setToolTipText(lm.getString("Menu.delete.tooltip"));
 		deleteBut.addActionListener(e -> deleteSet(setList.getSelectedValue()));
 		deleteBut.setEnabled(false);
 
 		JPanel buttonPanel = new JPanel(new GridBagLayout());
 		statisticsPanel = new JPanel(new BorderLayout());
+		statisticsPanel.add(new StatisticPanel(setList.getSelectedValue(), 20));
 
 		GridBagConstraints c = new GridBagConstraints();
 
@@ -118,9 +119,7 @@ public class Menu extends Screen {
 			editBut.setEnabled(isSelected);
 			deleteBut.setEnabled(isSelected);
 			statisticsPanel.removeAll();
-			if (isSelected) {
-				statisticsPanel.add(new StatisticPanel(setList.getSelectedValue(), 20));
-			}
+			statisticsPanel.add(new StatisticPanel(setList.getSelectedValue(), 20));
 			statisticsPanel.revalidate();
 			statisticsPanel.repaint();
 		}

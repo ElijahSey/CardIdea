@@ -39,7 +39,8 @@ public class DataManager implements AutoCloseable {
 		return q.getResultList();
 	}
 
-	public <T extends DBEntity, P extends DBEntity> List<T> findEntitiesOf(Class<T> entity, String fk, P parent) {
+	public <T extends DBEntity, P extends DBEntity> List<T> findEntitesByForeignKey(Class<T> entity, String fk,
+			P parent) {
 		String query = "SELECT e FROM %s e WHERE e.%s = ?1".formatted(entity.getSimpleName(), fk);
 		TypedQuery<T> q = em.createQuery(query, entity);
 		q.setParameter(1, parent);

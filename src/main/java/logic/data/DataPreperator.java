@@ -54,7 +54,7 @@ public class DataPreperator implements AutoCloseable {
 
 	private List<Locale> findAvailableLanguages() {
 		List<Locale> locales = new ArrayList<>();
-		List<Path> list = listFilesOfDir("/i18n");
+		List<Path> list = listFilesOfDir("/internationalization");
 		for (Path p : list) {
 			String file = p.getFileName().toString();
 			if (file.endsWith(".properties")) {
@@ -104,7 +104,7 @@ public class DataPreperator implements AutoCloseable {
 
 	public List<Topic> getTopicsOfSet(CardSet set) {
 		if (dm.contains(set)) {
-			return dm.findEntitiesOf(Topic.class, "cardSet", set);
+			return dm.findEntitesByForeignKey(Topic.class, "cardSet", set);
 		}
 		return new ArrayList<>();
 	}
@@ -172,7 +172,7 @@ public class DataPreperator implements AutoCloseable {
 	}
 
 	public List<CardParser> getParsers() {
-		return parsers;
+		return new ArrayList<>(parsers);
 	}
 
 	public List<Locale> getAvailableLanguages() {
