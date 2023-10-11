@@ -1,6 +1,7 @@
 package presentation.basic;
 
 import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -8,17 +9,23 @@ import java.util.Stack;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import presentation.menuBar.CommandBar;
+
 public class ContentPanel extends JPanel {
 
 	private JLabel header;
 	private Stack<Screen> screens;
 	private List<ReloadListener> reloadListeners;
+	private Frame frame;
+	private CommandBar commandBar;
 
-	public ContentPanel(JLabel header) {
+	public ContentPanel(JLabel header, Frame frame) {
 		super();
 		this.header = header;
+		this.frame = frame;
 		screens = new Stack<>();
 		reloadListeners = new ArrayList<>();
+		commandBar = new CommandBar(this);
 		setLayout(new BorderLayout());
 	}
 
@@ -27,16 +34,17 @@ public class ContentPanel extends JPanel {
 		displayScreen(screen);
 	}
 
-	public void back() {
+	public boolean back() {
 		if (screens.size() < 2) {
 			getActiveScreen().rebuild();
-			return;
+			return true;
 		}
 		if (!screens.peek().afterClosing()) {
-			return;
+			return false;
 		}
 		screens.pop();
 		displayScreen(screens.peek());
+		return true;
 	}
 
 	public void home() {
@@ -52,7 +60,7 @@ public class ContentPanel extends JPanel {
 	private void displayScreen(Screen screen) {
 		removeAll();
 		revalidate();
-		header.setText(screen.getHeader());
+		setHeader(screen.getHeader());
 		add(screen.getPanel());
 		screen.afterOpening();
 		revalidate();
@@ -77,8 +85,20 @@ public class ContentPanel extends JPanel {
 		reloadListeners.add(l);
 	}
 
+	public void setHeader(String text) {
+		header.setText(text);
+	}
+
 	public Screen getActiveScreen() {
 		return screens.peek();
+	}
+
+	public CommandBar getCommandBar() {
+		return commandBar;
+	}
+
+	public Frame getFrame() {
+		return frame;
 	}
 
 	@Override
