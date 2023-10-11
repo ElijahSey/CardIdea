@@ -18,17 +18,15 @@ import logic.data.DataPreperator;
 import presentation.menuBar.MenuBar;
 import presentation.screens.Menu;
 import presentation.util.GuiFactory;
-import presentation.util.LanguageManager;
 
 public class MainFrame {
 
 	protected DataPreperator dp;
 	protected GuiFactory gui;
 	private JFrame frame;
+	private ContentPanel contentPanel;
 	private JPanel mainPanel;
 	private Image icon;
-
-	private LanguageManager lm;
 
 	public MainFrame() {
 
@@ -46,7 +44,6 @@ public class MainFrame {
 	private void init() {
 		try {
 			icon = ImageIO.read(getClass().getResourceAsStream("/images/card_logo.png"));
-			lm = LanguageManager.getInstance();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -65,8 +62,9 @@ public class MainFrame {
 
 		JFrame frame = new JFrame();
 		frame.setSize(800, 500);
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setLocationRelativeTo(null);
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setIconImage(icon);
 		frame.addWindowListener(new WindowCloseListener());
 
@@ -76,7 +74,7 @@ public class MainFrame {
 		panel.setLayout(new BorderLayout());
 
 		JLabel header = new JLabel();
-		ContentPanel contentPanel = new ContentPanel(header);
+		contentPanel = new ContentPanel(header, frame);
 		MenuBar menuBar = new MenuBar(contentPanel, header);
 		JPanel topBar = menuBar.getPanel();
 		contentPanel.addReloadListener(() -> rebuildMenuBar(menuBar, panel));
@@ -90,6 +88,7 @@ public class MainFrame {
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.add(panel);
 
+		frame.setJMenuBar(contentPanel.getCommandBar());
 		frame.add(mainPanel);
 		return frame;
 	}
@@ -113,6 +112,9 @@ public class MainFrame {
 		@Override
 		public void windowClosing(WindowEvent we) {
 
+			if (!contentPanel.back()) {
+				return;
+			}
 			frame.dispose();
 			dp.close();
 			System.exit(0);
