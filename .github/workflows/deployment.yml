@@ -87,8 +87,12 @@ jobs:
           name: target
           path: ${{ env.PACKAGE_DIR}}
 
+      - name: Structure Folder
+        run: |
+          mv ${{ env.PACKAGE_DIR}}/target/ ${{ env.PACKAGE_DIR}}
+
       - name: Create Package
-        run: jpackage --name cardidea-${{ github.event.inputs.tag }} --input ${{ env.PACKAGE_DIR}} --main-jar target/cardidea-${{ github.event.inputs.tag }}.jar --icon cardidea.ico ${{matrix.var.options}}
+        run: jpackage --name cardIdea --input ${{ env.PACKAGE_DIR}} --main-jar cardidea-${{ github.event.inputs.tag }}.jar --icon cardidea.ico ${{matrix.var.options}}
 
       - name: Rename Package
         run: mv card*.${{matrix.var.suffix}} ${{env.INST_NAME}}

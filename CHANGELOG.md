@@ -5,6 +5,7 @@ New Features:
 - Export your card sets to markdown files
 
 Changes:
+- A new icon
 - Internationalization: English and German available
 - Replace some full screens with pop-up dialogs
 - Refactor the saving system when editing card sets
