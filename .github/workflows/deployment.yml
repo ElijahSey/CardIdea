@@ -88,9 +88,7 @@ jobs:
           path: ${{ env.PACKAGE_DIR}}
 
       - name: Create Package
-        run: |
-          ls package-dir
-          jpackage --name cardIdea --input ${{ env.PACKAGE_DIR}} --main-jar cardidea-${{ github.event.inputs.tag }}.jar --icon cardidea.ico ${{matrix.var.options}}
+        run: jpackage --name cardIdea --input ${{ env.PACKAGE_DIR}} --main-jar target/cardidea-${{ github.event.inputs.tag }}.jar --icon cardidea.ico ${{matrix.var.options}}
 
       - name: Rename Package
         run: mv card*.${{matrix.var.suffix}} ${{env.INST_NAME}}
