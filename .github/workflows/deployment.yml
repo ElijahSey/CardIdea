@@ -47,6 +47,7 @@ jobs:
           ./target/cardidea-${{ github.event.inputs.tag }}.jar
           ./target/lib/
           ./cardidea.ico
+          ./splashscreen.png
 
   create-installers:
 
@@ -85,14 +86,15 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: target
-          path: ${{ env.PACKAGE_DIR}}
+          path: ${{env.PACKAGE_DIR}}
 
       - name: Structure Folder
         run: |
-          mv ${{ env.PACKAGE_DIR}}/target/* ${{ env.PACKAGE_DIR}}/
+          mv ${{env.PACKAGE_DIR}}/target/* ${{env.PACKAGE_DIR}}/
+          rm ${{env.PACKAGE_DIR}}/target
 
       - name: Create Package
-        run: jpackage --name cardIdea --input ${{ env.PACKAGE_DIR}} --main-jar cardidea-${{ github.event.inputs.tag }}.jar --type ${{matrix.var.type}} --app-version ${{ github.event.inputs.tag }} --icon cardidea.ico ${{matrix.var.options}}
+        run: jpackage --name cardIdea --input ${{env.PACKAGE_DIR}} --main-jar cardidea-${{ github.event.inputs.tag }}.jar --type ${{matrix.var.type}} --app-version ${{ github.event.inputs.tag }} --icon cardidea.ico --java-options '-splash:$APPDIR/splashscreen.png' ${{matrix.var.options}} 
 
       - name: Rename Package
         run: mv card*.${{matrix.var.type}} ${{env.INST_NAME}}
