@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import logic.data.DataPreperator;
+import presentation.menuBar.CommandBar;
 import presentation.menuBar.MenuBar;
 import presentation.screens.Menu;
 import presentation.util.GuiFactory;
@@ -75,9 +76,10 @@ public class MainFrame {
 
 		JLabel header = new JLabel();
 		contentPanel = new ContentPanel(header, frame);
+		CommandBar cmdBar = contentPanel.getCommandBar();
 		MenuBar menuBar = new MenuBar(contentPanel, header);
 		JPanel topBar = menuBar.getPanel();
-		contentPanel.addReloadListener(() -> rebuildMenuBar(menuBar, panel));
+		contentPanel.addReloadListener(() -> menuBar.rebuild(panel));
 
 		panel.add(topBar, BorderLayout.NORTH);
 		panel.add(contentPanel, BorderLayout.CENTER);
@@ -88,7 +90,7 @@ public class MainFrame {
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.add(panel);
 
-		frame.setJMenuBar(contentPanel.getCommandBar());
+		frame.setJMenuBar(cmdBar);
 		frame.add(mainPanel);
 		return frame;
 	}
@@ -96,16 +98,6 @@ public class MainFrame {
 	private void update(JComponent c) {
 		c.revalidate();
 		c.repaint();
-	}
-
-	private void rebuildMenuBar(MenuBar bar, JPanel parent) {
-		parent.remove(bar.getPanel());
-		parent.revalidate();
-		parent.repaint();
-		bar.rebuild();
-		parent.add(bar.getPanel(), BorderLayout.NORTH);
-		parent.revalidate();
-		parent.repaint();
 	}
 
 	private class WindowCloseListener extends WindowAdapter {

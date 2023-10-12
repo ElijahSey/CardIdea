@@ -54,15 +54,6 @@ public class CardEditor extends Screen {
 			cards = dp.getCardsOfSet(cardSet);
 		}
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-		addMenuItem(CommandBar.FILE, lm.getString("export"), lm.getString("CardEditor.export.tooltip"), null,
-				e -> new CardExport(mainPanel, cardSet).show());
-		addMenuItem(CommandBar.FILE, lm.getString("import"), lm.getString("CardEditor.import.tooltip"), null,
-				e -> new CardImport(mainPanel, cardSet, topics, cards).show());
-		addMenuItem(CommandBar.FILE, lm.getString("save"), null,
-				KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK), e -> saveSet());
-		addMenuItem(CommandBar.EDIT, lm.getString("rename"), null, KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0),
-				e -> renameSet("CardEditor.rename.dialog"));
 	}
 
 	@Override
@@ -103,6 +94,19 @@ public class CardEditor extends Screen {
 		});
 
 		return panel;
+	}
+
+	@Override
+	public void createMenuItems() {
+		super.createMenuItems();
+		addMenuItem(CommandBar.FILE, lm.getString("export"), lm.getString("CardEditor.export.tooltip"), null,
+				e -> new CardExport(mainPanel, cardSet).show());
+		addMenuItem(CommandBar.FILE, lm.getString("import"), lm.getString("CardEditor.import.tooltip"), null,
+				e -> new CardImport(mainPanel, cardSet, topics, cards).show());
+		addMenuItem(CommandBar.FILE, lm.getString("save"), null,
+				KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK), e -> saveSet());
+		addMenuItem(CommandBar.EDIT, lm.getString("rename"), null, KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0),
+				e -> renameSet("CardEditor.rename.dialog"));
 	}
 
 	@Override

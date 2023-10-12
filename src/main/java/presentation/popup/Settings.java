@@ -46,7 +46,7 @@ public class Settings extends PopupFrame {
 		if (language != null) {
 			LanguageManager.getInstance().setLanguage(language);
 		}
-		mainPanel.rebuildAllScreens();
+		mainPanel.rebuildEverything();
 		super.close();
 	}
 }

@@ -29,7 +29,6 @@ public abstract class Screen {
 		dp = DataPreperator.getInstance();
 		gui = GuiFactory.getInstance();
 		this.mainPanel = mainPanel;
-		items = new ArrayList<>();
 	}
 
 	protected void revalidate() {
@@ -39,11 +38,16 @@ public abstract class Screen {
 
 	protected abstract JPanel createContent();
 
+	protected void createMenuItems() {
+		items = new ArrayList<>();
+	}
+
 	protected String getHeader() {
 		return lm.getString(this.getClass().getSimpleName() + ".header");
 	}
 
 	protected void afterOpening() {
+		createMenuItems();
 		CommandBar cmd = mainPanel.getCommandBar();
 		for (MenuItem item : items) {
 			cmd.add(item.menu, item.item);

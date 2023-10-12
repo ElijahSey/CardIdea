@@ -25,7 +25,9 @@ public class MenuBar {
 		this.contentArea = contentArea;
 		this.header = header;
 		i18n = LanguageManager.getInstance();
-		rebuild();
+		panel = createContent();
+		panel.revalidate();
+		panel.repaint();
 	}
 
 	protected JPanel createContent() {
@@ -62,10 +64,14 @@ public class MenuBar {
 		return panel;
 	}
 
-	public void rebuild() {
+	public void rebuild(JPanel parent) {
+		parent.remove(panel);
+		parent.revalidate();
+		parent.repaint();
 		panel = createContent();
-		panel.revalidate();
-		panel.repaint();
+		parent.add(panel, BorderLayout.NORTH);
+		parent.revalidate();
+		parent.repaint();
 	}
 
 	private JButton createButton(String text) {

@@ -2,10 +2,12 @@ package presentation.basic;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -14,16 +16,16 @@ import presentation.menuBar.CommandBar;
 public class ContentPanel extends JPanel {
 
 	private JLabel header;
-	private Stack<Screen> screens;
+	private Deque<Screen> screens;
 	private List<ReloadListener> reloadListeners;
-	private Frame frame;
+	private JFrame frame;
 	private CommandBar commandBar;
 
-	public ContentPanel(JLabel header, Frame frame) {
+	public ContentPanel(JLabel header, JFrame frame) {
 		super();
 		this.header = header;
 		this.frame = frame;
-		screens = new Stack<>();
+		screens = new ArrayDeque<>();
 		reloadListeners = new ArrayList<>();
 		commandBar = new CommandBar(this);
 		setLayout(new BorderLayout());
@@ -51,7 +53,7 @@ public class ContentPanel extends JPanel {
 		if (!screens.peek().afterClosing()) {
 			return;
 		}
-		Screen home = screens.firstElement();
+		Screen home = screens.peek();
 		screens.clear();
 		home.rebuild();
 		addScreen(home);
@@ -72,13 +74,20 @@ public class ContentPanel extends JPanel {
 		displayScreen(screen);
 	}
 
-	public void rebuildAllScreens() {
+	public void rebuildEverything() {
+		rebuildCommandBar();
 		for (ReloadListener r : reloadListeners) {
 			r.reload();
 		}
 		for (Screen s : screens) {
 			s.rebuild();
 		}
+		displayScreen(screens.peek());
+	}
+
+	public void rebuildCommandBar() {
+		commandBar = new CommandBar(this);
+		frame.setJMenuBar(commandBar);
 	}
 
 	public void addReloadListener(ReloadListener l) {
