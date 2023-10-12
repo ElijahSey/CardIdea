@@ -53,12 +53,12 @@ jobs:
     strategy:
       matrix:
         var: [
-          {os: windows-latest, name: win, suffix: exe, options: --win-dir-chooser --win-shortcut-prompt --win-menu},
-          {os: macos-latest, name: mac, suffix: dmg, options: },
-          {os: ubuntu-latest, name: linux, suffix: deb, options: --linux-shortcut}
+          {os: windows-latest, name: win, type: msi, options: --win-dir-chooser --win-shortcut-prompt --win-menu},
+          {os: macos-latest, name: mac, type: dmg, options: },
+          {os: ubuntu-latest, name: linux, type: deb, options: --linux-shortcut}
         ]
     env:
-      INST_NAME: cardidea-${{ github.event.inputs.tag }}-${{matrix.var.name}}.${{matrix.var.suffix}}
+      INST_NAME: cardidea-${{ github.event.inputs.tag }}-${{matrix.var.name}}.${{matrix.var.type}}
       PACKAGE_DIR: ./package-dir
 
     runs-on: ${{matrix.var.os}}
@@ -92,10 +92,10 @@ jobs:
           mv ${{ env.PACKAGE_DIR}}/target/ ${{ env.PACKAGE_DIR}}
 
       - name: Create Package
-        run: jpackage --name cardIdea --input ${{ env.PACKAGE_DIR}} --main-jar cardidea-${{ github.event.inputs.tag }}.jar --icon cardidea.ico ${{matrix.var.options}}
+        run: jpackage --name cardIdea --input ${{ env.PACKAGE_DIR}} --main-jar cardidea-${{ github.event.inputs.tag }}.jar --type ${{matrix.var.type}} --app-version ${{ github.event.inputs.tag }} --icon cardidea.ico ${{matrix.var.options}}
 
       - name: Rename Package
-        run: mv card*.${{matrix.var.suffix}} ${{env.INST_NAME}}
+        run: mv card*.${{matrix.var.type}} ${{env.INST_NAME}}
 
       - name: Upload Jar
         uses: actions/upload-artifact@v3
