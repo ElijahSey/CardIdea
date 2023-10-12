@@ -89,7 +89,7 @@ jobs:
 
       - name: Structure Folder
         run: |
-          mv ${{ env.PACKAGE_DIR}}/target/ ${{ env.PACKAGE_DIR}}
+          mv ${{ env.PACKAGE_DIR}}/target/* ${{ env.PACKAGE_DIR}}/
 
       - name: Create Package
         run: jpackage --name cardIdea --input ${{ env.PACKAGE_DIR}} --main-jar cardidea-${{ github.event.inputs.tag }}.jar --type ${{matrix.var.type}} --app-version ${{ github.event.inputs.tag }} --icon cardidea.ico ${{matrix.var.options}}
