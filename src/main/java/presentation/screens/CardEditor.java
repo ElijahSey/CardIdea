@@ -1,11 +1,13 @@
 package presentation.screens;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -172,7 +174,10 @@ public class CardEditor extends Screen {
 
 	private JPanel createButtonPanel() {
 
-		JPanel panel = new JPanel();
+		JPanel panel = new JPanel(new BorderLayout());
+
+		JPanel center = new JPanel();
+		JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		delBut = gui.createButton(lm.getString("delete"));
 		delBut.setToolTipText(lm.getString("CardEditor.delete.tooltip"));
 		delBut.addActionListener(e -> deleteCard(cardList.getSelectedValue()));
@@ -186,10 +191,13 @@ public class CardEditor extends Screen {
 		saveBut.setToolTipText(lm.getString("CardEditor.save.tooltip"));
 		saveBut.addActionListener(e -> saveSet());
 
-		panel.add(delBut);
-		panel.add(clearBut);
-		panel.add(addOrUpdateBut);
-		panel.add(saveBut);
+		center.add(delBut);
+		center.add(clearBut);
+		center.add(addOrUpdateBut);
+		right.add(saveBut);
+		panel.add(Box.createHorizontalStrut(100), BorderLayout.WEST);
+		panel.add(center, BorderLayout.CENTER);
+		panel.add(right, BorderLayout.EAST);
 		return panel;
 	}
 
