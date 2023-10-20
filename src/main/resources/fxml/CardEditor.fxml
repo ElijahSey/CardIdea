@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="presentation.screens.CardEditor">
+
+    <center>
+        <SplitPane orientation="HORIZONTAL">
+            <items>
+                <!-- West SplitPane -->
+                <SplitPane orientation="VERTICAL">
+                    <items>
+                        <!-- Topics -->
+                        <VBox spacing="5">
+                            <Label text="%topics"/>
+                            <ScrollPane>
+                                <ListView fx:id="topicList" VBox.vgrow="ALWAYS"/>
+                            </ScrollPane>
+                        </VBox>
+                        <!-- Cards -->
+                        <VBox spacing="5">
+                            <Label text="%cards"/>
+                            <ScrollPane>
+                                <ListView fx:id="cardList" VBox.vgrow="ALWAYS"/>
+                            </ScrollPane>
+                        </VBox>
+                    </items>
+                </SplitPane>
+
+                <!-- Center SplitPane -->
+                <SplitPane orientation="VERTICAL">
+                    <items>
+                        <!-- Card Header -->
+                        <VBox spacing="5">
+                            <Label text="%question"/>
+                            <TextField fx:id="question"/>
+                        </VBox>
+
+                        <!-- Card Body -->
+                        <SplitPane orientation="VERTICAL">
+                            <items>
+                                <!-- Solution -->
+                                <VBox spacing="5">
+                                    <Label text="%solution"/>
+                                    <TextArea fx:id="solution"/>
+                                </VBox>
+
+                                <!-- Hint -->
+                                <VBox spacing="5">
+                                    <Label text="%hint"/>
+                                    <TextArea fx:id="hint"/>
+                                </VBox>
+                            </items>
+                        </SplitPane>
+                    </items>
+                </SplitPane>
+            </items>
+        </SplitPane>
+    </center>
+
+    <!-- South (Button Panel) -->
+    <bottom>
+        <HBox spacing="10" alignment="CENTER">
+            <Button fx:id="deleteButton" text="%delete"/>
+            <Button fx:id="clearButton" text="%clear"/>
+            <Button fx:id="addOrUpdateButton" text="%add"/>
+            <Button fx:id="saveButton" text="%save"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

@@ -1,52 +1,59 @@
 package presentation.basic;
 
-import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.SplashScreen;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import javax.imageio.ImageIO;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import logic.data.DataPreperator;
-import presentation.menuBar.CommandBar;
 import presentation.menuBar.MenuBar;
+import presentation.screens.CardEditor;
 import presentation.screens.Menu;
 import presentation.util.GuiFactory;
+import presentation.util.LanguageManager;
 
-public class MainFrame {
+public class MainFrame extends Application {
 
 	protected DataPreperator dp;
 	protected GuiFactory gui;
-	private JFrame frame;
-	private ContentPanel contentPanel;
-	private JPanel mainPanel;
-	private Image icon;
+	protected LanguageManager lm;
 
-	public MainFrame() {
+	private Stage primaryStage;
+	private BorderPane layout;
+	private FXMLLoader menuBar;
+	private Map<Class<?>, FXMLLoader> loaders;
+	private Deque<Class<?>> screens;
+	private List<ReloadListener> reloadListeners;
 
-		init();
+	private static MainFrame instance;
+
+	@Override
+	public void start(Stage primaryStage) {
+
+		instance = this;
 		SplashScreen splash = showSplashScreen();
+
+		this.primaryStage = primaryStage;
+		screens = new ArrayDeque<>();
 		dp = DataPreperator.getInstance();
 		gui = GuiFactory.createDefaultGuiFactory();
-		frame = createFrame();
+		lm = LanguageManager.getInstance();
+
+		createMainFrame();
+		primaryStage.show();
+
 		if (splash != null) {
 			splash.close();
-		}
-		frame.setVisible(true);
-	}
-
-	private void init() {
-		try {
-			icon = ImageIO.read(getClass().getResourceAsStream("/images/card_logo.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -59,57 +66,106 @@ public class MainFrame {
 		return splash;
 	}
 
-	private JFrame createFrame() {
+	private void createMainFrame() {
 
-		JFrame frame = new JFrame();
-		frame.setSize(800, 500);
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		frame.setLocationRelativeTo(null);
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.setIconImage(icon);
-		frame.addWindowListener(new WindowCloseListener());
+		primaryStage.setTitle("cardIdea");
+		primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/card_logo.png")));
+		primaryStage.setMaximized(true);
+		primaryStage.setOnCloseRequest(e -> closeWindow());
 
-		mainPanel = new JPanel(new GridBagLayout());
+		loadAllClasses();
 
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.setLayout(new BorderLayout());
-
-		JLabel header = new JLabel();
-		contentPanel = new ContentPanel(header, frame);
-		CommandBar cmdBar = contentPanel.getCommandBar();
-		MenuBar menuBar = new MenuBar(contentPanel, header);
-		JPanel topBar = menuBar.getPanel();
-		contentPanel.addReloadListener(() -> menuBar.rebuild(panel));
-
-		panel.add(topBar, BorderLayout.NORTH);
-		panel.add(contentPanel, BorderLayout.CENTER);
-
-		contentPanel.addScreen(new Menu(contentPanel));
-		mainPanel.removeAll();
-		update(mainPanel);
-		mainPanel.setLayout(new BorderLayout());
-		mainPanel.add(panel);
-
-		frame.setJMenuBar(cmdBar);
-		frame.add(mainPanel);
-		return frame;
+		layout = new BorderPane();
+		Scene scene = new Scene(layout);
+		primaryStage.setScene(scene);
+		layout.setTop(menuBar.getRoot());
+		addScreen(Menu.class);
 	}
 
-	private void update(JComponent c) {
-		c.revalidate();
-		c.repaint();
+	private void closeWindow() {
+		dp.close();
 	}
 
-	private class WindowCloseListener extends WindowAdapter {
-		@Override
-		public void windowClosing(WindowEvent we) {
+	private void loadAllClasses() {
+		loaders = new HashMap<>();
+		menuBar = loadClass(MenuBar.class);
+		loadScreen(Menu.class);
+		loadScreen(CardEditor.class);
+	}
 
-			if (!contentPanel.back()) {
-				return;
-			}
-			frame.dispose();
-			dp.close();
-			System.exit(0);
+	private <T extends Screen> void loadScreen(Class<T> clazz) {
+
+		FXMLLoader loader = loadClass(clazz);
+		Screen controller = loader.getController();
+		controller.setHeader(((MenuBar) menuBar.getController()).getHeader());
+		loaders.put(clazz, loader);
+	}
+
+	private FXMLLoader loadClass(Class<?> clazz) {
+		String className = clazz.getSimpleName();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setResources(lm.getBundle(className));
+		try {
+			loader.load(getClass().getResourceAsStream("/fxml/" + className + ".fxml"));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		return loader;
+	}
+
+	public <T extends Screen> T addScreen(Class<?> clazz) {
+
+		screens.push(clazz);
+		FXMLLoader loader = loaders.get(clazz);
+		displayScreen(loader);
+		return loader.getController();
+	}
+
+	public void back() {
+		if (screens.size() < 2) {
+			return;
+		}
+		screens.pop();
+		displayScreen(loaders.get(screens.peek()));
+	}
+
+	public void home() {
+		Class<?> home = screens.peekLast();
+		screens.clear();
+		addScreen(home);
+	}
+
+	private void displayScreen(FXMLLoader loader) {
+		Node root = loader.getRoot();
+		layout.setCenter(root);
+	}
+
+//	public void rebuildActiveScreen() {
+//		Screen screen = getActiveScreen();
+//		screen.rebuild();
+//		displayScreen(screen);
+//	}
+//
+//	public void rebuildEverything() {
+////		rebuildCommandBar();
+//		for (ReloadListener r : reloadListeners) {
+//			r.reload();
+//		}
+//		for (Screen s : screens) {
+//			s.rebuild();
+//		}
+//		displayScreen(screens.peek());
+//	}
+
+	public void addReloadListener(ReloadListener l) {
+		reloadListeners.add(l);
+	}
+
+	public interface ReloadListener {
+		void reload();
+	}
+
+	public static MainFrame getInstance() {
+		return instance;
 	}
 }

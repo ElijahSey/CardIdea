@@ -23,8 +23,8 @@ public abstract class PopupFrame {
 	private static final int MARGIN = 10;
 
 	public PopupFrame(ContentPanel mainPanel, boolean modal) {
-		dialog = new JDialog(mainPanel.getFrame(), modal);
-		frame = mainPanel.getFrame();
+//		dialog = new JDialog(mainPanel.getFrame(), modal);
+//		frame = mainPanel.getFrame();
 		this.mainPanel = mainPanel;
 
 		i18n = LanguageManager.getInstance();

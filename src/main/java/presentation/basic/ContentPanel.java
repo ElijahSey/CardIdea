@@ -1,33 +1,35 @@
 package presentation.basic;
 
 import java.awt.BorderLayout;
-import java.awt.Frame;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import presentation.menuBar.CommandBar;
+import presentation.menuBar.MenuBar;
 
 public class ContentPanel extends JPanel {
 
 	private JLabel header;
 	private Deque<Screen> screens;
 	private List<ReloadListener> reloadListeners;
-	private JFrame frame;
-	private CommandBar commandBar;
+	private Stage primaryStage;
+	private MenuBar menuBar;
 
-	public ContentPanel(JLabel header, JFrame frame) {
+	public ContentPanel(Stage primaryStage, JLabel header) {
 		super();
 		this.header = header;
-		this.frame = frame;
+		this.primaryStage = primaryStage;
 		screens = new ArrayDeque<>();
 		reloadListeners = new ArrayList<>();
-		commandBar = new CommandBar(this);
+		menuBar = new MenuBar(this, header);
 		setLayout(new BorderLayout());
 	}
 
@@ -60,10 +62,12 @@ public class ContentPanel extends JPanel {
 	}
 
 	private void displayScreen(Screen screen) {
-		removeAll();
-		revalidate();
+		BorderPane layout = new BorderPane();
+		layout.setTop(menuBar.getNode());
+		layout.setCenter(screen.getNode());
+		Scene scene = new Scene(layout);
+		primaryStage.setScene(scene);
 		setHeader(screen.getHeader());
-		add(screen.getPanel());
 		screen.afterOpening();
 		revalidate();
 	}
@@ -86,8 +90,8 @@ public class ContentPanel extends JPanel {
 	}
 
 	public void rebuildCommandBar() {
-		commandBar = new CommandBar(this);
-		frame.setJMenuBar(commandBar);
+//		commandBar = new CommandBar(this);
+//		frame.setJMenuBar(commandBar);
 	}
 
 	public void addReloadListener(ReloadListener l) {
@@ -103,11 +107,7 @@ public class ContentPanel extends JPanel {
 	}
 
 	public CommandBar getCommandBar() {
-		return commandBar;
-	}
-
-	public Frame getFrame() {
-		return frame;
+		return menuBar.getCommandBar();
 	}
 
 	@Override

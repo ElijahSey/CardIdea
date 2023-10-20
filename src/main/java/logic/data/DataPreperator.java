@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import dataAccess.DataManager;
@@ -19,6 +20,7 @@ import entity.CardSet;
 import entity.DBEntity;
 import entity.Property;
 import entity.Topic;
+import javafx.collections.ObservableList;
 import logic.parsers.CardParser;
 import logic.parsers.MarkdownParser;
 import presentation.util.LanguageManager;
@@ -28,6 +30,8 @@ public class DataPreperator implements AutoCloseable {
 	private DataManager dm;
 	private List<CardParser> parsers;
 	private List<Locale> availableLanguages;
+
+	private Map<Class<?>, ObservableList<?>> observableLists;
 
 	private static DataPreperator instance;
 
@@ -135,6 +139,7 @@ public class DataPreperator implements AutoCloseable {
 	}
 
 	public void delete(Object entity) {
+		executeOnFittingList(entity, (o, list) -> list.remove(o));
 		dm.remove(entity);
 	}
 
@@ -182,6 +187,22 @@ public class DataPreperator implements AutoCloseable {
 		return availableLanguages;
 	}
 
+	private <T> void executeOnFittingList(T element, ListOperation<T> operation) {
+		for (Entry<Class<?>, ObservableList<?>> entry : observableLists.entrySet()) {
+			if (entry.getKey().isAssignableFrom(element.getClass())) {
+				operation.execute(element, (ObservableList<T>) entry.getValue());
+			}
+		}
+	}
+
+	public void addList(Class<?> clazz, ObservableList<?> list) {
+		observableLists.put(clazz, list);
+	}
+
+	public void removeList(Class<?> clazz) {
+		observableLists.remove(clazz);
+	}
+
 	public static DataPreperator getInstance() {
 		if (instance == null) {
 			instance = new DataPreperator(DataManager.getInstance());
@@ -194,6 +215,10 @@ public class DataPreperator implements AutoCloseable {
 			instance = new DataPreperator(DataManager.getTestInstance());
 		}
 		return instance;
+	}
+
+	private interface ListOperation<E> {
+		void execute(E element, ObservableList<E> list);
 	}
 
 	@Override

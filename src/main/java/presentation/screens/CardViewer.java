@@ -17,6 +17,8 @@ import javax.swing.JTextArea;
 
 import entity.Card;
 import entity.CardSet;
+import javafx.embed.swing.SwingNode;
+import javafx.scene.Node;
 import presentation.basic.ContentPanel;
 import presentation.basic.Screen;
 
@@ -38,7 +40,7 @@ public class CardViewer extends Screen {
 	}
 
 	@Override
-	public JPanel createContent() {
+	public Node createContent() {
 		JPanel panel = new JPanel(new BorderLayout());
 
 		JPanel headerPanel = new JPanel();
@@ -91,7 +93,10 @@ public class CardViewer extends Screen {
 
 		panel.add(buttonPanel, BorderLayout.SOUTH);
 
-		return panel;
+		SwingNode node = new SwingNode();
+		node.setContent(panel);
+
+		return node;
 	}
 
 	@Override

@@ -30,13 +30,6 @@ public class CardSet implements DBEntity {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-
-		CardSet s = (CardSet) o;
-		return name.equals(s.getName());
-	}
-
-	@Override
 	public String toString() {
 		return name;
 	}
