@@ -67,13 +67,6 @@ public class Card implements DBEntity {
 		return question;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-
-		Card c = (Card) o;
-		return topic.equals(c.getTopic()) && question.equals(c.getQuestion()) && solution.equals(c.getSolution());
-	}
-
 	// GETTERS AND SETTERS
 
 	public long getId() {

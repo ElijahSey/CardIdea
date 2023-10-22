@@ -1,23 +1,19 @@
 package presentation.basic;
 
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
 
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import logic.data.DataPreperator;
-import presentation.util.GuiFactory;
 import presentation.util.LanguageManager;
 
 public abstract class Screen {
 
 	protected LanguageManager lm;
 	protected DataPreperator dp;
-	protected GuiFactory gui;
 
 	protected Label header;
 
@@ -31,22 +27,35 @@ public abstract class Screen {
 		mainFrame = MainFrame.getInstance();
 	}
 
+	public abstract void initialize();
+
 	protected void createMenuItems() {
 		items = new ArrayList<>();
 	}
 
-	public void setHeader(Label header) {
+	public void setHeaderLabel(Label header) {
 		this.header = header;
-//		header.setText(lm.getString(getClass(), "header"));
 	}
 
-	protected void addMenuItem(int menu, String text, String tooltip, KeyStroke key, ActionListener l) {
-		JMenuItem item = gui.createMenuItem(text);
-		item.addActionListener(l);
-		item.setAccelerator(key);
-		item.setToolTipText(tooltip);
-		items.add(new MenuItem(menu, item));
+	public void afterLoad() {
+		header.setText(getHeader());
 	}
+
+	public boolean beforeClose() {
+		return true;
+	}
+
+	public String getHeader() {
+		return lm.getString(getClass(), "header");
+	}
+
+//	protected void addMenuItem(int menu, String text, String tooltip, KeyStroke key, ActionListener l) {
+//		JMenuItem item = gui.createMenuItem(text);
+//		item.addActionListener(l);
+//		item.setAccelerator(key);
+//		item.setToolTipText(tooltip);
+//		items.add(new MenuItem(menu, item));
+//	}
 
 	protected class MenuItem {
 

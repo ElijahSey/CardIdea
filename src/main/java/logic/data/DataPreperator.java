@@ -1,98 +1,27 @@
 package logic.data;
 
-import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import dataAccess.DataManager;
 import entity.Card;
 import entity.CardSet;
 import entity.DBEntity;
-import entity.Property;
 import entity.Topic;
-import javafx.collections.ObservableList;
 import logic.parsers.CardParser;
 import logic.parsers.MarkdownParser;
-import presentation.util.LanguageManager;
 
 public class DataPreperator implements AutoCloseable {
 
-	private DataManager dm;
-	private List<CardParser> parsers;
-	private List<Locale> availableLanguages;
-
-	private Map<Class<?>, ObservableList<?>> observableLists;
+	private final DataManager dm;
+	private final List<CardParser> parsers;
 
 	private static DataPreperator instance;
 
-	private static final String LANGUAGE_KEY = "Language";
-
 	private DataPreperator(DataManager dm) {
 		this.dm = dm;
-		initializeProperties();
 		parsers = new ArrayList<>();
 		parsers.add(new MarkdownParser("Markdown"));
-	}
-
-	private void initializeProperties() {
-		if (dm.countProperties() < 1) {
-			initializeDatabase();
-		}
-		Map<String, String> props = getAllProperties();
-		LanguageManager.getInstance().setLanguage(props.get(LANGUAGE_KEY));
-	}
-
-	private void initializeDatabase() {
-		dm.persist(new Property(LANGUAGE_KEY, Locale.getDefault().getLanguage()));
-	}
-
-	private List<Locale> findAvailableLanguages() {
-		List<Locale> locales = new ArrayList<>();
-		List<Path> list = listFilesOfDir("/internationalization");
-		for (Path p : list) {
-			String file = p.getFileName().toString();
-			if (file.endsWith(".properties")) {
-				locales.add(new Locale(file.split("_")[1].substring(0, 2)));
-			}
-		}
-		return locales;
-	}
-
-	private List<Path> listFilesOfDir(String path) {
-		try {
-			URI uri = getClass().getResource(path).toURI();
-			try (FileSystem fileSystem = (uri.getScheme().equals("jar")
-					? FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap())
-					: null)) {
-				Path myPath = Paths.get(uri);
-				List<Path> list = Files.walk(myPath, 1).toList();
-				return list;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	public Map<String, String> getAllProperties() {
-		return dm.findAll(Property.class).stream()
-				.collect(Collectors.toUnmodifiableMap(Property::getName, Property::getContent));
-	}
-
-	public void saveProperty(String property, String value) {
-		Property prop = dm.find(Property.class, property);
-		prop.setContent(value);
-		update(prop);
 	}
 
 	public List<CardSet> getAllSets() {
@@ -139,7 +68,6 @@ public class DataPreperator implements AutoCloseable {
 	}
 
 	public void delete(Object entity) {
-		executeOnFittingList(entity, (o, list) -> list.remove(o));
 		dm.remove(entity);
 	}
 
@@ -180,29 +108,6 @@ public class DataPreperator implements AutoCloseable {
 		return new ArrayList<>(parsers);
 	}
 
-	public List<Locale> getAvailableLanguages() {
-		if (availableLanguages == null) {
-			availableLanguages = findAvailableLanguages();
-		}
-		return availableLanguages;
-	}
-
-	private <T> void executeOnFittingList(T element, ListOperation<T> operation) {
-		for (Entry<Class<?>, ObservableList<?>> entry : observableLists.entrySet()) {
-			if (entry.getKey().isAssignableFrom(element.getClass())) {
-				operation.execute(element, (ObservableList<T>) entry.getValue());
-			}
-		}
-	}
-
-	public void addList(Class<?> clazz, ObservableList<?> list) {
-		observableLists.put(clazz, list);
-	}
-
-	public void removeList(Class<?> clazz) {
-		observableLists.remove(clazz);
-	}
-
 	public static DataPreperator getInstance() {
 		if (instance == null) {
 			instance = new DataPreperator(DataManager.getInstance());
@@ -215,10 +120,6 @@ public class DataPreperator implements AutoCloseable {
 			instance = new DataPreperator(DataManager.getTestInstance());
 		}
 		return instance;
-	}
-
-	private interface ListOperation<E> {
-		void execute(E element, ObservableList<E> list);
 	}
 
 	@Override

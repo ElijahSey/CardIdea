@@ -5,15 +5,13 @@ import java.util.ResourceBundle;
 
 import javax.swing.JOptionPane;
 
-import com.ibm.icu.text.MessageFormat;
-
 public class LanguageManager {
 
 	private Locale locale;
 
 	private static LanguageManager instance;
 
-	private static final String PARENT_FOLDER = "internationalization";
+	public static final String I18N_FOLDER = "internationalization";
 
 	private LanguageManager() {
 	}
@@ -30,16 +28,12 @@ public class LanguageManager {
 	}
 
 	public ResourceBundle getBundle(String className) {
-		return ResourceBundle.getBundle(String.join(".", PARENT_FOLDER, locale.getLanguage(), className), locale);
+		return ResourceBundle.getBundle(String.join(".", I18N_FOLDER, locale.getLanguage(), className), locale);
 	}
 
 	public String getString(Class<?> clazz, String key) {
-		return getBundle(clazz.getSimpleName()).getString(key);
-	}
-
-	public String getString(Class<?> clazz, String key, int magnitude) {
-		MessageFormat message = new MessageFormat(getString(clazz, key), locale);
-		return message.format(new Object[] { magnitude });
+		ResourceBundle bundle = getBundle(clazz.getSimpleName());
+		return bundle.getString(key);
 	}
 
 	public static LanguageManager getInstance() {

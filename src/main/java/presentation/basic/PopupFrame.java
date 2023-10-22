@@ -7,29 +7,24 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import logic.data.DataPreperator;
-import presentation.util.GuiFactory;
 import presentation.util.LanguageManager;
 
 public abstract class PopupFrame {
 
 	protected LanguageManager i18n;
 	protected DataPreperator dp;
-	protected GuiFactory gui;
 
 	protected JDialog dialog;
 	protected Frame frame;
-	protected ContentPanel mainPanel;
 
 	private static final int MARGIN = 10;
 
-	public PopupFrame(ContentPanel mainPanel, boolean modal) {
+	public PopupFrame(boolean modal) {
 //		dialog = new JDialog(mainPanel.getFrame(), modal);
 //		frame = mainPanel.getFrame();
-		this.mainPanel = mainPanel;
 
 		i18n = LanguageManager.getInstance();
 		dp = DataPreperator.getInstance();
-		gui = GuiFactory.getInstance();
 	}
 
 	public void show() {
@@ -59,6 +54,6 @@ public abstract class PopupFrame {
 	protected abstract JPanel createContent();
 
 	protected String getHeader() {
-		return i18n.getString(this.getClass().getSimpleName() + ".header");
+		return i18n.getString(getClass(), this.getClass().getSimpleName() + ".header");
 	}
 }

@@ -2,38 +2,36 @@ package presentation.basic;
 
 import java.awt.SplashScreen;
 import java.io.IOException;
-import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.ResourceBundle;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import logic.data.DataPreperator;
+import logic.data.PropertyManager;
 import presentation.menuBar.MenuBar;
-import presentation.screens.CardEditor;
 import presentation.screens.Menu;
-import presentation.util.GuiFactory;
 import presentation.util.LanguageManager;
 
 public class MainFrame extends Application {
 
+	protected PropertyManager pm;
 	protected DataPreperator dp;
-	protected GuiFactory gui;
 	protected LanguageManager lm;
 
 	private Stage primaryStage;
 	private BorderPane layout;
 	private FXMLLoader menuBar;
-	private Map<Class<?>, FXMLLoader> loaders;
-	private Deque<Class<?>> screens;
-	private List<ReloadListener> reloadListeners;
+	private Deque<FXMLLoader> screens;
 
 	private static MainFrame instance;
 
@@ -44,9 +42,9 @@ public class MainFrame extends Application {
 		SplashScreen splash = showSplashScreen();
 
 		this.primaryStage = primaryStage;
-		screens = new ArrayDeque<>();
+		screens = new LinkedList<>();
+		pm = PropertyManager.getInstance();
 		dp = DataPreperator.getInstance();
-		gui = GuiFactory.createDefaultGuiFactory();
 		lm = LanguageManager.getInstance();
 
 		createMainFrame();
@@ -73,38 +71,32 @@ public class MainFrame extends Application {
 		primaryStage.setMaximized(true);
 		primaryStage.setOnCloseRequest(e -> closeWindow());
 
-		loadAllClasses();
+		menuBar = loadClass(new MenuBar());
 
 		layout = new BorderPane();
 		Scene scene = new Scene(layout);
 		primaryStage.setScene(scene);
 		layout.setTop(menuBar.getRoot());
-		addScreen(Menu.class);
+		initMenu();
 	}
 
 	private void closeWindow() {
 		dp.close();
 	}
 
-	private void loadAllClasses() {
-		loaders = new HashMap<>();
-		menuBar = loadClass(MenuBar.class);
-		loadScreen(Menu.class);
-		loadScreen(CardEditor.class);
+	private <T extends Screen> FXMLLoader loadScreen(Screen controller) {
+
+		FXMLLoader loader = loadClass(controller);
+		controller.setHeaderLabel(((MenuBar) menuBar.getController()).getHeaderLabel());
+		controller.afterLoad();
+		return loader;
 	}
 
-	private <T extends Screen> void loadScreen(Class<T> clazz) {
-
-		FXMLLoader loader = loadClass(clazz);
-		Screen controller = loader.getController();
-		controller.setHeader(((MenuBar) menuBar.getController()).getHeader());
-		loaders.put(clazz, loader);
-	}
-
-	private FXMLLoader loadClass(Class<?> clazz) {
-		String className = clazz.getSimpleName();
+	private FXMLLoader loadClass(Object controller) {
+		String className = controller.getClass().getSimpleName();
 		FXMLLoader loader = new FXMLLoader();
 		loader.setResources(lm.getBundle(className));
+		loader.setController(controller);
 		try {
 			loader.load(getClass().getResourceAsStream("/fxml/" + className + ".fxml"));
 		} catch (IOException e) {
@@ -113,56 +105,54 @@ public class MainFrame extends Application {
 		return loader;
 	}
 
-	public <T extends Screen> T addScreen(Class<?> clazz) {
-
-		screens.push(clazz);
-		FXMLLoader loader = loaders.get(clazz);
+	public void initMenu() {
+		FXMLLoader loader = loadScreen(new Menu());
+		screens.push(loader);
 		displayScreen(loader);
-		return loader.getController();
+	}
+
+	public void addScreen(Screen screen) {
+
+		if (!((Screen) screens.peek().getController()).beforeClose()) {
+			return;
+		}
+		FXMLLoader loader = loadScreen(screen);
+		screens.push(loader);
+		displayScreen(loader);
 	}
 
 	public void back() {
+		if (!((Screen) screens.peek().getController()).beforeClose()) {
+			return;
+		}
 		if (screens.size() < 2) {
 			return;
 		}
 		screens.pop();
-		displayScreen(loaders.get(screens.peek()));
+		displayScreen(screens.peek());
 	}
 
 	public void home() {
-		Class<?> home = screens.peekLast();
+		if (!((Screen) screens.peek().getController()).beforeClose()) {
+			return;
+		}
 		screens.clear();
-		addScreen(home);
+		initMenu();
 	}
 
-	private void displayScreen(FXMLLoader loader) {
-		Node root = loader.getRoot();
+	private void displayScreen(FXMLLoader newLoader) {
+		Node root = newLoader.getRoot();
 		layout.setCenter(root);
 	}
 
-//	public void rebuildActiveScreen() {
-//		Screen screen = getActiveScreen();
-//		screen.rebuild();
-//		displayScreen(screen);
-//	}
-//
-//	public void rebuildEverything() {
-////		rebuildCommandBar();
-//		for (ReloadListener r : reloadListeners) {
-//			r.reload();
-//		}
-//		for (Screen s : screens) {
-//			s.rebuild();
-//		}
-//		displayScreen(screens.peek());
-//	}
-
-	public void addReloadListener(ReloadListener l) {
-		reloadListeners.add(l);
-	}
-
-	public interface ReloadListener {
-		void reload();
+	public ButtonType showAlert(Class<?> clazz, String key, AlertType alertType, ButtonType... buttonTypes) {
+		String className = clazz.getSimpleName();
+		ResourceBundle bundle = lm.getBundle(className);
+		String message = bundle.getString(key + ".message");
+		Alert alert = new Alert(alertType, message, buttonTypes);
+		alert.setHeaderText(bundle.getString(key + ".header"));
+		alert.showAndWait();
+		return alert.getResult();
 	}
 
 	public static MainFrame getInstance() {

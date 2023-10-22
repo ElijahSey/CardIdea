@@ -1,6 +1,5 @@
 package presentation.menuBar;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -18,24 +17,19 @@ public class MenuBar {
 	private Button settingsButton;
 
 	@FXML
-	private Label header;
+	private Label headerLabel;
 
 	@FXML
-	private void handleBack(ActionEvent event) {
+	private void handleBack() {
 		MainFrame.getInstance().back();
 	}
 
 	@FXML
-	private void handleHome(ActionEvent event) {
+	private void handleHome() {
 		MainFrame.getInstance().home();
 	}
 
-	@FXML
-	private void handleSettings(ActionEvent event) {
-//		new Settings();
-	}
-
-	public Label getHeader() {
-		return header;
+	public Label getHeaderLabel() {
+		return headerLabel;
 	}
 }
