@@ -4,34 +4,35 @@ import java.awt.SplashScreen;
 import java.io.IOException;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import logic.data.DataPreperator;
-import logic.data.PropertyManager;
 import presentation.menuBar.MenuBar;
 import presentation.screens.Menu;
 import presentation.util.LanguageManager;
 
 public class MainFrame extends Application {
 
-	protected PropertyManager pm;
 	protected DataPreperator dp;
 	protected LanguageManager lm;
 
 	private Stage primaryStage;
 	private BorderPane layout;
-	private FXMLLoader menuBar;
-	private Deque<FXMLLoader> screens;
+	private Deque<Display> screens;
+
+	public static Image cardImage;
 
 	private static MainFrame instance;
 
@@ -42,10 +43,10 @@ public class MainFrame extends Application {
 		SplashScreen splash = showSplashScreen();
 
 		this.primaryStage = primaryStage;
-		screens = new LinkedList<>();
-		pm = PropertyManager.getInstance();
 		dp = DataPreperator.getInstance();
 		lm = LanguageManager.getInstance();
+		screens = new LinkedList<>();
+		cardImage = new Image(getClass().getResourceAsStream("/images/card_logo.png"));
 
 		createMainFrame();
 		primaryStage.show();
@@ -66,39 +67,31 @@ public class MainFrame extends Application {
 
 	private void createMainFrame() {
 
-		primaryStage.setTitle("cardIdea");
-		primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/card_logo.png")));
+		primaryStage.setTitle("cardIDEA");
+		primaryStage.getIcons().add(cardImage);
 		primaryStage.setMaximized(true);
 		primaryStage.setOnCloseRequest(e -> closeWindow());
-
-		menuBar = loadClass(new MenuBar());
 
 		layout = new BorderPane();
 		Scene scene = new Scene(layout);
 		primaryStage.setScene(scene);
-		layout.setTop(menuBar.getRoot());
 		initMenu();
 	}
 
-	private void closeWindow() {
-		dp.close();
-	}
-
-	private <T extends Screen> FXMLLoader loadScreen(Screen controller) {
+	private Display loadScreen(Screen controller) {
 
 		FXMLLoader loader = loadClass(controller);
-		controller.setHeaderLabel(((MenuBar) menuBar.getController()).getHeaderLabel());
-		controller.afterLoad();
-		return loader;
+		FXMLLoader menuBar = loadClass(new MenuBar());
+		return new Display(loader, menuBar);
 	}
 
-	private FXMLLoader loadClass(Object controller) {
+	private static FXMLLoader loadClass(Object controller) {
 		String className = controller.getClass().getSimpleName();
 		FXMLLoader loader = new FXMLLoader();
-		loader.setResources(lm.getBundle(className));
+		loader.setResources(LanguageManager.getInstance().getBundle(className));
 		loader.setController(controller);
 		try {
-			loader.load(getClass().getResourceAsStream("/fxml/" + className + ".fxml"));
+			loader.load(MainFrame.class.getResourceAsStream("/fxml/" + className + ".fxml"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -106,23 +99,25 @@ public class MainFrame extends Application {
 	}
 
 	public void initMenu() {
-		FXMLLoader loader = loadScreen(new Menu());
-		screens.push(loader);
-		displayScreen(loader);
+		addScreen0(new Menu());
 	}
 
 	public void addScreen(Screen screen) {
 
-		if (!((Screen) screens.peek().getController()).beforeClose()) {
+		if (!screens.peek().getController().beforeClose()) {
 			return;
 		}
-		FXMLLoader loader = loadScreen(screen);
+		addScreen0(screen);
+	}
+
+	public void addScreen0(Screen screen) {
+		Display loader = loadScreen(screen);
 		screens.push(loader);
 		displayScreen(loader);
 	}
 
 	public void back() {
-		if (!((Screen) screens.peek().getController()).beforeClose()) {
+		if (!screens.peek().getController().beforeClose()) {
 			return;
 		}
 		if (screens.size() < 2) {
@@ -133,26 +128,62 @@ public class MainFrame extends Application {
 	}
 
 	public void home() {
-		if (!((Screen) screens.peek().getController()).beforeClose()) {
+		if (!screens.peek().getController().beforeClose()) {
 			return;
 		}
 		screens.clear();
 		initMenu();
 	}
 
-	private void displayScreen(FXMLLoader newLoader) {
-		Node root = newLoader.getRoot();
-		layout.setCenter(root);
+	private void displayScreen(Display display) {
+		layout.setTop(display.getMenuBarNode());
+		layout.setCenter(display.getNode());
+		display.getController().onDisplay();
 	}
 
-	public ButtonType showAlert(Class<?> clazz, String key, AlertType alertType, ButtonType... buttonTypes) {
+	public static void showDialog(AbstractDialog dialog) {
+
+		FXMLLoader loader = loadClass(dialog);
+		Stage stage = new Stage();
+		stage.setTitle("cardIDEA");
+		stage.getIcons().add(cardImage);
+
+		BorderPane layout = new BorderPane();
+		Scene scene = new Scene(layout);
+		stage.setScene(scene);
+		layout.setCenter(loader.getRoot());
+	}
+
+	public static <R> Optional<R> showDialog(Dialog<R> dialog, Class<?> clazz, String key) {
 		String className = clazz.getSimpleName();
-		ResourceBundle bundle = lm.getBundle(className);
+		ResourceBundle bundle = LanguageManager.getInstance().getBundle(className);
+		dialog.setTitle(bundle.getString(key + ".title"));
+		dialog.setHeaderText(bundle.getString(key + ".header"));
+		dialog.setContentText(bundle.getString(key + ".message"));
+		return dialog.showAndWait();
+	}
+
+	public static ButtonType showAlert(Class<?> clazz, String key, AlertType alertType, ButtonType... buttonTypes) {
+		String className = clazz.getSimpleName();
+		ResourceBundle bundle = LanguageManager.getInstance().getBundle(className);
 		String message = bundle.getString(key + ".message");
 		Alert alert = new Alert(alertType, message, buttonTypes);
+		((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(cardImage);
 		alert.setHeaderText(bundle.getString(key + ".header"));
 		alert.showAndWait();
 		return alert.getResult();
+	}
+
+	private void closeWindow() {
+		if (!screens.peek().getController().beforeClose()) {
+			return;
+		}
+		showAlert(getClass(), "close", AlertType.CONFIRMATION);
+		dp.close();
+	}
+
+	public Window getWindow() {
+		return primaryStage;
 	}
 
 	public static MainFrame getInstance() {

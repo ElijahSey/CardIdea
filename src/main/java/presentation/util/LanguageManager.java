@@ -31,6 +31,12 @@ public class LanguageManager {
 		return ResourceBundle.getBundle(String.join(".", I18N_FOLDER, locale.getLanguage(), className), locale);
 	}
 
+	public String getString(String key) {
+		String fullClassName = Thread.currentThread().getStackTrace()[2].getClassName();
+		String className = fullClassName.substring(fullClassName.lastIndexOf("."));
+		return getBundle(className).getString(key);
+	}
+
 	public String getString(Class<?> clazz, String key) {
 		ResourceBundle bundle = getBundle(clazz.getSimpleName());
 		return bundle.getString(key);

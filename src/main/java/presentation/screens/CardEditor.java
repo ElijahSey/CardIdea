@@ -1,5 +1,7 @@
 package presentation.screens;
 
+import java.util.Optional;
+
 import entity.Card;
 import entity.CardSet;
 import entity.Topic;
@@ -13,8 +15,15 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import presentation.basic.MainFrame;
 import presentation.basic.Screen;
+import presentation.dialog.CardExport;
+import presentation.dialog.CardImport;
+import presentation.menuBar.MenuBar;
 
 public class CardEditor extends Screen {
 
@@ -87,7 +96,7 @@ public class CardEditor extends Screen {
 	private void handleAddOrUpdate() {
 		Topic topic = topicList.getSelectionModel().getSelectedItem();
 		if (topic == null) {
-			MainFrame.getInstance().showAlert(getClass(), "notopic", AlertType.WARNING);
+			MainFrame.showAlert(getClass(), "notopic", AlertType.WARNING);
 			return;
 		}
 		Card card = cardList.getSelectionModel().getSelectedItem();
@@ -109,25 +118,40 @@ public class CardEditor extends Screen {
 		setChanged(false);
 	}
 
-//	@Override
-//	public void createMenuItems() {
-//		super.createMenuItems();
-//		addMenuItem(CommandBar.FILE, lm.getString("export"), lm.getString("CardEditor.export.tooltip"), null,
-//				e -> new CardExport(mainPanel, cardSet).show());
-//		addMenuItem(CommandBar.FILE, lm.getString("import"), lm.getString("CardEditor.import.tooltip"), null,
-//				e -> new CardImport(mainPanel, cardSet, topics, cards).show());
-//		addMenuItem(CommandBar.FILE, lm.getString("save"), null,
-//				KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK), e -> saveSet());
-//		addMenuItem(CommandBar.EDIT, lm.getString("rename"), null, KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0),
-//				e -> renameSet("CardEditor.rename.dialog"));
-//	}
+	@Override
+	public void addMenuItems(MenuBar menuBar) {
+		menuBar.addMenuItem(MenuBar.FILE, lm.getString("export"), null,
+				e -> MainFrame.showDialog(new CardExport(cardSet)));
+		menuBar.addMenuItem(MenuBar.FILE, lm.getString("import"), null,
+				e -> MainFrame.showDialog(new CardImport(cardSet, topics, cards)));
+		menuBar.addMenuItem(MenuBar.FILE, lm.getString("save"),
+				new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN), e -> handleSave());
+		menuBar.addMenuItem(MenuBar.EDIT, lm.getString("rename"), new KeyCodeCombination(KeyCode.F2), e -> renameSet());
+	}
 
 	@Override
-	public void afterLoad() {
-		super.afterLoad();
-		if (cardSet.getName() != null && !cardSet.getName().isBlank()) {
-			header.setText(cardSet.getName());
+	public boolean beforeClose() {
+		if (!changed) {
+			return true;
 		}
+		ButtonType response = MainFrame.showAlert(getClass(), "save", AlertType.CONFIRMATION, ButtonType.YES,
+				ButtonType.NO, ButtonType.CANCEL);
+		return switch (response.getButtonData()) {
+		case YES -> {
+			handleSave();
+			yield true;
+		}
+		case NO -> true;
+		default -> false;
+		};
+	}
+
+	@Override
+	public String getHeader() {
+		if (cardSet.getName() != null && !cardSet.getName().isBlank()) {
+			return cardSet.getName();
+		}
+		return super.getHeader();
 	}
 
 	private void updateInputFields(Card card) {
@@ -140,39 +164,24 @@ public class CardEditor extends Screen {
 		hint.setText(card.getHint());
 	}
 
-//	private boolean renameSet(String message) {
-//		String newName = JOptionPane.showInputDialog(mainPanel, lm.getString(message), cardSet.getName());
-//		if (newName == null) {
-//			return false;
-//		}
-//		if (newName.isBlank()) {
-//			showUserInfo(lm.getString("CardEditor.blankname.message"));
-//			return false;
-//		}
-//		cardSet.setName(newName);
-//		dp.update(cardSet);
-//		mainPanel.setHeader(getHeader());
-//		return true;
-//	}
-
-	@Override
-	public boolean beforeClose() {
-		if (!changed) {
-			return true;
+	private boolean renameSet() {
+		Optional<String> newNameOpt = MainFrame.showDialog(new TextInputDialog(cardSet.getName()), getClass(),
+				"rename");
+		if (newNameOpt.isEmpty()) {
+			return false;
 		}
-		ButtonType response = MainFrame.getInstance().showAlert(getClass(), "save", AlertType.CONFIRMATION,
-				ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
-		return switch (response.getButtonData()) {
-		case YES -> {
-			handleSave();
-			yield true;
+		String newName = newNameOpt.get();
+		if (newName.isBlank()) {
+			MainFrame.showAlert(getClass(), "invalidName", AlertType.WARNING);
+			return false;
 		}
-		case NO -> true;
-		default -> false;
-		};
+		cardSet.setName(newName);
+		dp.update(cardSet);
+		header.setText(getHeader());
+		return true;
 	}
 
-	public void setChanged(boolean flag) {
+	private void setChanged(boolean flag) {
 		changed = flag;
 		saveButton.setDisable(!flag);
 	}

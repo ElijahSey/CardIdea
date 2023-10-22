@@ -20,6 +20,7 @@ public class DataPreperator implements AutoCloseable {
 
 	private DataPreperator(DataManager dm) {
 		this.dm = dm;
+		PropertyManager.getInstance();
 		parsers = new ArrayList<>();
 		parsers.add(new MarkdownParser("Markdown"));
 	}

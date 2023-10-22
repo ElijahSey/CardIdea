@@ -1,4 +1,4 @@
-package presentation.popup;
+package presentation.dialog;
 
 import java.util.Locale;
 

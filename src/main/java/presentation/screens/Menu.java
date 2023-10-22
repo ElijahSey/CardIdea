@@ -59,4 +59,9 @@ public class Menu extends Screen {
 			dp.deleteSet(set);
 		}
 	}
+
+	@Override
+	public void onDisplay() {
+		setList.refresh();
+	}
 }

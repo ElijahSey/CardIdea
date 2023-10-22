@@ -94,7 +94,7 @@ jobs:
           rmdir ${{env.PACKAGE_DIR}}/target
 
       - name: Create Package
-        run: jpackage --name cardIdea --input ${{env.PACKAGE_DIR}} --main-jar cardidea-${{ github.event.inputs.tag }}.jar --type ${{matrix.var.type}} --app-version ${{ github.event.inputs.tag }} --icon cardidea.ico --java-options '-splash:$APPDIR/splashscreen.png' ${{matrix.var.options}} 
+        run: jpackage --name cardIDEA --input ${{env.PACKAGE_DIR}} --main-jar cardidea-${{ github.event.inputs.tag }}.jar --type ${{matrix.var.type}} --app-version ${{ github.event.inputs.tag }} --icon cardidea.ico --java-options '-splash:$APPDIR/splashscreen.png' ${{matrix.var.options}} 
 
       - name: Rename Package
         run: mv card*.${{matrix.var.type}} ${{env.INST_NAME}}
