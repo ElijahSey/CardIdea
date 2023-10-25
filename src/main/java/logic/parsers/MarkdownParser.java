@@ -11,11 +11,10 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import entity.Card;
 import entity.CardSet;
 import entity.Topic;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public class MarkdownParser extends CardParser {
 
@@ -89,8 +88,8 @@ public class MarkdownParser extends CardParser {
 	}
 
 	@Override
-	public FileNameExtensionFilter createFileFilter() {
-		return new FileNameExtensionFilter("Markdown Files (.md)", "md");
+	public ExtensionFilter createFileFilter() {
+		return new ExtensionFilter("Markdown Files (.md)", "md");
 	}
 
 	@Override

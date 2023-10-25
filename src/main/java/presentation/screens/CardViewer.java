@@ -1,150 +1,148 @@
 package presentation.screens;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
 import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
-
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
 
 import entity.Card;
 import entity.CardSet;
-import presentation.basic.ContentPanel;
+import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import logic.util.SelectionIterator;
+import presentation.basic.MainFrame;
 import presentation.basic.Screen;
 
 public class CardViewer extends Screen {
 
 	private CardSet cardSet;
-	private JLabel question;
-	private JTextArea answer, solution;
-	private String hint;
-	private ListIterator<Card> iterator;
-	private Card currentCard;
+	private SelectionIterator<Card> iterator;
+	private int size;
+	private Pane[] scoreTiles;
 
-	public CardViewer(ContentPanel mainPanel, CardSet cardSet) {
-		super(mainPanel);
-		this.cardSet = cardSet;
+	private static final Color DEFAULT_COLOR = Color.valueOf("#E0E0E0");
+	private static final Color INCORRECT_COLOR = Color.valueOf("#FF3333");
+	private static final Color NEUTRAL_COLOR = Color.valueOf("#F0F033");
+	private static final Color CORRECT_COLOR = Color.valueOf("#44FF44");
+
+	@FXML
+	private Label questionLabel;
+
+	@FXML
+	private GridPane scoreBar;
+
+	@FXML
+	private TextArea answerArea, solutionArea;
+
+	@FXML
+	private Button revealButton;
+
+	public CardViewer(CardSet set) {
+
+		cardSet = set;
 		List<Card> cards = dp.getCardsOfSet(cardSet);
+		size = cards.size();
 		Collections.shuffle(cards);
-		iterator = cards.listIterator();
+		iterator = new SelectionIterator<>(cards);
 	}
 
 	@Override
-	public JPanel createContent() {
-		JPanel panel = new JPanel(new BorderLayout());
+	public void initialize() {
 
-		JPanel headerPanel = new JPanel();
-		question = new JLabel();
-		headerPanel.add(question);
-		panel.add(headerPanel, BorderLayout.NORTH);
-
-		answer = gui.createTextArea();
-		solution = gui.createTextArea();
-		solution.setEditable(false);
-		solution.setVisible(false);
-
-		JPanel center = new JPanel(new GridBagLayout());
-
-		JPanel cardBody = new JPanel(new GridLayout(2, 1, 0, 10));
-		cardBody.add(gui.createScrollPane(answer));
-		cardBody.add(gui.createScrollPane(solution));
-		cardBody.setPreferredSize(new Dimension(400, 250));
-
-		center.add(cardBody);
-		panel.add(center, BorderLayout.CENTER);
-
-		JPanel buttonPanel = new JPanel();
-
-		JButton prev = gui.createButton("<");
-		prev.addActionListener(e -> prevCard());
-		JButton reveal = gui.createButton("reveal");
-		reveal.addActionListener(this::toggleSolution);
-		reveal.setPreferredSize(new Dimension(75, 26));
-		JButton hint = gui.createButton("hint");
-		hint.addActionListener(e -> showHint());
-
-		JPanel nextPanel = new JPanel(new GridLayout(0, 1));
-
-		JButton correct = gui.createButton("correct");
-		correct.addActionListener(e -> nextCard(Card.CORRECT));
-		JButton skip = gui.createButton("skip");
-		skip.addActionListener(e -> nextCard(Card.SKIP));
-		JButton wrong = gui.createButton("wrong");
-		wrong.addActionListener(e -> nextCard(Card.WRONG));
-
-		nextPanel.add(correct);
-		nextPanel.add(skip);
-		nextPanel.add(wrong);
-
-		buttonPanel.add(prev);
-		buttonPanel.add(reveal);
-		buttonPanel.add(hint);
-		buttonPanel.add(nextPanel);
-
-		panel.add(buttonPanel, BorderLayout.SOUTH);
-
-		return panel;
+		scoreTiles = new Pane[size];
+		for (int i = 0; i < size; i++) {
+			ColumnConstraints column = new ColumnConstraints();
+			column.setPrefWidth(40);
+			scoreBar.getColumnConstraints().add(column);
+			Pane pane = new Pane();
+			pane.setBackground(Background.fill(DEFAULT_COLOR));
+			pane.getStyleClass().add("progress-tile");
+			scoreBar.addColumn(i, (Node) pane);
+			scoreTiles[i] = pane;
+		}
+		updateContent();
 	}
 
-	@Override
-	public void afterOpening() {
-		nextCard();
-	}
+	@FXML
+	private void handlePrevious() {
 
-	private void updateContent(Card card) {
-
-		currentCard = card;
-		solution.setVisible(false);
-		question.setText(card.getQuestion());
-		solution.setText(card.getSolution());
-		answer.setText("");
-		hint = card.getHint();
-	}
-
-	private void prevCard() {
 		if (iterator.hasPrevious()) {
-			updateContent(iterator.previous());
+			iterator.previous();
+			updateContent();
 		}
 	}
 
-	private void nextCard(int score) {
+	@FXML
+	private void handleIncorrect() {
 
-		currentCard.setScore(score);
-		dp.update(currentCard);
-		nextCard();
+		next(Card.INCORRECT, INCORRECT_COLOR);
 	}
 
-	private void nextCard() {
+	@FXML
+	private void handleNeutral() {
+
+		next(Card.NEUTRAL, NEUTRAL_COLOR);
+	}
+
+	@FXML
+	private void handleCorrect() {
+
+		next(Card.CORRECT, CORRECT_COLOR);
+	}
+
+	@FXML
+	private void handleHint() {
+
+		Alert alert = new Alert(AlertType.INFORMATION);
+		MainFrame.setDialogIcon(alert);
+		alert.setHeaderText(lm.getString(getClass(), "hint"));
+		alert.setContentText(iterator.element().getHint());
+		alert.show();
+	}
+
+	@FXML
+	private void handleReveal() {
+
+		revealButton.setVisible(false);
+	}
+
+	@FXML
+	private void handleHide() {
+
+		revealButton.setVisible(true);
+	}
+
+	private void next(int score, Color color) {
+
+		scoreTiles[iterator.index()].setBackground(Background.fill(color));
+		iterator.element().setScore(score);
+		dp.update(iterator.element());
 		if (iterator.hasNext()) {
-			updateContent(iterator.next());
+			iterator.next();
+			updateContent();
 		}
 	}
 
-	private void toggleSolution(ActionEvent e) {
-		JButton b = (JButton) e.getSource();
-		boolean visible = solution.isVisible();
-		if (visible) {
-			b.setText("reveal");
-		} else {
-			b.setText("hide");
-		}
-		solution.setVisible(!visible);
-	}
+	private void updateContent() {
 
-	private void showHint() {
-		JOptionPane.showMessageDialog(mainPanel, hint, "Hint", JOptionPane.INFORMATION_MESSAGE);
+		Card card = iterator.element();
+		revealButton.setVisible(true);
+		questionLabel.setText(card.getQuestion());
+		solutionArea.setText(card.getSolution());
+		answerArea.setText("");
 	}
 
 	@Override
-	protected String getHeader() {
+	public String getHeader() {
+
 		return cardSet.getName();
 	}
 }

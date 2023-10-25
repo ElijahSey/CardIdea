@@ -1,269 +1,259 @@
 package presentation.screens;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.event.KeyEvent;
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingUtilities;
+import java.util.Optional;
 
 import entity.Card;
 import entity.CardSet;
 import entity.Topic;
-import presentation.basic.ContentPanel;
+import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import presentation.basic.MainFrame;
 import presentation.basic.Screen;
-import presentation.menuBar.CommandBar;
-import presentation.popup.CardExport;
-import presentation.popup.CardImport;
+import presentation.dialog.CardExport;
+import presentation.dialog.CardImport;
+import presentation.menuBar.MenuBar;
 
 public class CardEditor extends Screen {
 
 	private CardSet cardSet;
-	private List<Card> cards;
-	private List<Topic> topics;
-	private JList<Card> cardList;
-	private JList<Topic> topicList;
-	private JTextField question;
-	private JTextArea solution, hint;
-	private JButton addOrUpdateBut, saveBut, delBut;
-
+	private ObservableList<Card> cards;
+	private ObservableList<Topic> topics;
 	private boolean changed;
 
-	public CardEditor(ContentPanel mainPanel, CardSet cardSet) {
-		super(mainPanel);
+	@FXML
+	private ListView<Topic> topicList;
+
+	@FXML
+	private Button deleteTopic, editTopic;
+
+	@FXML
+	private ListView<Card> cardList;
+
+	@FXML
+	private TextField question;
+
+	@FXML
+	private TextArea solution, hint;
+
+	@FXML
+	private Button deleteButton, addOrUpdateButton, saveButton;
+
+	public CardEditor(CardSet set) {
+
+		cardSet = set;
+		topics = FXCollections.observableArrayList();
+		cards = FXCollections.observableArrayList();
+	}
+
+	@Override
+	public void initialize() {
+
+		topicList.setItems(topics);
+		cardList.setItems(cards);
+
+		topicList.getSelectionModel().selectedItemProperty()
+				.addListener((ChangeListener<Topic>) (observable, oldValue, newValue) -> {
+					boolean isEmpty = newValue == null;
+					deleteTopic.setDisable(isEmpty);
+					editTopic.setDisable(isEmpty);
+				});
+
+		cardList.getSelectionModel().selectedItemProperty()
+				.addListener((ChangeListener<Card>) (observable, oldValue, newValue) -> {
+					if (newValue != null) {
+						updateInputFields(newValue);
+					}
+				});
 		if (cardSet == null) {
-			this.cardSet = new CardSet();
-			topics = new ArrayList<>();
-			cards = new ArrayList<>();
+			cardSet = new CardSet();
 		} else {
-			this.cardSet = cardSet;
-			topics = dp.getTopicsOfSet(cardSet);
-			cards = dp.getCardsOfSet(cardSet);
+			topics.addAll(dp.getTopicsOfSet(cardSet));
+			cards.addAll(dp.getCardsOfSet(cardSet));
 		}
-		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		topics.addListener((ListChangeListener<Topic>) c -> setChanged(true));
+		cards.addListener((ListChangeListener<Card>) c -> setChanged(true));
 	}
 
-	@Override
-	protected JPanel createContent() {
+	@FXML
+	private void handleDeleteTopic() {
 
-		initializeGuiElements();
+		Topic topic = topicList.getSelectionModel().getSelectedItem();
+		List<Card> cardsOfTopic = dp.getCardsOfTopic(topic);
+		if (cards.size() > 0) {
+			ButtonType type = MainFrame.showAlert(getClass(), "deleteTopic", AlertType.WARNING, ButtonType.OK,
+					ButtonType.CANCEL);
+			if (!type.getButtonData().equals(ButtonData.OK_DONE)) {
+				return;
+			}
+		}
+		cards.removeAll(cardsOfTopic);
+		topics.remove(topic);
+	}
 
-		JScrollPane topicScroll = gui.createScrollPane(topicList);
-		topicScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		JScrollPane cardScroll = gui.createScrollPane(cardList);
-		cardScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+	@FXML
+	private void handleEditTopic() {
 
-		JPanel topics = createNCPanel(new JLabel(lm.getString("Topic", 2)), topicScroll);
-		JPanel cards = createNCPanel(new JLabel(lm.getString("Card", 2)), cardScroll);
-
-		JSplitPane west = gui.createSplitPane(JSplitPane.VERTICAL_SPLIT, topics, cards);
-
-		JPanel cardHeader = createNCPanel(new JLabel(lm.getString("question")), question);
-		JSplitPane cardBody = gui.createSplitPane(JSplitPane.VERTICAL_SPLIT,
-				createNCPanel(new JLabel(lm.getString("solution")), solution),
-				createNCPanel(new JLabel(lm.getString("hint")), hint));
-
-		JPanel center = createNCPanel(cardHeader, cardBody);
-		JPanel south = createButtonPanel();
-
-		JSplitPane mainSplit = gui.createSplitPane(JSplitPane.HORIZONTAL_SPLIT, west, center);
-
-		updateTextFields(null);
-
-		JPanel panel = new JPanel(new BorderLayout(10, 10));
-		panel.add(mainSplit, BorderLayout.CENTER);
-		panel.add(south, BorderLayout.SOUTH);
-
-		SwingUtilities.invokeLater(() -> {
-			west.setDividerLocation(0.35);
-			cardBody.setDividerLocation(0.6);
-			mainSplit.setDividerLocation(0.2);
+		Topic topic = topicList.getSelectionModel().getSelectedItem();
+		Optional<String> nameOpt = MainFrame.showDialog(new TextInputDialog(topic.getName()), getClass(), "addTopic");
+		nameOpt.ifPresent(name -> {
+			topic.setName(name);
+			topicList.refresh();
 		});
-
-		return panel;
 	}
 
-	@Override
-	public void createMenuItems() {
-		super.createMenuItems();
-		addMenuItem(CommandBar.FILE, lm.getString("export"), lm.getString("CardEditor.export.tooltip"), null,
-				e -> new CardExport(mainPanel, cardSet).show());
-		addMenuItem(CommandBar.FILE, lm.getString("import"), lm.getString("CardEditor.import.tooltip"), null,
-				e -> new CardImport(mainPanel, cardSet, topics, cards).show());
-		addMenuItem(CommandBar.FILE, lm.getString("save"), null,
-				KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK), e -> saveSet());
-		addMenuItem(CommandBar.EDIT, lm.getString("rename"), null, KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0),
-				e -> renameSet("CardEditor.rename.dialog"));
+	@FXML
+	private void handleAddTopic() {
+
+		Optional<String> nameOpt = MainFrame.showDialog(new TextInputDialog(), getClass(), "addTopic");
+		nameOpt.ifPresent(name -> topics.add(new Topic(name, cardSet)));
 	}
 
-	@Override
-	protected void afterOpening() {
-		super.afterOpening();
-		if (cardSet.getName() == null) {
-			if (!renameSet("CardEditor.new.dialog")) {
-				mainPanel.back();
-			}
-		}
-		setChanged(false);
-		revalidate();
+	@FXML
+	private void handleDelete() {
+
+		Card card = cardList.getSelectionModel().getSelectedItem();
+		cards.remove(card);
 	}
 
-	@Override
-	protected boolean afterClosing() {
+	@FXML
+	private void handleClear() {
 
-		if (changed) {
-			int opt = JOptionPane.showConfirmDialog(mainPanel, lm.getString("CardEditor.save.dialog"),
-					lm.getString("save"), JOptionPane.YES_NO_CANCEL_OPTION);
-			switch (opt) {
-			case 0:
-				saveSet();
-				break;
-			case 2:
-				return false;
-			}
-		}
-		super.afterClosing();
-		return true;
+		deleteButton.setDisable(true);
+		addOrUpdateButton.setText(lm.getString(getClass(), "add"));
+		topicList.getSelectionModel().clearSelection();
+		cardList.getSelectionModel().clearSelection();
+		question.clear();
+		solution.clear();
+		hint.clear();
 	}
 
-	private void initializeGuiElements() {
-		cardList = gui.createList(cards, new Card[0]);
-		cardList.addListSelectionListener(e -> updateTextFields(cardList.getSelectedValue()));
-		topicList = gui.createList(dp.getTopicsOfSet(cardSet), new Topic[0]);
-		question = gui.createTextField();
-		solution = gui.createTextArea();
-		hint = gui.createTextArea();
-	}
+	@FXML
+	private void handleAddOrUpdate() {
 
-	private void updateTextFields(Card card) {
-		if (card == null) {
-			card = new Card();
-			delBut.setEnabled(false);
-			addOrUpdateBut.setText(lm.getString("add"));
-		} else {
-			delBut.setEnabled(true);
-			addOrUpdateBut.setText(lm.getString("update"));
-		}
-		topicList.setSelectedValue(card.getTopic(), true);
-		question.setText(card.getQuestion());
-		solution.setText(card.getSolution());
-		hint.setText(card.getHint());
-	}
-
-	private static JPanel createNCPanel(JComponent north, JComponent center) {
-		JPanel panel = new JPanel(new BorderLayout(0, 5));
-		panel.add(north, BorderLayout.NORTH);
-		panel.add(center, BorderLayout.CENTER);
-		return panel;
-	}
-
-	private JPanel createButtonPanel() {
-
-		JPanel panel = new JPanel(new BorderLayout());
-
-		JPanel center = new JPanel();
-		JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		delBut = gui.createButton(lm.getString("delete"));
-		delBut.setToolTipText(lm.getString("CardEditor.delete.tooltip"));
-		delBut.addActionListener(e -> deleteCard(cardList.getSelectedValue()));
-		JButton clearBut = gui.createButton(lm.getString("clear"));
-		clearBut.setToolTipText(lm.getString("CardEditor.clear.tooltip"));
-		clearBut.addActionListener(e -> cardList.clearSelection());
-		addOrUpdateBut = gui.createButton(lm.getString("add"));
-		addOrUpdateBut.setToolTipText(lm.getString("CardEditor.add.tooltip"));
-		addOrUpdateBut.addActionListener(e -> addOrUpdateCard(cardList.getSelectedValue()));
-		saveBut = gui.createButton(lm.getString("save"));
-		saveBut.setToolTipText(lm.getString("CardEditor.save.tooltip"));
-		saveBut.addActionListener(e -> saveSet());
-
-		center.add(delBut);
-		center.add(clearBut);
-		center.add(addOrUpdateBut);
-		right.add(saveBut);
-		panel.add(Box.createHorizontalStrut(100), BorderLayout.WEST);
-		panel.add(center, BorderLayout.CENTER);
-		panel.add(right, BorderLayout.EAST);
-		return panel;
-	}
-
-	public void addOrUpdateCard(Card card) {
-		Topic topic = topicList.getSelectedValue();
+		Topic topic = topicList.getSelectionModel().getSelectedItem();
 		if (topic == null) {
-			showUserInfo(lm.getString("CardEditor.notopic.message"));
+			MainFrame.showAlert(getClass(), "notopic", AlertType.WARNING);
 			return;
 		}
+		Card card = cardList.getSelectionModel().getSelectedItem();
 		if (card == null) {
 			cards.add(new Card(topic, question.getText(), solution.getText(), hint.getText()));
 		} else {
-			card.setTopic(topic);
-			card.setQuestion(question.getText());
-			card.setSolution(solution.getText());
-			card.setHint(hint.getText());
+			updateCard(topic, card);
 		}
-		revalidate();
-		setChanged(true);
 	}
 
-	public void deleteCard(Card card) {
-		cards.remove(card);
-		revalidate();
-		setChanged(true);
-	}
-
-	private boolean renameSet(String message) {
-		String newName = JOptionPane.showInputDialog(mainPanel, lm.getString(message), cardSet.getName());
-		if (newName == null) {
-			return false;
-		}
-		if (newName.isBlank()) {
-			showUserInfo(lm.getString("CardEditor.blankname.message"));
-			return false;
-		}
-		cardSet.setName(newName);
-		dp.update(cardSet);
-		mainPanel.setHeader(getHeader());
-		return true;
-	}
-
-	public void saveSet() {
+	@FXML
+	private void handleSave() {
 
 		dp.updateSet(cardSet, topics, cards);
 		setChanged(false);
 	}
 
-	public void setChanged(boolean flag) {
-		changed = flag;
-		saveBut.setEnabled(flag);
+	@Override
+	public void addMenuItems(MenuBar menuBar) {
+
+		menuBar.addSeparator(MenuBar.FILE);
+		menuBar.addMenuItem(MenuBar.FILE, lm.getString("export"), null, e -> new CardExport(cardSet));
+		menuBar.addMenuItem(MenuBar.FILE, lm.getString("import"), null, e -> new CardImport(cardSet, topics, cards));
+		menuBar.addSeparator(MenuBar.FILE);
+		menuBar.addMenuItem(MenuBar.FILE, lm.getString("save"),
+				new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN), e -> handleSave());
+		menuBar.addMenuItem(MenuBar.EDIT, lm.getString("rename"), new KeyCodeCombination(KeyCode.F2),
+				e -> renameSet("rename"));
 	}
 
 	@Override
-	protected void revalidate() {
-		topicList.setListData(topics.toArray(new Topic[0]));
-		cardList.setListData(cards.toArray(new Card[0]));
-		updateTextFields(null);
-		super.revalidate();
-	}
+	public boolean beforeOpen() {
 
-	@Override
-	protected String getHeader() {
-		if (cardSet.getName() == null || cardSet.getName().isBlank()) {
-			return lm.getString("new");
+		if (cardSet.getName() == null && !renameSet("create")) {
+			return false;
 		}
-		return cardSet.getName();
+		return super.beforeOpen();
+	}
+
+	@Override
+	public boolean beforeClose() {
+
+		if (changed) {
+			ButtonType response = MainFrame.showAlert(getClass(), "save", AlertType.CONFIRMATION, ButtonType.YES,
+					ButtonType.NO, ButtonType.CANCEL);
+			switch (response.getButtonData()) {
+			case YES:
+				handleSave();
+				break;
+			case NO:
+				break;
+			default:
+				return false;
+			}
+		}
+		return super.beforeClose();
+	}
+
+	@Override
+	public String getHeader() {
+
+		if (cardSet.getName() != null && !cardSet.getName().isBlank()) {
+			return cardSet.getName();
+		}
+		return super.getHeader();
+	}
+
+	private void updateInputFields(Card card) {
+
+		deleteButton.setDisable(false);
+		addOrUpdateButton.setText(lm.getString(getClass(), "update"));
+		topicList.getSelectionModel().select(card.getTopic());
+		question.setText(card.getQuestion());
+		solution.setText(card.getSolution());
+		hint.setText(card.getHint());
+	}
+
+	private void updateCard(Topic topic, Card card) {
+
+		card.setTopic(topic);
+		card.setQuestion(question.getText());
+		card.setSolution(solution.getText());
+		card.setHint(hint.getText());
+		setChanged(true);
+	}
+
+	private boolean renameSet(String key) {
+
+		Optional<String> newNameOpt = MainFrame.showDialog(new TextInputDialog(cardSet.getName()), getClass(), key);
+		if (newNameOpt.isEmpty()) {
+			return false;
+		}
+		String newName = newNameOpt.get();
+		if (newName.isBlank()) {
+			MainFrame.showAlert(getClass(), "invalidName", AlertType.WARNING);
+			return false;
+		}
+		cardSet.setName(newName);
+		header.setText(getHeader());
+		setChanged(true);
+		return true;
+	}
+
+	private void setChanged(boolean flag) {
+
+		changed = flag;
+		saveButton.setDisable(!flag);
 	}
 }

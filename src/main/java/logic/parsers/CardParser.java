@@ -5,18 +5,16 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import entity.Card;
 import entity.CardSet;
 import entity.Topic;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public abstract class CardParser {
 
 	private String name;
 
-	protected FileNameExtensionFilter fileFilter;
+	protected ExtensionFilter fileFilter;
 
 	public CardParser(String name) {
 		this.name = name;
@@ -29,14 +27,14 @@ public abstract class CardParser {
 
 	public abstract CardParser newInstance();
 
-	protected abstract FileNameExtensionFilter createFileFilter();
+	protected abstract ExtensionFilter createFileFilter();
 
-	public FileFilter getFileFilter() {
+	public ExtensionFilter getFileFilter() {
 		return fileFilter;
 	}
 
 	public String getExtension() {
-		return "." + fileFilter.getExtensions()[0];
+		return "." + fileFilter.getExtensions().get(0);
 	}
 
 	@Override

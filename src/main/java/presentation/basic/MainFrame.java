@@ -1,52 +1,58 @@
 package presentation.basic;
 
-import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.SplashScreen;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
-import javax.imageio.ImageIO;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.image.Image;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import logic.data.DataPreperator;
-import presentation.menuBar.CommandBar;
 import presentation.menuBar.MenuBar;
 import presentation.screens.Menu;
-import presentation.util.GuiFactory;
+import presentation.util.LanguageManager;
 
-public class MainFrame {
+public class MainFrame extends Application {
 
 	protected DataPreperator dp;
-	protected GuiFactory gui;
-	private JFrame frame;
-	private ContentPanel contentPanel;
-	private JPanel mainPanel;
-	private Image icon;
+	protected LanguageManager lm;
 
-	public MainFrame() {
+	private Stage primaryStage;
+	private BorderPane layout;
+	private Deque<Display> screens;
 
-		init();
+	public static Image cardImage;
+	private static MainFrame instance;
+
+	private static final String APP_NAME = "cardIDEA";
+
+	@Override
+	public void start(Stage primaryStage) {
+
+		instance = this;
 		SplashScreen splash = showSplashScreen();
+
+		this.primaryStage = primaryStage;
 		dp = DataPreperator.getInstance();
-		gui = GuiFactory.createDefaultGuiFactory();
-		frame = createFrame();
+		lm = LanguageManager.getInstance();
+		screens = new LinkedList<>();
+		cardImage = new Image(getClass().getResourceAsStream("/images/card_logo.png"));
+
+		createMainFrame();
+		primaryStage.show();
 		if (splash != null) {
 			splash.close();
-		}
-		frame.setVisible(true);
-	}
-
-	private void init() {
-		try {
-			icon = ImageIO.read(getClass().getResourceAsStream("/images/card_logo.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -59,57 +65,142 @@ public class MainFrame {
 		return splash;
 	}
 
-	private JFrame createFrame() {
+	private void createMainFrame() {
 
-		JFrame frame = new JFrame();
-		frame.setSize(800, 500);
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		frame.setLocationRelativeTo(null);
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.setIconImage(icon);
-		frame.addWindowListener(new WindowCloseListener());
-
-		mainPanel = new JPanel(new GridBagLayout());
-
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.setLayout(new BorderLayout());
-
-		JLabel header = new JLabel();
-		contentPanel = new ContentPanel(header, frame);
-		CommandBar cmdBar = contentPanel.getCommandBar();
-		MenuBar menuBar = new MenuBar(contentPanel, header);
-		JPanel topBar = menuBar.getPanel();
-		contentPanel.addReloadListener(() -> menuBar.rebuild(panel));
-
-		panel.add(topBar, BorderLayout.NORTH);
-		panel.add(contentPanel, BorderLayout.CENTER);
-
-		contentPanel.addScreen(new Menu(contentPanel));
-		mainPanel.removeAll();
-		update(mainPanel);
-		mainPanel.setLayout(new BorderLayout());
-		mainPanel.add(panel);
-
-		frame.setJMenuBar(cmdBar);
-		frame.add(mainPanel);
-		return frame;
-	}
-
-	private void update(JComponent c) {
-		c.revalidate();
-		c.repaint();
-	}
-
-	private class WindowCloseListener extends WindowAdapter {
-		@Override
-		public void windowClosing(WindowEvent we) {
-
-			if (!contentPanel.back()) {
-				return;
+		primaryStage.setTitle(APP_NAME);
+		primaryStage.getIcons().add(cardImage);
+		primaryStage.setMaximized(true);
+		primaryStage.setOnCloseRequest(e -> {
+			if (!onWindowClose()) {
+				e.consume();
 			}
-			frame.dispose();
-			dp.close();
-			System.exit(0);
+		});
+
+		layout = new BorderPane();
+		Scene scene = new Scene(layout);
+		scene.getStylesheets().add("css/stylesheet.css");
+		primaryStage.setScene(scene);
+		initMenu();
+	}
+
+	private Display loadScreen(Screen controller) {
+
+		FXMLLoader loader = loadClass(controller);
+		FXMLLoader menuBar = loadClass(new MenuBar());
+		return new Display(loader, menuBar);
+	}
+
+	public static FXMLLoader loadClass(Object controller) {
+
+		String className = controller.getClass().getSimpleName();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setResources(LanguageManager.getInstance().getBundle(className));
+		loader.setController(controller);
+		try {
+			loader.load(MainFrame.class.getResourceAsStream("/fxml/" + className + ".fxml"));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		return loader;
+	}
+
+	public void initMenu() {
+
+		addScreen0(new Menu());
+	}
+
+	public void addScreen(Screen screen) {
+
+		if (!screens.peek().getController().beforeClose()) {
+			return;
+		}
+		addScreen0(screen);
+	}
+
+	public void addScreen0(Screen screen) {
+
+		Display display = loadScreen(screen);
+		if (display.getController().beforeOpen()) {
+			screens.push(display);
+			displayScreen(display);
+		}
+	}
+
+	public void back() {
+
+		if (!screens.peek().getController().beforeClose()) {
+			return;
+		}
+		if (screens.size() < 2) {
+			return;
+		}
+		screens.pop();
+		displayScreen(screens.peek());
+	}
+
+	public void home() {
+
+		if (!screens.peek().getController().beforeClose()) {
+			return;
+		}
+		screens.clear();
+		initMenu();
+	}
+
+	private void displayScreen(Display display) {
+
+		display.getController().onDisplay();
+		layout.setTop(display.getMenuBarNode());
+		layout.setCenter(display.getNode());
+	}
+
+	public static <R> Optional<R> showDialog(Dialog<R> dialog, Class<?> clazz, String key) {
+
+		String className = clazz.getSimpleName();
+		ResourceBundle bundle = LanguageManager.getInstance().getBundle(className);
+		setDialogIcon(dialog);
+		dialog.setTitle(bundle.getString(key + ".title"));
+		dialog.setHeaderText(bundle.getString(key + ".header"));
+		dialog.setContentText(bundle.getString(key + ".message"));
+		return dialog.showAndWait();
+	}
+
+	public static ButtonType showAlert(Class<?> clazz, String key, AlertType alertType, ButtonType... buttonTypes) {
+
+		String className = clazz.getSimpleName();
+		ResourceBundle bundle = LanguageManager.getInstance().getBundle(className);
+		String message = bundle.getString(key + ".message");
+		Alert alert = new Alert(alertType, message, buttonTypes);
+		setDialogIcon(alert);
+		alert.setHeaderText(bundle.getString(key + ".header"));
+		alert.showAndWait();
+		return alert.getResult();
+	}
+
+	public static void setDialogIcon(Dialog<?> dialog) {
+
+		((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(cardImage);
+	}
+
+	public boolean onWindowClose() {
+
+//		if (!showAlert(getClass(), "close", AlertType.CONFIRMATION).getButtonData().equals(ButtonData.OK_DONE)) {
+//			return false;
+//		}
+		if (!screens.peek().getController().beforeClose()) {
+			return false;
+		}
+		dp.close();
+		return true;
+	}
+
+	public Window getWindow() {
+
+		return primaryStage;
+	}
+
+	public static MainFrame getInstance() {
+
+		return instance;
 	}
 }

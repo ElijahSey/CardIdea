@@ -33,8 +33,8 @@ public class Card implements DBEntity {
 
 	public static final int CORRECT = 1;
 	public static final int DEFAULT = 0;
-	public static final int SKIP = -1;
-	public static final int WRONG = -2;
+	public static final int NEUTRAL = -1;
+	public static final int INCORRECT = -2;
 
 	public Card() {
 		score = 0;
@@ -65,13 +65,6 @@ public class Card implements DBEntity {
 	@Override
 	public String toString() {
 		return question;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-
-		Card c = (Card) o;
-		return topic.equals(c.getTopic()) && question.equals(c.getQuestion()) && solution.equals(c.getSolution());
 	}
 
 	// GETTERS AND SETTERS

@@ -1,84 +1,100 @@
 package presentation.menuBar;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
+import java.util.ArrayList;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.input.KeyCombination;
+import presentation.basic.FXController;
+import presentation.basic.MainFrame;
+import presentation.dialog.Preferences;
 
-import presentation.basic.ContentPanel;
-import presentation.popup.Settings;
-import presentation.util.GuiFactory;
-import presentation.util.LanguageManager;
+public class MenuBar implements FXController {
 
-public class MenuBar {
+	public static final int FILE = 0;
+	public static final int EDIT = 1;
+	public static final int VIEW = 2;
 
-	private JPanel panel;
-	private ContentPanel contentArea;
-	private JLabel header;
-	private LanguageManager i18n;
-	private static final int HEIGHT = 40;
+	@FXML
+	private Button backButton;
 
-	public MenuBar(ContentPanel contentArea, JLabel header) {
-		this.contentArea = contentArea;
-		this.header = header;
-		i18n = LanguageManager.getInstance();
-		panel = createContent();
-		panel.revalidate();
-		panel.repaint();
+	@FXML
+	private Button homeButton;
+
+	@FXML
+	private Button settingsButton;
+
+	@FXML
+	private Label headerLabel;
+
+	@FXML
+	private ArrayList<Menu> menuList;
+
+	public MenuBar() {
+
 	}
 
-	protected JPanel createContent() {
-		JPanel panel = new JPanel(new BorderLayout());
+	@Override
+	public void initialize() {
 
-		panel.setSize(100, HEIGHT);
-		panel.setBackground(new Color(150, 200, 255));
-
-		JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 5));
-		left.setOpaque(false);
-		JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 5));
-		right.setOpaque(false);
-
-		JButton back = createButton(i18n.getString("back"));
-		back.setToolTipText(i18n.getString("MenuBar.back.tooltip"));
-		back.addActionListener(e -> contentArea.back());
-
-		JButton home = createButton(i18n.getString("home"));
-		home.setToolTipText(i18n.getString("MenuBar.home.tooltip"));
-		home.addActionListener(e -> contentArea.home());
-
-		JButton settings = createButton(i18n.getString("settings"));
-		settings.setToolTipText(i18n.getString("MenuBar.settings.tooltip"));
-		settings.addActionListener(e -> new Settings(contentArea).show());
-
-		left.add(back);
-		left.add(home);
-		left.add(header);
-
-		right.add(settings);
-
-		panel.add(left, BorderLayout.WEST);
-		panel.add(right, BorderLayout.EAST);
-		return panel;
 	}
 
-	public void rebuild(JPanel parent) {
-		parent.remove(panel);
-		parent.revalidate();
-		parent.repaint();
-		panel = createContent();
-		parent.add(panel, BorderLayout.NORTH);
-		parent.revalidate();
-		parent.repaint();
+	@FXML
+	private void handleBack() {
+
+		MainFrame.getInstance().back();
 	}
 
-	private JButton createButton(String text) {
-		return GuiFactory.getInstance().createButton(text);
+	@FXML
+	private void handleHome() {
+
+		MainFrame.getInstance().home();
 	}
 
-	public JPanel getPanel() {
-		return panel;
+	@FXML
+	private void handlePreferences() {
+
+		new Preferences();
+	}
+
+	@FXML
+	private void handleClose() {
+
+		MainFrame.getInstance().onWindowClose();
+	}
+
+	public Label getHeaderLabel() {
+
+		return headerLabel;
+	}
+
+	public void addMenuItem(int menu, int index, String text, KeyCombination key, EventHandler<ActionEvent> handler) {
+
+		MenuItem item = new MenuItem(text);
+		item.setOnAction(handler);
+		item.setAccelerator(key);
+		menuList.get(menu).getItems().add(index, item);
+	}
+
+	public void addMenuItem(int menu, String text, KeyCombination key, EventHandler<ActionEvent> handler) {
+
+		addMenuItem(menu, 0, text, key, handler);
+	}
+
+	public void addSeparator(int menu, int index) {
+
+		SeparatorMenuItem sep = new SeparatorMenuItem();
+		menuList.get(menu).getItems().add(index, sep);
+	}
+
+	public void addSeparator(int menu) {
+
+		addSeparator(menu, 0);
 	}
 }

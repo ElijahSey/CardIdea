@@ -6,7 +6,7 @@
 	<artifactId>cardidea</artifactId>
 	<version>0.1.0</version>
 	<packaging>jar</packaging>
-	<name>cardIdea</name>
+	<name>cardIDEA</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,13 +27,6 @@
 			<artifactId>h2</artifactId>
 			<version>2.2.224</version>
 		</dependency>
-		
-		<dependency>
-		    <groupId>com.ibm.icu</groupId>
-		    <artifactId>icu4j</artifactId>
-		    <version>73.2</version>
-		</dependency>
-
 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -41,6 +34,31 @@
 			<version>5.10.0</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.openjfx</groupId>
+		    <artifactId>javafx-base</artifactId>
+		    <version>21</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.openjfx</groupId>
+		    <artifactId>javafx-controls</artifactId>
+		    <version>21</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.openjfx</groupId>
+		    <artifactId>javafx-fxml</artifactId>
+		    <version>21</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.openjfx</groupId>
+		    <artifactId>javafx-swing</artifactId>
+		    <version>21</version>
+		</dependency>
+
 
 	</dependencies>
 
@@ -111,7 +129,7 @@
 	<distributionManagement>
 		<repository>
 			<id>github</id>
-			<url>https://maven.pkg.github.com/ElijahSey/cardIdea</url>
+			<url>https://maven.pkg.github.com/ElijahSey/cardIDEA</url>
 		</repository>
 	</distributionManagement>
 

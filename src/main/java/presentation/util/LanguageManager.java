@@ -5,38 +5,45 @@ import java.util.ResourceBundle;
 
 import javax.swing.JOptionPane;
 
-import com.ibm.icu.text.MessageFormat;
-
 public class LanguageManager {
 
-	private ResourceBundle bundle;
+	private Locale locale;
 
 	private static LanguageManager instance;
+
+	public static final String I18N_FOLDER = "internationalization";
 
 	private LanguageManager() {
 	}
 
+	public ResourceBundle getBundle(String className) {
+		return ResourceBundle.getBundle(String.join(".", I18N_FOLDER, locale.getLanguage(), className), locale);
+	}
+
 	public String getString(String key) {
+		String fullClassName = Thread.currentThread().getStackTrace()[2].getClassName();
+		String className = fullClassName.substring(fullClassName.lastIndexOf("."));
+		return getBundle(className).getString(key);
+	}
+
+	public String getString(Class<?> clazz, String key) {
+		ResourceBundle bundle = getBundle(clazz.getSimpleName());
 		return bundle.getString(key);
 	}
 
-	public String getString(String key, int magnitude) {
-		MessageFormat message = new MessageFormat(bundle.getString(key), bundle.getLocale());
-		return message.format(new Object[] { magnitude });
-	}
+	public void setLocale(Locale locale) {
 
-	public void setLanguage(Locale locale) {
-
-		bundle = getBundle(locale);
+		this.locale = locale;
 		JOptionPane.setDefaultLocale(locale);
+		Locale.setDefault(locale);
 	}
 
-	public void setLanguage(String language) {
-		setLanguage(new Locale(language));
+	public void setLocale(String locale) {
+		setLocale(new Locale(locale));
 	}
 
-	private ResourceBundle getBundle(Locale language) {
-		return ResourceBundle.getBundle("internationalization.i18n", language);
+	public Locale getLocale() {
+		return locale;
 	}
 
 	public static LanguageManager getInstance() {
@@ -45,4 +52,5 @@ public class LanguageManager {
 		}
 		return instance;
 	}
+
 }
