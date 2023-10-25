@@ -16,17 +16,6 @@ public class LanguageManager {
 	private LanguageManager() {
 	}
 
-	public void setLanguage(Locale locale) {
-
-		this.locale = locale;
-		JOptionPane.setDefaultLocale(locale);
-		Locale.setDefault(locale);
-	}
-
-	public void setLanguage(String language) {
-		setLanguage(new Locale(language));
-	}
-
 	public ResourceBundle getBundle(String className) {
 		return ResourceBundle.getBundle(String.join(".", I18N_FOLDER, locale.getLanguage(), className), locale);
 	}
@@ -42,10 +31,26 @@ public class LanguageManager {
 		return bundle.getString(key);
 	}
 
+	public void setLocale(Locale locale) {
+
+		this.locale = locale;
+		JOptionPane.setDefaultLocale(locale);
+		Locale.setDefault(locale);
+	}
+
+	public void setLocale(String locale) {
+		setLocale(new Locale(locale));
+	}
+
+	public Locale getLocale() {
+		return locale;
+	}
+
 	public static LanguageManager getInstance() {
 		if (instance == null) {
 			instance = new LanguageManager();
 		}
 		return instance;
 	}
+
 }

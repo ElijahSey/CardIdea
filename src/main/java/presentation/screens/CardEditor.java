@@ -1,5 +1,6 @@
 package presentation.screens;
 
+import java.util.List;
 import java.util.Optional;
 
 import entity.Card;
@@ -7,10 +8,12 @@ import entity.CardSet;
 import entity.Topic;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
@@ -33,10 +36,13 @@ public class CardEditor extends Screen {
 	private boolean changed;
 
 	@FXML
-	private ListView<Card> cardList;
+	private ListView<Topic> topicList;
 
 	@FXML
-	private ListView<Topic> topicList;
+	private Button deleteTopic, editTopic;
+
+	@FXML
+	private ListView<Card> cardList;
 
 	@FXML
 	private TextField question;
@@ -48,6 +54,7 @@ public class CardEditor extends Screen {
 	private Button deleteButton, addOrUpdateButton, saveButton;
 
 	public CardEditor(CardSet set) {
+
 		cardSet = set;
 		topics = FXCollections.observableArrayList();
 		cards = FXCollections.observableArrayList();
@@ -59,30 +66,73 @@ public class CardEditor extends Screen {
 		topicList.setItems(topics);
 		cardList.setItems(cards);
 
+		topicList.getSelectionModel().selectedItemProperty()
+				.addListener((ChangeListener<Topic>) (observable, oldValue, newValue) -> {
+					boolean isEmpty = newValue == null;
+					deleteTopic.setDisable(isEmpty);
+					editTopic.setDisable(isEmpty);
+				});
+
 		cardList.getSelectionModel().selectedItemProperty()
 				.addListener((ChangeListener<Card>) (observable, oldValue, newValue) -> {
 					if (newValue != null) {
 						updateInputFields(newValue);
 					}
 				});
-
 		if (cardSet == null) {
 			cardSet = new CardSet();
 		} else {
 			topics.addAll(dp.getTopicsOfSet(cardSet));
 			cards.addAll(dp.getCardsOfSet(cardSet));
 		}
+		topics.addListener((ListChangeListener<Topic>) c -> setChanged(true));
+		cards.addListener((ListChangeListener<Card>) c -> setChanged(true));
+	}
+
+	@FXML
+	private void handleDeleteTopic() {
+
+		Topic topic = topicList.getSelectionModel().getSelectedItem();
+		List<Card> cardsOfTopic = dp.getCardsOfTopic(topic);
+		if (cards.size() > 0) {
+			ButtonType type = MainFrame.showAlert(getClass(), "deleteTopic", AlertType.WARNING, ButtonType.OK,
+					ButtonType.CANCEL);
+			if (!type.getButtonData().equals(ButtonData.OK_DONE)) {
+				return;
+			}
+		}
+		cards.removeAll(cardsOfTopic);
+		topics.remove(topic);
+	}
+
+	@FXML
+	private void handleEditTopic() {
+
+		Topic topic = topicList.getSelectionModel().getSelectedItem();
+		Optional<String> nameOpt = MainFrame.showDialog(new TextInputDialog(topic.getName()), getClass(), "addTopic");
+		nameOpt.ifPresent(name -> {
+			topic.setName(name);
+			topicList.refresh();
+		});
+	}
+
+	@FXML
+	private void handleAddTopic() {
+
+		Optional<String> nameOpt = MainFrame.showDialog(new TextInputDialog(), getClass(), "addTopic");
+		nameOpt.ifPresent(name -> topics.add(new Topic(name, cardSet)));
 	}
 
 	@FXML
 	private void handleDelete() {
+
 		Card card = cardList.getSelectionModel().getSelectedItem();
 		cards.remove(card);
-		setChanged(true);
 	}
 
 	@FXML
 	private void handleClear() {
+
 		deleteButton.setDisable(true);
 		addOrUpdateButton.setText(lm.getString(getClass(), "add"));
 		topicList.getSelectionModel().clearSelection();
@@ -94,6 +144,7 @@ public class CardEditor extends Screen {
 
 	@FXML
 	private void handleAddOrUpdate() {
+
 		Topic topic = topicList.getSelectionModel().getSelectedItem();
 		if (topic == null) {
 			MainFrame.showAlert(getClass(), "notopic", AlertType.WARNING);
@@ -103,12 +154,8 @@ public class CardEditor extends Screen {
 		if (card == null) {
 			cards.add(new Card(topic, question.getText(), solution.getText(), hint.getText()));
 		} else {
-			card.setTopic(topic);
-			card.setQuestion(question.getText());
-			card.setSolution(solution.getText());
-			card.setHint(hint.getText());
+			updateCard(topic, card);
 		}
-		setChanged(true);
 	}
 
 	@FXML
@@ -120,34 +167,48 @@ public class CardEditor extends Screen {
 
 	@Override
 	public void addMenuItems(MenuBar menuBar) {
-		menuBar.addMenuItem(MenuBar.FILE, lm.getString("export"), null,
-				e -> MainFrame.showDialog(new CardExport(cardSet)));
-		menuBar.addMenuItem(MenuBar.FILE, lm.getString("import"), null,
-				e -> MainFrame.showDialog(new CardImport(cardSet, topics, cards)));
+
+		menuBar.addSeparator(MenuBar.FILE);
+		menuBar.addMenuItem(MenuBar.FILE, lm.getString("export"), null, e -> new CardExport(cardSet));
+		menuBar.addMenuItem(MenuBar.FILE, lm.getString("import"), null, e -> new CardImport(cardSet, topics, cards));
+		menuBar.addSeparator(MenuBar.FILE);
 		menuBar.addMenuItem(MenuBar.FILE, lm.getString("save"),
 				new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN), e -> handleSave());
-		menuBar.addMenuItem(MenuBar.EDIT, lm.getString("rename"), new KeyCodeCombination(KeyCode.F2), e -> renameSet());
+		menuBar.addMenuItem(MenuBar.EDIT, lm.getString("rename"), new KeyCodeCombination(KeyCode.F2),
+				e -> renameSet("rename"));
+	}
+
+	@Override
+	public boolean beforeOpen() {
+
+		if (cardSet.getName() == null && !renameSet("create")) {
+			return false;
+		}
+		return super.beforeOpen();
 	}
 
 	@Override
 	public boolean beforeClose() {
-		if (!changed) {
-			return true;
+
+		if (changed) {
+			ButtonType response = MainFrame.showAlert(getClass(), "save", AlertType.CONFIRMATION, ButtonType.YES,
+					ButtonType.NO, ButtonType.CANCEL);
+			switch (response.getButtonData()) {
+			case YES:
+				handleSave();
+				break;
+			case NO:
+				break;
+			default:
+				return false;
+			}
 		}
-		ButtonType response = MainFrame.showAlert(getClass(), "save", AlertType.CONFIRMATION, ButtonType.YES,
-				ButtonType.NO, ButtonType.CANCEL);
-		return switch (response.getButtonData()) {
-		case YES -> {
-			handleSave();
-			yield true;
-		}
-		case NO -> true;
-		default -> false;
-		};
+		return super.beforeClose();
 	}
 
 	@Override
 	public String getHeader() {
+
 		if (cardSet.getName() != null && !cardSet.getName().isBlank()) {
 			return cardSet.getName();
 		}
@@ -164,9 +225,18 @@ public class CardEditor extends Screen {
 		hint.setText(card.getHint());
 	}
 
-	private boolean renameSet() {
-		Optional<String> newNameOpt = MainFrame.showDialog(new TextInputDialog(cardSet.getName()), getClass(),
-				"rename");
+	private void updateCard(Topic topic, Card card) {
+
+		card.setTopic(topic);
+		card.setQuestion(question.getText());
+		card.setSolution(solution.getText());
+		card.setHint(hint.getText());
+		setChanged(true);
+	}
+
+	private boolean renameSet(String key) {
+
+		Optional<String> newNameOpt = MainFrame.showDialog(new TextInputDialog(cardSet.getName()), getClass(), key);
 		if (newNameOpt.isEmpty()) {
 			return false;
 		}
@@ -176,12 +246,13 @@ public class CardEditor extends Screen {
 			return false;
 		}
 		cardSet.setName(newName);
-		dp.update(cardSet);
 		header.setText(getHeader());
+		setChanged(true);
 		return true;
 	}
 
 	private void setChanged(boolean flag) {
+
 		changed = flag;
 		saveButton.setDisable(!flag);
 	}

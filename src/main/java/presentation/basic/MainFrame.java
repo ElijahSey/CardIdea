@@ -33,8 +33,9 @@ public class MainFrame extends Application {
 	private Deque<Display> screens;
 
 	public static Image cardImage;
-
 	private static MainFrame instance;
+
+	private static final String APP_NAME = "cardIDEA";
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -50,7 +51,6 @@ public class MainFrame extends Application {
 
 		createMainFrame();
 		primaryStage.show();
-
 		if (splash != null) {
 			splash.close();
 		}
@@ -67,13 +67,18 @@ public class MainFrame extends Application {
 
 	private void createMainFrame() {
 
-		primaryStage.setTitle("cardIDEA");
+		primaryStage.setTitle(APP_NAME);
 		primaryStage.getIcons().add(cardImage);
 		primaryStage.setMaximized(true);
-		primaryStage.setOnCloseRequest(e -> closeWindow());
+		primaryStage.setOnCloseRequest(e -> {
+			if (!onWindowClose()) {
+				e.consume();
+			}
+		});
 
 		layout = new BorderPane();
 		Scene scene = new Scene(layout);
+		scene.getStylesheets().add("css/stylesheet.css");
 		primaryStage.setScene(scene);
 		initMenu();
 	}
@@ -85,7 +90,8 @@ public class MainFrame extends Application {
 		return new Display(loader, menuBar);
 	}
 
-	private static FXMLLoader loadClass(Object controller) {
+	public static FXMLLoader loadClass(Object controller) {
+
 		String className = controller.getClass().getSimpleName();
 		FXMLLoader loader = new FXMLLoader();
 		loader.setResources(LanguageManager.getInstance().getBundle(className));
@@ -99,6 +105,7 @@ public class MainFrame extends Application {
 	}
 
 	public void initMenu() {
+
 		addScreen0(new Menu());
 	}
 
@@ -111,12 +118,16 @@ public class MainFrame extends Application {
 	}
 
 	public void addScreen0(Screen screen) {
-		Display loader = loadScreen(screen);
-		screens.push(loader);
-		displayScreen(loader);
+
+		Display display = loadScreen(screen);
+		if (display.getController().beforeOpen()) {
+			screens.push(display);
+			displayScreen(display);
+		}
 	}
 
 	public void back() {
+
 		if (!screens.peek().getController().beforeClose()) {
 			return;
 		}
@@ -128,6 +139,7 @@ public class MainFrame extends Application {
 	}
 
 	public void home() {
+
 		if (!screens.peek().getController().beforeClose()) {
 			return;
 		}
@@ -136,27 +148,17 @@ public class MainFrame extends Application {
 	}
 
 	private void displayScreen(Display display) {
+
+		display.getController().onDisplay();
 		layout.setTop(display.getMenuBarNode());
 		layout.setCenter(display.getNode());
-		display.getController().onDisplay();
-	}
-
-	public static void showDialog(AbstractDialog dialog) {
-
-		FXMLLoader loader = loadClass(dialog);
-		Stage stage = new Stage();
-		stage.setTitle("cardIDEA");
-		stage.getIcons().add(cardImage);
-
-		BorderPane layout = new BorderPane();
-		Scene scene = new Scene(layout);
-		stage.setScene(scene);
-		layout.setCenter(loader.getRoot());
 	}
 
 	public static <R> Optional<R> showDialog(Dialog<R> dialog, Class<?> clazz, String key) {
+
 		String className = clazz.getSimpleName();
 		ResourceBundle bundle = LanguageManager.getInstance().getBundle(className);
+		setDialogIcon(dialog);
 		dialog.setTitle(bundle.getString(key + ".title"));
 		dialog.setHeaderText(bundle.getString(key + ".header"));
 		dialog.setContentText(bundle.getString(key + ".message"));
@@ -164,29 +166,41 @@ public class MainFrame extends Application {
 	}
 
 	public static ButtonType showAlert(Class<?> clazz, String key, AlertType alertType, ButtonType... buttonTypes) {
+
 		String className = clazz.getSimpleName();
 		ResourceBundle bundle = LanguageManager.getInstance().getBundle(className);
 		String message = bundle.getString(key + ".message");
 		Alert alert = new Alert(alertType, message, buttonTypes);
-		((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(cardImage);
+		setDialogIcon(alert);
 		alert.setHeaderText(bundle.getString(key + ".header"));
 		alert.showAndWait();
 		return alert.getResult();
 	}
 
-	private void closeWindow() {
+	public static void setDialogIcon(Dialog<?> dialog) {
+
+		((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(cardImage);
+	}
+
+	public boolean onWindowClose() {
+
+//		if (!showAlert(getClass(), "close", AlertType.CONFIRMATION).getButtonData().equals(ButtonData.OK_DONE)) {
+//			return false;
+//		}
 		if (!screens.peek().getController().beforeClose()) {
-			return;
+			return false;
 		}
-		showAlert(getClass(), "close", AlertType.CONFIRMATION);
 		dp.close();
+		return true;
 	}
 
 	public Window getWindow() {
+
 		return primaryStage;
 	}
 
 	public static MainFrame getInstance() {
+
 		return instance;
 	}
 }

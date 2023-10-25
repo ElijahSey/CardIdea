@@ -31,18 +31,14 @@ public class CardImport extends AbstractDialog {
 	private TextField pathField;
 
 	public CardImport(CardSet cardSet, List<Topic> topics, List<Card> cards) {
-		super(true);
 		this.cardSet = cardSet;
 		this.topics = topics;
 		this.cards = cards;
 
 		parsers = FXCollections.observableArrayList(dp.getParsers());
-	}
-
-	@Override
-	public void initialize() {
-
 		parserList.setItems(parsers);
+
+		show(true);
 	}
 
 	@FXML
@@ -61,6 +57,7 @@ public class CardImport extends AbstractDialog {
 				new ErrorDialog(e);
 			}
 		}
+		close();
 	}
 
 	private boolean browse() {
@@ -84,11 +81,9 @@ public class CardImport extends AbstractDialog {
 	}
 
 	@Override
-	public void beforeDisplay() {
+	public void show(boolean modal) {
 		if (browse()) {
-			// open
-		} else {
-			// close
+			super.show(modal);
 		}
 	}
 }

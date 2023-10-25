@@ -7,7 +7,11 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import presentation.basic.Screen;
+import presentation.menuBar.MenuBar;
 
 public class Menu extends Screen {
 
@@ -20,34 +24,36 @@ public class Menu extends Screen {
 	private Button startButton, editButton, deleteButton;
 
 	public Menu() {
-		sets = FXCollections.observableArrayList(dp.getAllSets());
+
 	}
 
 	@Override
 	public void initialize() {
 
-		setList.setItems(sets);
 		setList.getSelectionModel().selectedItemProperty()
 				.addListener((ChangeListener<CardSet>) (observable, oldValue, newValue) -> {
-					boolean isSelected = newValue == null;
-					startButton.setDisable(isSelected);
-					editButton.setDisable(isSelected);
-					deleteButton.setDisable(isSelected);
+					boolean isEmpty = newValue == null;
+					startButton.setDisable(isEmpty || newValue.getSize() < 1);
+					editButton.setDisable(isEmpty);
+					deleteButton.setDisable(isEmpty);
 				});
 	}
 
 	@FXML
 	private void handleNew() {
+
 		mainFrame.addScreen(new CardEditor(null));
 	}
 
 	@FXML
 	private void handleStart() {
+
 		mainFrame.addScreen(new CardViewer(setList.getSelectionModel().getSelectedItem()));
 	}
 
 	@FXML
 	private void handleEdit() {
+
 		mainFrame.addScreen(new CardEditor(setList.getSelectionModel().getSelectedItem()));
 	}
 
@@ -55,13 +61,24 @@ public class Menu extends Screen {
 	private void handleDelete() {
 
 		CardSet set = setList.getSelectionModel().getSelectedItem();
-		if (set != null) {
-			dp.deleteSet(set);
-		}
+		sets.remove(set);
+		dp.deleteSet(set);
+	}
+
+	@Override
+	public void addMenuItems(MenuBar menuBar) {
+
+		menuBar.addSeparator(MenuBar.FILE);
+		menuBar.addMenuItem(MenuBar.FILE, lm.getString("new"),
+				new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN), e -> handleNew());
+		menuBar.addMenuItem(MenuBar.EDIT, lm.getString("delete"), new KeyCodeCombination(KeyCode.DELETE),
+				e -> handleDelete());
 	}
 
 	@Override
 	public void onDisplay() {
-		setList.refresh();
+
+		sets = FXCollections.observableArrayList(dp.getAllSets());
+		setList.setItems(sets);
 	}
 }

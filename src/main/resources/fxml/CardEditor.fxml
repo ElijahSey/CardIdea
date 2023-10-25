@@ -9,7 +9,10 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
@@ -20,11 +23,56 @@
                 <SplitPane dividerPositions="0.4" orientation="VERTICAL">
                     <items>
                         <VBox spacing="5">
-                            <Label text="%topics">
-                                <padding>
-                                    <Insets left="5.0" />
-                                </padding>
-                            </Label>
+                     <BorderPane>
+                        <left>
+                                  <Label text="%topics" BorderPane.alignment="CENTER" />
+                        </left>
+                        <right>
+                           <HBox spacing="5.0" BorderPane.alignment="CENTER">
+                              <children>
+                                 <Button fx:id="deleteTopic" mnemonicParsing="false" onAction="#handleDeleteTopic">
+                                    <graphic>
+                                       <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                          <image>
+                                             <Image url="@/images/delete.png" />
+                                          </image>
+                                       </ImageView>
+                                    </graphic>
+                                    <padding>
+                                       <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                    </padding>
+                                 </Button>
+                                 <Button fx:id="editTopic" mnemonicParsing="false" onAction="#handleEditTopic">
+                                    <graphic>
+                                       <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                          <image>
+                                             <Image url="@/images/edit.png" />
+                                          </image>
+                                       </ImageView>
+                                    </graphic>
+                                    <padding>
+                                       <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                    </padding>
+                                 </Button>
+                                 <Button mnemonicParsing="false" onAction="#handleAddTopic">
+                                    <graphic>
+                                       <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                          <image>
+                                             <Image url="@/images/add.png" />
+                                          </image>
+                                       </ImageView>
+                                    </graphic>
+                                    <padding>
+                                       <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                    </padding>
+                                 </Button>
+                              </children>
+                           </HBox>
+                        </right>
+                        <VBox.margin>
+                           <Insets left="5.0" right="5.0" />
+                        </VBox.margin>
+                     </BorderPane>
                             <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
                                 <ListView fx:id="topicList" VBox.vgrow="ALWAYS" />
                             </ScrollPane>
@@ -34,9 +82,9 @@
                         </VBox>
                         <VBox spacing="5">
                             <Label text="%cards">
-                        <padding>
+                        <VBox.margin>
                            <Insets left="5.0" />
-                        </padding>
+                        </VBox.margin>
                             </Label>
                             <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
                                 <ListView fx:id="cardList" VBox.vgrow="ALWAYS" />

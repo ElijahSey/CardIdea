@@ -14,17 +14,21 @@ public abstract class Screen implements FXController {
 	protected Label header;
 
 	public Screen() {
+
 		lm = LanguageManager.getInstance();
 		dp = DataPreperator.getInstance();
 		mainFrame = MainFrame.getInstance();
 	}
 
 	public void setHeaderLabel(Label header) {
+
 		this.header = header;
 	}
 
-	public void afterLoad() {
+	public boolean beforeOpen() {
+
 		header.setText(getHeader());
+		return true;
 	}
 
 	public void onDisplay() {
@@ -32,6 +36,7 @@ public abstract class Screen implements FXController {
 	}
 
 	public boolean beforeClose() {
+
 		return true;
 	}
 
@@ -40,6 +45,7 @@ public abstract class Screen implements FXController {
 	}
 
 	public String getHeader() {
+
 		return lm.getString(getClass(), "header");
 	}
 }

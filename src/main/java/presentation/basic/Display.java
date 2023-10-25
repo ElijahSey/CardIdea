@@ -11,6 +11,7 @@ public class Display {
 	private Node menuBarNode;
 
 	public Display(FXMLLoader loader, FXMLLoader menuBarLoader) {
+
 		screen = loader.getController();
 		node = loader.getRoot();
 		menuBarNode = menuBarLoader.getRoot();
@@ -18,18 +19,20 @@ public class Display {
 		MenuBar menuBar = menuBarLoader.getController();
 		screen.setHeaderLabel((menuBar).getHeaderLabel());
 		screen.addMenuItems(menuBar);
-		screen.afterLoad();
 	}
 
 	public Screen getController() {
+
 		return screen;
 	}
 
 	public Node getNode() {
+
 		return node;
 	}
 
 	public Node getMenuBarNode() {
+
 		return menuBarNode;
 	}
 }

@@ -9,6 +9,8 @@ import java.util.Map;
 
 import entity.Card;
 import entity.CardSet;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.stage.FileChooser;
@@ -20,16 +22,16 @@ public class CardExport extends AbstractDialog {
 
 	private CardSet cardSet;
 
+	private final ObservableList<CardParser> parsers;
+
 	@FXML
 	private ListView<CardParser> parserList;
 
 	public CardExport(CardSet cardSet) {
-		super(true);
 		this.cardSet = cardSet;
-	}
-
-	@Override
-	public void initialize() {
+		parsers = FXCollections.observableArrayList(dp.getParsers());
+		parserList.setItems(parsers);
+		show(true);
 	}
 
 	@FXML
@@ -47,19 +49,19 @@ public class CardExport extends AbstractDialog {
 		if (file == null) {
 			return;
 		}
-
-		Map<String, List<Card>> cards = new HashMap<>();
+		Map<String, List<Card>> topics = new HashMap<>();
 		for (Card card : dp.getCardsOfSet(cardSet)) {
 			String name = card.getTopic().getName();
-			if (!cards.containsKey(name)) {
-				cards.put(name, new ArrayList<>());
+			if (!topics.containsKey(name)) {
+				topics.put(name, new ArrayList<>());
 			}
-			cards.get(name).add(card);
+			topics.get(name).add(card);
 		}
 		try {
-			parser.write(file, cardSet, cards);
+			parser.write(file, cardSet, topics);
 		} catch (IOException e) {
 			new ErrorDialog(e);
 		}
+		close();
 	}
 }

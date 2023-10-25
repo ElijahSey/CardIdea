@@ -19,6 +19,7 @@ public class DataPreperator implements AutoCloseable {
 	private static DataPreperator instance;
 
 	private DataPreperator(DataManager dm) {
+
 		this.dm = dm;
 		PropertyManager.getInstance();
 		parsers = new ArrayList<>();
@@ -26,17 +27,28 @@ public class DataPreperator implements AutoCloseable {
 	}
 
 	public List<CardSet> getAllSets() {
+
 		return dm.findAll(CardSet.class);
 	}
 
 	public List<Card> getCardsOfSet(CardSet set) {
+
 		if (dm.contains(set)) {
 			return dm.findCardsOfSet(set);
 		}
 		return new ArrayList<>();
 	}
 
+	public List<Card> getCardsOfTopic(Topic topic) {
+
+		if (dm.contains(topic)) {
+			return dm.findEntitesByForeignKey(Card.class, "topic", topic);
+		}
+		return new ArrayList<>();
+	}
+
 	public List<Topic> getTopicsOfSet(CardSet set) {
+
 		if (dm.contains(set)) {
 			return dm.findEntitesByForeignKey(Topic.class, "cardSet", set);
 		}
@@ -44,6 +56,7 @@ public class DataPreperator implements AutoCloseable {
 	}
 
 	public boolean isUniqueName(CardSet set, String newName) {
+
 		if (set.getName().equals(newName)) {
 			return true;
 		}
@@ -57,22 +70,27 @@ public class DataPreperator implements AutoCloseable {
 	}
 
 	public void insert(Object entity) {
+
 		dm.persist(entity);
 	}
 
 	public void insertAll(Iterable<?> entities) {
+
 		dm.persistAll(entities);
 	}
 
 	public <T extends DBEntity> void update(T entity) {
+
 		dm.update(entity);
 	}
 
 	public void delete(Object entity) {
+
 		dm.remove(entity);
 	}
 
 	public void insertSet(CardSet set, List<Topic> topics, List<Card> cards) {
+
 		dm.persist(set);
 		dm.persistAll(topics);
 		dm.persistAll(cards);
@@ -80,6 +98,7 @@ public class DataPreperator implements AutoCloseable {
 
 	public void updateSet(CardSet set, List<Topic> topics, List<Card> cards) {
 
+		set.setSize(cards.size());
 		if (!dm.contains(set)) {
 			insertSet(set, topics, cards);
 		} else {
@@ -96,20 +115,24 @@ public class DataPreperator implements AutoCloseable {
 	}
 
 	public void deleteSet(CardSet set) {
+
 		dm.removeAll(getCardsOfSet(set));
 		dm.removeAll(getTopicsOfSet(set));
 		dm.remove(set);
 	}
 
 	public void addParser(CardParser p) {
+
 		parsers.add(p);
 	}
 
 	public List<CardParser> getParsers() {
+
 		return new ArrayList<>(parsers);
 	}
 
 	public static DataPreperator getInstance() {
+
 		if (instance == null) {
 			instance = new DataPreperator(DataManager.getInstance());
 		}
@@ -117,6 +140,7 @@ public class DataPreperator implements AutoCloseable {
 	}
 
 	public static DataPreperator getTestInstance() {
+
 		if (instance == null) {
 			instance = new DataPreperator(DataManager.getTestInstance());
 		}
@@ -125,6 +149,7 @@ public class DataPreperator implements AutoCloseable {
 
 	@Override
 	public void close() {
+
 		instance = null;
 		dm.close();
 	}

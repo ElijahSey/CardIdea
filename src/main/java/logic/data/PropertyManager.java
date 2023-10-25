@@ -43,7 +43,7 @@ public class PropertyManager {
 			initializeDatabase();
 		}
 		Map<String, String> props = getAllProperties();
-		LanguageManager.getInstance().setLanguage(props.get(LANGUAGE_KEY));
+		LanguageManager.getInstance().setLocale(props.get(LANGUAGE_KEY));
 	}
 
 	private void initializeDatabase() throws IOException {

@@ -9,9 +9,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 import presentation.basic.FXController;
 import presentation.basic.MainFrame;
+import presentation.dialog.Preferences;
 
 public class MenuBar implements FXController {
 
@@ -45,27 +47,54 @@ public class MenuBar implements FXController {
 
 	@FXML
 	private void handleBack() {
+
 		MainFrame.getInstance().back();
 	}
 
 	@FXML
 	private void handleHome() {
+
 		MainFrame.getInstance().home();
 	}
 
+	@FXML
+	private void handlePreferences() {
+
+		new Preferences();
+	}
+
+	@FXML
+	private void handleClose() {
+
+		MainFrame.getInstance().onWindowClose();
+	}
+
 	public Label getHeaderLabel() {
+
 		return headerLabel;
 	}
 
-	public void add(int menu, MenuItem item) {
-		menuList.get(menu).getItems().add(0, item);
-	}
+	public void addMenuItem(int menu, int index, String text, KeyCombination key, EventHandler<ActionEvent> handler) {
 
-	public MenuItem addMenuItem(int menu, String text, KeyCombination key, EventHandler<ActionEvent> handler) {
 		MenuItem item = new MenuItem(text);
 		item.setOnAction(handler);
 		item.setAccelerator(key);
-		add(menu, item);
-		return item;
+		menuList.get(menu).getItems().add(index, item);
+	}
+
+	public void addMenuItem(int menu, String text, KeyCombination key, EventHandler<ActionEvent> handler) {
+
+		addMenuItem(menu, 0, text, key, handler);
+	}
+
+	public void addSeparator(int menu, int index) {
+
+		SeparatorMenuItem sep = new SeparatorMenuItem();
+		menuList.get(menu).getItems().add(index, sep);
+	}
+
+	public void addSeparator(int menu) {
+
+		addSeparator(menu, 0);
 	}
 }

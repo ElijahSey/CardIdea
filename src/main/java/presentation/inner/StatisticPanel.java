@@ -49,10 +49,10 @@ public class StatisticPanel extends IntegratedPanel {
 	private void paintCard(Graphics2D g, Card card, double x, double y, double width, double height) {
 
 		switch (card.getScore()) {
-		case Card.WRONG:
+		case Card.INCORRECT:
 			g.setColor(WRONG_COLOR);
 			break;
-		case Card.SKIP:
+		case Card.NEUTRAL:
 			g.setColor(SKIP_COLOR);
 			break;
 		case Card.CORRECT:

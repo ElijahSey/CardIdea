@@ -1,0 +1,8 @@
+#toolBar {
+    -fx-background-color: #96c8ff;
+}
+
+.progress-tile {
+    -fx-border-color: #444444;
+    -fx-border-width: 1 1 1 1;
+}
