@@ -14,19 +14,25 @@ public class LanguageManager {
 	public static final String I18N_FOLDER = "internationalization";
 
 	private LanguageManager() {
+
 	}
 
 	public ResourceBundle getBundle(String className) {
+
 		return ResourceBundle.getBundle(String.join(".", I18N_FOLDER, locale.getLanguage(), className), locale);
 	}
 
 	public String getString(String key) {
-		String fullClassName = Thread.currentThread().getStackTrace()[2].getClassName();
-		String className = fullClassName.substring(fullClassName.lastIndexOf("."));
+
+		String className = Thread.currentThread().getStackTrace()[2].getClassName();
+		if (className.contains(".")) {
+			className = className.substring(className.lastIndexOf(".") + 1);
+		}
 		return getBundle(className).getString(key);
 	}
 
 	public String getString(Class<?> clazz, String key) {
+
 		ResourceBundle bundle = getBundle(clazz.getSimpleName());
 		return bundle.getString(key);
 	}
@@ -39,18 +45,20 @@ public class LanguageManager {
 	}
 
 	public void setLocale(String locale) {
+
 		setLocale(new Locale(locale));
 	}
 
 	public Locale getLocale() {
+
 		return locale;
 	}
 
 	public static LanguageManager getInstance() {
+
 		if (instance == null) {
 			instance = new LanguageManager();
 		}
 		return instance;
 	}
-
 }

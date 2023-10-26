@@ -153,6 +153,7 @@ public class CardEditor extends Screen {
 		Card card = cardList.getSelectionModel().getSelectedItem();
 		if (card == null) {
 			cards.add(new Card(topic, question.getText(), solution.getText(), hint.getText()));
+			cardList.getSelectionModel().select(card);
 		} else {
 			updateCard(topic, card);
 		}
