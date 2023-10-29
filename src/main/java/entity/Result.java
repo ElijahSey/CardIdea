@@ -74,7 +74,8 @@ public class Result implements Repository {
 		for (int i = 0; i < 4; i++) {
 			Series<String, Number> series = new Series<>(legend[i], FXCollections.observableArrayList());
 			for (Result res : resultList) {
-				String time = res.getCreatedOn().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+				String time = res.getCreatedOn()
+						.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM));
 				series.getData().add(new XYChart.Data<>(time, res.getScore(i)));
 			}
 			data.add(series);
@@ -90,13 +91,13 @@ public class Result implements Repository {
 	@Override
 	public void persist() {
 
-		EntityTransaction et = em.getTransaction();
+		EntityTransaction et = EM.getTransaction();
 		et.begin();
 		List<Result> list = ofSet(cardSet);
 		if (list.size() >= 10) {
-			em.remove(list.get(0));
+			EM.remove(list.get(0));
 		}
-		em.persist(this);
+		EM.persist(this);
 		et.commit();
 	}
 
