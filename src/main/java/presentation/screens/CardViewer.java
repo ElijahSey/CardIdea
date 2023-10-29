@@ -28,6 +28,7 @@ public class CardViewer extends Screen {
 	private Pane[] scoreTiles;
 
 	private static final String FX_BG_COLOR = "-fx-background-color: -fx-color";
+	private static final String SELECTED = "selected";
 
 	@FXML
 	private Label questionLabel;
@@ -69,6 +70,7 @@ public class CardViewer extends Screen {
 	@FXML
 	private void handlePrevious() {
 
+		scoreTiles[iterator.index()].getStyleClass().remove(SELECTED);
 		if (iterator.hasPrevious()) {
 			iterator.previous();
 			updateContent();
@@ -118,6 +120,7 @@ public class CardViewer extends Screen {
 	private void next(int score) {
 
 		scoreTiles[iterator.index()].setStyle(FX_BG_COLOR + score);
+		scoreTiles[iterator.index()].getStyleClass().remove(SELECTED);
 		iterator.element().setScore(score);
 		iterator.element().update();
 		if (iterator.hasNext()) {
@@ -129,6 +132,7 @@ public class CardViewer extends Screen {
 	private void updateContent() {
 
 		Card card = iterator.element();
+		scoreTiles[iterator.index()].getStyleClass().add(SELECTED);
 		revealButton.setVisible(true);
 		questionLabel.setText(card.getQuestion());
 		solutionArea.setText(card.getSolution());

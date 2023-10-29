@@ -2,12 +2,15 @@
     -fx-color0: #4fdf35;
     -fx-color1: #efdd3c;
     -fx-color2: #df4035;
-    -fx-color3: #9bb6d6;
+    -fx-color3: #b3ced8;
 
     -fx-color0a: #4fdf3530;
     -fx-color1a: #efdd3c30;
     -fx-color2a: #df403530;
     -fx-color3a: #9bb6d630;
+
+    -fx-default-color: #666666;
+    -fx-selected-color: #000000;
 }
 
 #toolBar {
@@ -15,15 +18,14 @@
 }
 
 .progress-tile {
-    -fx-border-color: #444444;
+    -fx-border-color: -fx-default-color;
     -fx-border-width: 1 1 1 1;
 }
 
-.color0 { -fx-background-color: -fx-color0; }
-.color1 { -fx-background-color: -fx-color1; }
-.color2 { -fx-background-color: -fx-color2; }
-.color3 { -fx-background-color: -fx-color3; }
-
+.selected {
+    -fx-border-color: -fx-selected-color;
+    -fx-border-width: 2 2 2 2;
+}
 
 .default-color0.chart-area-symbol { -fx-background-color: -fx-color0, white; }
 .default-color1.chart-area-symbol { -fx-background-color: -fx-color1, white; }
