@@ -1,3 +1,15 @@
+.root * {
+    -fx-color0: #4fdf35;
+    -fx-color1: #efdd3c;
+    -fx-color2: #df4035;
+    -fx-color3: #9bb6d6;
+
+    -fx-color0a: #4fdf3530;
+    -fx-color1a: #efdd3c30;
+    -fx-color2a: #df403530;
+    -fx-color3a: #9bb6d630;
+}
+
 #toolBar {
     -fx-background-color: #96c8ff;
 }
@@ -6,3 +18,36 @@
     -fx-border-color: #444444;
     -fx-border-width: 1 1 1 1;
 }
+
+.color0 { -fx-background-color: -fx-color0; }
+.color1 { -fx-background-color: -fx-color1; }
+.color2 { -fx-background-color: -fx-color2; }
+.color3 { -fx-background-color: -fx-color3; }
+
+
+.default-color0.chart-area-symbol { -fx-background-color: -fx-color0, white; }
+.default-color1.chart-area-symbol { -fx-background-color: -fx-color1, white; }
+.default-color2.chart-area-symbol { -fx-background-color: -fx-color2, white; }
+.default-color3.chart-area-symbol { -fx-background-color: -fx-color3, white; }
+.default-color4.chart-area-symbol { -fx-background-color: -fx-color0, white; }
+.default-color5.chart-area-symbol { -fx-background-color: -fx-color1, white; }
+.default-color6.chart-area-symbol { -fx-background-color: -fx-color2, white; }
+.default-color7.chart-area-symbol { -fx-background-color: -fx-color3, white; }
+
+.default-color0.chart-series-area-line { -fx-stroke: -fx-color0; }
+.default-color1.chart-series-area-line { -fx-stroke: -fx-color1; }
+.default-color2.chart-series-area-line { -fx-stroke: -fx-color2; }
+.default-color3.chart-series-area-line { -fx-stroke: -fx-color3; }
+.default-color4.chart-series-area-line { -fx-stroke: -fx-color0; }
+.default-color5.chart-series-area-line { -fx-stroke: -fx-color1; }
+.default-color6.chart-series-area-line { -fx-stroke: -fx-color2; }
+.default-color7.chart-series-area-line { -fx-stroke: -fx-color3; }
+
+.default-color0.chart-series-area-fill { -fx-fill: -fx-color0a; }
+.default-color1.chart-series-area-fill { -fx-fill: -fx-color1a; }
+.default-color2.chart-series-area-fill { -fx-fill: -fx-color2a; }
+.default-color3.chart-series-area-fill { -fx-fill: -fx-color3a; }
+.default-color4.chart-series-area-fill { -fx-fill: -fx-color0a; }
+.default-color5.chart-series-area-fill { -fx-fill: -fx-color1a; }
+.default-color6.chart-series-area-fill { -fx-fill: -fx-color2a; }
+.default-color7.chart-series-area-fill { -fx-fill: -fx-color3a; }

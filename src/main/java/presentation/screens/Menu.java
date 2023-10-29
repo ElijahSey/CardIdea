@@ -1,10 +1,12 @@
 package presentation.screens;
 
 import entity.CardSet;
+import entity.Result;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
@@ -23,6 +25,9 @@ public class Menu extends Screen {
 	@FXML
 	private Button startButton, editButton, deleteButton;
 
+	@FXML
+	private StackedAreaChart<String, Number> resultsChart;
+
 	public Menu() {
 
 	}
@@ -36,6 +41,10 @@ public class Menu extends Screen {
 					startButton.setDisable(isEmpty || newValue.getSize() < 1);
 					editButton.setDisable(isEmpty);
 					deleteButton.setDisable(isEmpty);
+					resultsChart.getData().clear();
+					if (!isEmpty) {
+						resultsChart.getData().addAll(Result.getChartData(newValue));
+					}
 				});
 	}
 
@@ -62,7 +71,7 @@ public class Menu extends Screen {
 
 		CardSet set = setList.getSelectionModel().getSelectedItem();
 		sets.remove(set);
-		dp.deleteSet(set);
+		set.remove();
 	}
 
 	@Override
@@ -78,7 +87,7 @@ public class Menu extends Screen {
 	@Override
 	public void onDisplay() {
 
-		sets = FXCollections.observableArrayList(dp.getAllSets());
+		sets = FXCollections.observableArrayList(CardSet.all());
 		setList.setItems(sets);
 	}
 }

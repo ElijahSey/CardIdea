@@ -37,6 +37,11 @@ public class LanguageManager {
 		return bundle.getString(key);
 	}
 
+	public String[] getArray(Class<?> clazz, String key) {
+
+		return getString(clazz, key).split(";");
+	}
+
 	public void setLocale(Locale locale) {
 
 		this.locale = locale;
