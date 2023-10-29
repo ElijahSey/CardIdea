@@ -82,8 +82,8 @@ public class CardEditor extends Screen {
 		if (cardSet == null) {
 			cardSet = new CardSet();
 		} else {
-			topics.addAll(dp.getTopicsOfSet(cardSet));
-			cards.addAll(dp.getCardsOfSet(cardSet));
+			topics.addAll(Topic.ofSet(cardSet));
+			cards.addAll(Card.ofSet(cardSet));
 		}
 		topics.addListener((ListChangeListener<Topic>) c -> setChanged(true));
 		cards.addListener((ListChangeListener<Card>) c -> setChanged(true));
@@ -93,7 +93,7 @@ public class CardEditor extends Screen {
 	private void handleDeleteTopic() {
 
 		Topic topic = topicList.getSelectionModel().getSelectedItem();
-		List<Card> cardsOfTopic = dp.getCardsOfTopic(topic);
+		List<Card> cardsOfTopic = Card.ofTopic(topic);
 		if (cards.size() > 0) {
 			ButtonType type = MainFrame.showAlert(getClass(), "deleteTopic", AlertType.WARNING, ButtonType.OK,
 					ButtonType.CANCEL);
@@ -162,7 +162,7 @@ public class CardEditor extends Screen {
 	@FXML
 	private void handleSave() {
 
-		dp.updateSet(cardSet, topics, cards);
+		cardSet.update(topics, cards);
 		setChanged(false);
 	}
 

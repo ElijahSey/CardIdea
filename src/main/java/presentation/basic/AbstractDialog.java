@@ -4,23 +4,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import logic.data.DataPreperator;
-import logic.data.PropertyManager;
 import presentation.util.LanguageManager;
 
 public abstract class AbstractDialog implements FXController {
 
 	protected final LanguageManager lm;
-	protected final DataPreperator dp;
-	protected final PropertyManager pm;
 
 	private final Stage stage;
 
 	public AbstractDialog() {
 
 		lm = LanguageManager.getInstance();
-		dp = DataPreperator.getInstance();
-		pm = PropertyManager.getInstance();
 
 		FXMLLoader loader = MainFrame.loadClass(this);
 		stage = new Stage();
@@ -35,9 +29,11 @@ public abstract class AbstractDialog implements FXController {
 
 	@Override
 	public void initialize() {
+
 	}
 
 	public void show(boolean modal) {
+
 		if (modal) {
 			stage.showAndWait();
 		} else {
@@ -46,10 +42,12 @@ public abstract class AbstractDialog implements FXController {
 	}
 
 	public void close() {
+
 		stage.close();
 	}
 
 	protected String getHeader() {
+
 		return lm.getString(getClass(), "header");
 	}
 }

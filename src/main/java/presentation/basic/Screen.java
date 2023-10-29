@@ -1,14 +1,12 @@
 package presentation.basic;
 
 import javafx.scene.control.Label;
-import logic.data.DataPreperator;
 import presentation.menuBar.MenuBar;
 import presentation.util.LanguageManager;
 
 public abstract class Screen implements FXController {
 
 	protected final LanguageManager lm;
-	protected final DataPreperator dp;
 	protected final MainFrame mainFrame;
 
 	protected Label header;
@@ -16,7 +14,6 @@ public abstract class Screen implements FXController {
 	public Screen() {
 
 		lm = LanguageManager.getInstance();
-		dp = DataPreperator.getInstance();
 		mainFrame = MainFrame.getInstance();
 	}
 

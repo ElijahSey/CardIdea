@@ -5,6 +5,7 @@ import java.util.List;
 
 import entity.Card;
 import entity.CardSet;
+import entity.Result;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -12,11 +13,9 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import logic.util.SelectionIterator;
 import presentation.basic.MainFrame;
 import presentation.basic.Screen;
@@ -25,13 +24,10 @@ public class CardViewer extends Screen {
 
 	private CardSet cardSet;
 	private SelectionIterator<Card> iterator;
-	private int size;
+	private List<Card> cards;
 	private Pane[] scoreTiles;
 
-	private static final Color DEFAULT_COLOR = Color.valueOf("#E0E0E0");
-	private static final Color INCORRECT_COLOR = Color.valueOf("#FF3333");
-	private static final Color NEUTRAL_COLOR = Color.valueOf("#F0F033");
-	private static final Color CORRECT_COLOR = Color.valueOf("#44FF44");
+	private static final String FX_BG_COLOR = "-fx-background-color: -fx-color";
 
 	@FXML
 	private Label questionLabel;
@@ -48,8 +44,7 @@ public class CardViewer extends Screen {
 	public CardViewer(CardSet set) {
 
 		cardSet = set;
-		List<Card> cards = dp.getCardsOfSet(cardSet);
-		size = cards.size();
+		cards = Card.ofSet(cardSet);
 		Collections.shuffle(cards);
 		iterator = new SelectionIterator<>(cards);
 	}
@@ -57,14 +52,14 @@ public class CardViewer extends Screen {
 	@Override
 	public void initialize() {
 
-		scoreTiles = new Pane[size];
-		for (int i = 0; i < size; i++) {
+		scoreTiles = new Pane[cards.size()];
+		for (int i = 0; i < cards.size(); i++) {
 			ColumnConstraints column = new ColumnConstraints();
 			column.setPrefWidth(40);
 			scoreBar.getColumnConstraints().add(column);
 			Pane pane = new Pane();
-			pane.setBackground(Background.fill(DEFAULT_COLOR));
 			pane.getStyleClass().add("progress-tile");
+			pane.setStyle(FX_BG_COLOR + Card.DEFAULT);
 			scoreBar.addColumn(i, (Node) pane);
 			scoreTiles[i] = pane;
 		}
@@ -83,19 +78,19 @@ public class CardViewer extends Screen {
 	@FXML
 	private void handleIncorrect() {
 
-		next(Card.INCORRECT, INCORRECT_COLOR);
+		next(Card.INCORRECT);
 	}
 
 	@FXML
 	private void handleNeutral() {
 
-		next(Card.NEUTRAL, NEUTRAL_COLOR);
+		next(Card.NEUTRAL);
 	}
 
 	@FXML
 	private void handleCorrect() {
 
-		next(Card.CORRECT, CORRECT_COLOR);
+		next(Card.CORRECT);
 	}
 
 	@FXML
@@ -120,11 +115,11 @@ public class CardViewer extends Screen {
 		revealButton.setVisible(true);
 	}
 
-	private void next(int score, Color color) {
+	private void next(int score) {
 
-		scoreTiles[iterator.index()].setBackground(Background.fill(color));
+		scoreTiles[iterator.index()].setStyle(FX_BG_COLOR + score);
 		iterator.element().setScore(score);
-		dp.update(iterator.element());
+		iterator.element().update();
 		if (iterator.hasNext()) {
 			iterator.next();
 			updateContent();
@@ -138,6 +133,17 @@ public class CardViewer extends Screen {
 		questionLabel.setText(card.getQuestion());
 		solutionArea.setText(card.getSolution());
 		answerArea.setText("");
+	}
+
+	@Override
+	public boolean beforeClose() {
+
+		int[] counts = new int[4];
+		for (Card card : cards) {
+			counts[card.getScore()]++;
+		}
+		new Result(cardSet, counts).persist();
+		return super.beforeClose();
 	}
 
 	@Override

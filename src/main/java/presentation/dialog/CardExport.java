@@ -9,6 +9,7 @@ import java.util.Map;
 
 import entity.Card;
 import entity.CardSet;
+import entity.Repository;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -28,8 +29,9 @@ public class CardExport extends AbstractDialog {
 	private ListView<CardParser> parserList;
 
 	public CardExport(CardSet cardSet) {
+
 		this.cardSet = cardSet;
-		parsers = FXCollections.observableArrayList(dp.getParsers());
+		parsers = FXCollections.observableArrayList(Repository.getParsers());
 		parserList.setItems(parsers);
 		show(true);
 	}
@@ -50,7 +52,7 @@ public class CardExport extends AbstractDialog {
 			return;
 		}
 		Map<String, List<Card>> topics = new HashMap<>();
-		for (Card card : dp.getCardsOfSet(cardSet)) {
+		for (Card card : Card.ofSet(cardSet)) {
 			String name = card.getTopic().getName();
 			if (!topics.containsKey(name)) {
 				topics.put(name, new ArrayList<>());

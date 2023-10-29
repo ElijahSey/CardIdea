@@ -6,6 +6,7 @@ import java.util.List;
 
 import entity.Card;
 import entity.CardSet;
+import entity.Repository;
 import entity.Topic;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,11 +32,12 @@ public class CardImport extends AbstractDialog {
 	private TextField pathField;
 
 	public CardImport(CardSet cardSet, List<Topic> topics, List<Card> cards) {
+
 		this.cardSet = cardSet;
 		this.topics = topics;
 		this.cards = cards;
 
-		parsers = FXCollections.observableArrayList(dp.getParsers());
+		parsers = FXCollections.observableArrayList(Repository.getParsers());
 		parserList.setItems(parsers);
 
 		show(true);
@@ -43,11 +45,13 @@ public class CardImport extends AbstractDialog {
 
 	@FXML
 	private void handleBrowse() {
+
 		browse();
 	}
 
 	@FXML
 	private void handleImport() {
+
 		CardParser parser = parserList.getSelectionModel().getSelectedItem();
 		File file = new File(pathField.getText());
 		if (file.exists() && file.isFile() && file.canRead()) {
@@ -61,6 +65,7 @@ public class CardImport extends AbstractDialog {
 	}
 
 	private boolean browse() {
+
 		FileChooser explorer = new FileChooser();
 		File file = explorer.showOpenDialog(MainFrame.getInstance().getWindow());
 		if (file == null) {
@@ -72,8 +77,9 @@ public class CardImport extends AbstractDialog {
 	}
 
 	private void selectParsers(File file) {
+
 		parsers.clear();
-		List<CardParser> cp = dp.getParsers();
+		List<CardParser> cp = Repository.getParsers();
 		String extension = file.getName().substring(file.getName().lastIndexOf("."));
 		cp.removeIf(p -> !p.getExtension().equals(extension));
 		parsers.addAll(cp);
@@ -82,6 +88,7 @@ public class CardImport extends AbstractDialog {
 
 	@Override
 	public void show(boolean modal) {
+
 		if (browse()) {
 			super.show(modal);
 		}

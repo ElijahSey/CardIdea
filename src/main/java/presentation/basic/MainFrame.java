@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import entity.Repository;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -18,14 +19,12 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import logic.data.DataPreperator;
 import presentation.menuBar.MenuBar;
 import presentation.screens.Menu;
 import presentation.util.LanguageManager;
 
 public class MainFrame extends Application {
 
-	protected DataPreperator dp;
 	protected LanguageManager lm;
 
 	private Stage primaryStage;
@@ -44,7 +43,6 @@ public class MainFrame extends Application {
 		SplashScreen splash = showSplashScreen();
 
 		this.primaryStage = primaryStage;
-		dp = DataPreperator.getInstance();
 		lm = LanguageManager.getInstance();
 		screens = new LinkedList<>();
 		cardImage = new Image(getClass().getResourceAsStream("/images/card_logo.png"));
@@ -190,7 +188,7 @@ public class MainFrame extends Application {
 		if (!screens.peek().getController().beforeClose()) {
 			return false;
 		}
-		dp.close();
+		Repository.close();
 		return true;
 	}
 
