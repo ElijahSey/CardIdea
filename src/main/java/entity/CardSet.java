@@ -1,5 +1,7 @@
 package entity;
 
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,7 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class CardSet implements DBEntity {
+public class CardSet implements Repository {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +33,7 @@ public class CardSet implements DBEntity {
 	}
 
 	@Override
-	public void update() {
+	public void updateFields() {
 
 		setName(name);
 		setSize(size);
@@ -43,16 +45,49 @@ public class CardSet implements DBEntity {
 		return name;
 	}
 
+	public static List<CardSet> all() {
+
+		return Repository.findAll(CardSet.class);
+	}
+
+	public void persist(List<Topic> topics, List<Card> cards) {
+
+		this.persist();
+		Repository.persistAll(topics);
+		Repository.persistAll(cards);
+	}
+
+	public void update(List<Topic> topics, List<Card> cards) {
+
+		setSize(cards.size());
+		if (!isContained()) {
+			persist(topics, cards);
+		} else {
+			List<Card> cardDB = Card.ofSet(this);
+			cardDB.removeAll(cards);
+			Repository.removeAll(cardDB);
+			List<Topic> topicsDB = Topic.ofSet(this);
+			topicsDB.removeAll(topics);
+			Repository.removeAll(topicsDB);
+			this.update();
+			Repository.updateAll(topics);
+			Repository.updateAll(cards);
+		}
+	}
+
+	@Override
+	public void remove() {
+
+		Repository.removeAll(Card.ofSet(this));
+		Repository.removeAll(Topic.ofSet(this));
+		remove();
+	}
+
 	// GETTERS AND SETTERS
 
 	public long getId() {
 
 		return id;
-	}
-
-	public void setId(long id) {
-
-		this.id = id;
 	}
 
 	public String getName() {

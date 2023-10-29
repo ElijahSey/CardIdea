@@ -1,4 +1,4 @@
-package logic.data;
+package dataAccess;
 
 import java.io.IOException;
 import java.util.Properties;

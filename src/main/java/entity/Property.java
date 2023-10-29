@@ -3,9 +3,10 @@ package entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.TypedQuery;
 
 @Entity
-public class Property implements DBEntity {
+public class Property implements Repository {
 
 	@Id
 	@Column(length = 30, nullable = false)
@@ -15,33 +16,42 @@ public class Property implements DBEntity {
 	private String content;
 
 	public Property() {
+
 	}
 
 	public Property(String name, String content) {
+
 		this.name = name;
 		this.content = content;
 	}
 
 	@Override
-	public void update() {
+	public void updateFields() {
+
 		setContent(content);
+	}
+
+	public static int count() {
+
+		String queryString = "SELECT COUNT(p) FROM Property p";
+		TypedQuery<Number> query = Repository.createQuery(queryString, Number.class);
+		return query.getSingleResult().intValue();
 	}
 
 	// GETTERS AND SETTERS
 
 	public String getName() {
+
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getContent() {
+
 		return content;
 	}
 
 	public void setContent(String content) {
+
 		this.content = content;
 	}
 }

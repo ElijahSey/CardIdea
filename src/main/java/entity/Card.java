@@ -1,5 +1,8 @@
 package entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,9 +10,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
+import jakarta.persistence.TypedQuery;
 
 @Entity
-public class Card implements DBEntity {
+public class Card implements Repository {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,33 +33,36 @@ public class Card implements DBEntity {
 	@Column(length = 255)
 	private String hint;
 
-	@Column(columnDefinition = "integer default 0")
+	@Transient
 	private int score;
 
-	public static final int CORRECT = 1;
-	public static final int DEFAULT = 0;
-	public static final int NEUTRAL = -1;
-	public static final int INCORRECT = -2;
+	public static final int CORRECT = 0;
+	public static final int NEUTRAL = 1;
+	public static final int INCORRECT = 2;
+	public static final int DEFAULT = 3;
 
 	public Card() {
-		score = 0;
+
+		score = DEFAULT;
 	}
 
 	public Card(Topic topic, String question, String solution) {
+
 		this(topic, question, solution, "");
 	}
 
 	public Card(Topic topic, String question, String solution, String hint) {
-		super();
+
+		this();
 		this.topic = topic;
 		this.question = question;
 		this.solution = solution;
 		this.hint = hint;
-		score = 0;
 	}
 
 	@Override
-	public void update() {
+	public void updateFields() {
+
 		setTopic(topic);
 		setQuestion(question);
 		setSolution(solution);
@@ -64,56 +72,83 @@ public class Card implements DBEntity {
 
 	@Override
 	public String toString() {
+
 		return question;
+	}
+
+	public static List<Card> ofTopic(Topic topic) {
+
+		if (topic.isContained()) {
+			return Repository.findEntitiesByForeignKey(Card.class, "topic", topic);
+		}
+		return new ArrayList<>();
+	}
+
+	public static List<Card> ofSet(CardSet set) {
+
+		if (!set.isContained()) {
+			return new ArrayList<>();
+		}
+		TypedQuery<Card> q = Repository.createQuery("SELECT c FROM Card c JOIN c.topic t ON t.cardSet = ?1",
+				Card.class);
+		q.setParameter(1, set);
+		return q.getResultList();
 	}
 
 	// GETTERS AND SETTERS
 
 	public long getId() {
+
 		return id;
 	}
 
-	public void setId(long id) {
-		this.id = id;
-	}
-
 	public Topic getTopic() {
+
 		return topic;
 	}
 
 	public void setTopic(Topic topic) {
+
 		this.topic = topic;
 	}
 
 	public String getQuestion() {
+
 		return question;
 	}
 
 	public void setQuestion(String question) {
+
 		this.question = question;
 	}
 
 	public String getSolution() {
+
 		return solution;
 	}
 
 	public void setSolution(String solution) {
+
 		this.solution = solution;
 	}
 
 	public String getHint() {
+
 		return hint;
 	}
 
 	public void setHint(String hint) {
+
 		this.hint = hint;
 	}
 
 	public int getScore() {
+
 		return score;
 	}
 
 	public void setScore(int score) {
+
 		this.score = score;
 	}
 }
