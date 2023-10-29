@@ -192,6 +192,11 @@ public class MainFrame extends Application {
 		return true;
 	}
 
+	public void reload() {
+
+		home();
+	}
+
 	public Window getWindow() {
 
 		return primaryStage;

@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.util.StringConverter;
 import presentation.basic.AbstractDialog;
+import presentation.basic.MainFrame;
 
 public class Preferences extends AbstractDialog {
 
@@ -52,6 +53,7 @@ public class Preferences extends AbstractDialog {
 		Locale loc = languages.getValue();
 		lm.setLocale(loc);
 		PropertyManager.setProperty(PropertyManager.LANGUAGE_KEY, loc.getLanguage());
+		MainFrame.getInstance().reload();
 		close();
 	}
 }
