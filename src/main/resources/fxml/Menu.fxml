@@ -39,12 +39,12 @@
                 </GridPane>
             </children>
         </HBox>
-      <StackedAreaChart fx:id="resultsChart" legendSide="TOP">
+      <StackedAreaChart fx:id="resultsChart" animated="false" legendSide="TOP">
         <xAxis>
-          <CategoryAxis animated="false" endMargin="0.0" gapStartAndEnd="false" side="BOTTOM" startMargin="0.0" />
+          <CategoryAxis animated="false" endMargin="0.0" gapStartAndEnd="false" side="BOTTOM" startMargin="0.0" tickMarkVisible="false" />
         </xAxis>
         <yAxis>
-          <NumberAxis side="LEFT" />
+          <NumberAxis minorTickCount="0" minorTickVisible="false" side="LEFT" tickUnit="1.0" upperBound="0.0" />
         </yAxis>
          <VBox.margin>
             <Insets bottom="5.0" left="50.0" right="50.0" top="20.0" />

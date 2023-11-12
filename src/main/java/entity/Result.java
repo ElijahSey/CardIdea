@@ -1,8 +1,6 @@
 package entity;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,12 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
-import presentation.screens.Menu;
-import presentation.util.LanguageManager;
+import jakarta.persistence.TypedQuery;
 
 @Entity
 public class Result implements Repository {
@@ -59,28 +52,11 @@ public class Result implements Repository {
 	public static List<Result> ofSet(CardSet set) {
 
 		if (set.isContained()) {
-			List<Result> list = Repository.findEntitiesByForeignKey(Result.class, "cardSet", set);
+			TypedQuery<Result> query = Repository.findEntitiesByForeignKey(Result.class, "cardSet", set);
+			List<Result> list = query.setMaxResults(10).getResultList();
 			return list;
 		}
 		return new ArrayList<>();
-	}
-
-	public static ObservableList<Series<String, Number>> getChartData(CardSet set) {
-
-		ObservableList<Series<String, Number>> data = FXCollections.observableArrayList();
-
-		String[] legend = LanguageManager.getInstance().getArray(Menu.class, "legend");
-		List<Result> resultList = ofSet(set);
-		for (int i = 0; i < 4; i++) {
-			Series<String, Number> series = new Series<>(legend[i], FXCollections.observableArrayList());
-			for (Result res : resultList) {
-				String time = res.getCreatedOn()
-						.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM));
-				series.getData().add(new XYChart.Data<>(time, res.getScore(i)));
-			}
-			data.add(series);
-		}
-		return data;
 	}
 
 	@Override
