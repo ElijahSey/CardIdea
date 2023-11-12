@@ -33,6 +33,9 @@ public class Card implements Repository {
 	@Column(length = 255)
 	private String hint;
 
+	@Column
+	private Integer position;
+
 	@Transient
 	private int score;
 
@@ -67,6 +70,7 @@ public class Card implements Repository {
 		setQuestion(question);
 		setSolution(solution);
 		setHint(hint);
+		setPosition(position);
 		setScore(score);
 	}
 
@@ -79,7 +83,9 @@ public class Card implements Repository {
 	public static List<Card> ofTopic(Topic topic) {
 
 		if (topic.isContained()) {
-			return Repository.findEntitiesByForeignKey(Card.class, "topic", topic);
+			TypedQuery<Card> query = Repository.findEntitiesByForeignKey(Card.class, "topic", topic,
+					(q, root, cb) -> q.orderBy(cb.asc(root.get("position"))));
+			return query.getResultList();
 		}
 		return new ArrayList<>();
 	}
@@ -140,6 +146,16 @@ public class Card implements Repository {
 	public void setHint(String hint) {
 
 		this.hint = hint;
+	}
+
+	public int getPosition() {
+
+		return position;
+	}
+
+	public void setPosition(int position) {
+
+		this.position = position;
 	}
 
 	public int getScore() {

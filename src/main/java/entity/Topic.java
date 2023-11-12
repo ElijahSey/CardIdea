@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.TypedQuery;
 
 @Entity
 public class Topic implements Repository {
@@ -24,6 +25,9 @@ public class Topic implements Repository {
 	@ManyToOne
 	@JoinColumn(name = "cardset_id", referencedColumnName = "id", nullable = false)
 	private CardSet cardSet;
+
+	@Column
+	private Integer position;
 
 	public Topic() {
 
@@ -41,6 +45,7 @@ public class Topic implements Repository {
 
 		setName(name);
 		setCardSet(cardSet);
+		setPosition(position);
 	}
 
 	@Override
@@ -52,7 +57,9 @@ public class Topic implements Repository {
 	public static List<Topic> ofSet(CardSet set) {
 
 		if (set.isContained()) {
-			return Repository.findEntitiesByForeignKey(Topic.class, "cardSet", set);
+			TypedQuery<Topic> query = Repository.findEntitiesByForeignKey(Topic.class, "cardSet", set,
+					(q, root, cb) -> q.orderBy(cb.asc(root.get("position"))));
+			return query.getResultList();
 		}
 		return new ArrayList<>();
 	}
@@ -82,5 +89,15 @@ public class Topic implements Repository {
 	public void setCardSet(CardSet cardSet) {
 
 		this.cardSet = cardSet;
+	}
+
+	public int getPosition() {
+
+		return position;
+	}
+
+	public void setPosition(int position) {
+
+		this.position = position;
 	}
 }

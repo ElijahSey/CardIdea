@@ -24,11 +24,6 @@ public interface Repository extends Updatable {
 
 	static final List<CardParser> parsers = List.of(new MarkdownParser("Markdown"));
 
-	static <T> CriteriaQuery<T> getCriteriaQuery(Class<T> resultClass) {
-
-		return CB.createQuery(resultClass);
-	}
-
 	static <T> TypedQuery<T> createQuery(String queryString, Class<T> resultClass) {
 
 		return EM.createQuery(queryString, resultClass);
@@ -45,20 +40,27 @@ public interface Repository extends Updatable {
 		return q.getResultList();
 	}
 
-	static <T, P> List<T> findEntitiesByForeignKey(Class<T> entity, String fk, P parent) {
+	static <T, P> TypedQuery<T> findEntitiesByForeignKey(Class<T> entity, String fk, P parent) {
 
-		String query = "SELECT e FROM %s e WHERE e.%s = ?1".formatted(entity.getSimpleName(), fk);
-		TypedQuery<T> q = EM.createQuery(query, entity);
-		q.setParameter(1, parent);
-		return q.getResultList();
-	}
-
-	static <T, P> List<T> findLimitedEntitiesByForeignKey(Class<T> entity, String fk, P parent, int limit) {
+//		String query = "SELECT e FROM %s e WHERE e.%s = ?1".formatted(entity.getSimpleName(), fk);
+//		TypedQuery<T> q = EM.createQuery(query, entity);
+//		q.setParameter(1, parent);
+//		return q.getResultList();
 
 		CriteriaQuery<T> q = CB.createQuery(entity);
 		Root<T> root = q.from(entity);
 		q.select(root).where(CB.equal(root.get(fk), parent));
-		return EM.createQuery(q).setMaxResults(limit).getResultList();
+		return EM.createQuery(q);
+	}
+
+	static <T, P> TypedQuery<T> findEntitiesByForeignKey(Class<T> entity, String fk, P parent,
+			QueryModifier<T> modifier) {
+
+		CriteriaQuery<T> q = CB.createQuery(entity);
+		Root<T> root = q.from(entity);
+		q.select(root).where(CB.equal(root.get(fk), parent));
+		modifier.execute(q, root, CB);
+		return EM.createQuery(q);
 	}
 
 	default boolean isContained() {
@@ -133,5 +135,10 @@ public interface Repository extends Updatable {
 	static List<CardParser> getParsers() {
 
 		return new ArrayList<>(parsers);
+	}
+
+	public interface QueryModifier<T> {
+
+		void execute(CriteriaQuery<T> q, Root<T> root, CriteriaBuilder cb);
 	}
 }
