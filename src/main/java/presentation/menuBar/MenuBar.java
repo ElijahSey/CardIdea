@@ -66,7 +66,7 @@ public class MenuBar implements FXController {
 	@FXML
 	private void handleClose() {
 
-		MainFrame.getInstance().onWindowClose();
+		MainFrame.getInstance().requestClose();
 	}
 
 	public Label getHeaderLabel() {
@@ -74,17 +74,19 @@ public class MenuBar implements FXController {
 		return headerLabel;
 	}
 
-	public void addMenuItem(int menu, int index, String text, KeyCombination key, EventHandler<ActionEvent> handler) {
+	public MenuItem addMenuItem(int menu, int index, String text, KeyCombination key,
+			EventHandler<ActionEvent> handler) {
 
 		MenuItem item = new MenuItem(text);
 		item.setOnAction(handler);
 		item.setAccelerator(key);
 		menuList.get(menu).getItems().add(index, item);
+		return item;
 	}
 
-	public void addMenuItem(int menu, String text, KeyCombination key, EventHandler<ActionEvent> handler) {
+	public MenuItem addMenuItem(int menu, String text, KeyCombination key, EventHandler<ActionEvent> handler) {
 
-		addMenuItem(menu, 0, text, key, handler);
+		return addMenuItem(menu, 0, text, key, handler);
 	}
 
 	public void addSeparator(int menu, int index) {

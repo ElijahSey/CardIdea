@@ -19,6 +19,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 import presentation.menuBar.MenuBar;
 import presentation.screens.Menu;
 import presentation.util.LanguageManager;
@@ -27,7 +28,7 @@ public class MainFrame extends Application {
 
 	protected LanguageManager lm;
 
-	private Stage primaryStage;
+	private Stage stage;
 	private BorderPane layout;
 	private Deque<Display> screens;
 
@@ -42,7 +43,7 @@ public class MainFrame extends Application {
 		instance = this;
 		SplashScreen splash = showSplashScreen();
 
-		this.primaryStage = primaryStage;
+		stage = primaryStage;
 		lm = LanguageManager.getInstance();
 		screens = new LinkedList<>();
 		cardImage = new Image(getClass().getResourceAsStream("/images/card_logo.png"));
@@ -65,19 +66,21 @@ public class MainFrame extends Application {
 
 	private void createMainFrame() {
 
-		primaryStage.setTitle(APP_NAME);
-		primaryStage.getIcons().add(cardImage);
-		primaryStage.setMaximized(true);
-		primaryStage.setOnCloseRequest(e -> {
+		stage.setTitle(APP_NAME);
+		stage.getIcons().add(cardImage);
+		stage.setMaximized(true);
+		stage.setOnCloseRequest(e -> {
 			if (!onWindowClose()) {
 				e.consume();
+			} else {
+				Repository.close();
 			}
 		});
 
 		layout = new BorderPane();
 		Scene scene = new Scene(layout);
 		scene.getStylesheets().add("css/stylesheet.css");
-		primaryStage.setScene(scene);
+		stage.setScene(scene);
 		initMenu();
 	}
 
@@ -180,7 +183,12 @@ public class MainFrame extends Application {
 		((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(cardImage);
 	}
 
-	public boolean onWindowClose() {
+	public void requestClose() {
+
+		stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+	}
+
+	private boolean onWindowClose() {
 
 //		if (!showAlert(getClass(), "close", AlertType.CONFIRMATION).getButtonData().equals(ButtonData.OK_DONE)) {
 //			return false;
@@ -188,7 +196,6 @@ public class MainFrame extends Application {
 		if (!screens.peek().getController().beforeClose()) {
 			return false;
 		}
-		Repository.close();
 		return true;
 	}
 
@@ -199,7 +206,7 @@ public class MainFrame extends Application {
 
 	public Window getWindow() {
 
-		return primaryStage;
+		return stage;
 	}
 
 	public static MainFrame getInstance() {

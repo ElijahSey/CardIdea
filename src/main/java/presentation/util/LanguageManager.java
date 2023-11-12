@@ -5,7 +5,7 @@ import java.util.ResourceBundle;
 
 import javax.swing.JOptionPane;
 
-public class LanguageManager {
+public final class LanguageManager {
 
 	private Locale locale;
 

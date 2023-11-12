@@ -151,7 +151,8 @@ public class CardEditor extends Screen {
 	public void addMenuItems(MenuBar menuBar) {
 
 		menuBar.addSeparator(MenuBar.FILE);
-		menuBar.addMenuItem(MenuBar.FILE, lm.getString("export"), null, e -> new CardExport(cardSet));
+		menuBar.addMenuItem(MenuBar.FILE, lm.getString("export"), null,
+				e -> new CardExport(cardSet, cardTree.getAll()));
 		menuBar.addMenuItem(MenuBar.FILE, lm.getString("import"), null, e -> {
 			new CardImport(cardSet, map -> cardTree.addAll(map));
 			setChanged(true);
