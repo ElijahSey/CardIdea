@@ -11,6 +11,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.ColumnConstraints;
@@ -26,6 +28,7 @@ public class CardViewer extends Screen {
 	private SelectionIterator<Card> iterator;
 	private List<Card> cards;
 	private Pane[] scoreTiles;
+	private boolean finished;
 
 	private static final String FX_BG_COLOR = "-fx-background-color: -fx-color";
 	private static final String SELECTED = "selected";
@@ -48,6 +51,7 @@ public class CardViewer extends Screen {
 		cards = Card.ofSet(cardSet);
 		Collections.shuffle(cards);
 		iterator = new SelectionIterator<>(cards);
+		finished = false;
 	}
 
 	@Override
@@ -70,8 +74,8 @@ public class CardViewer extends Screen {
 	@FXML
 	private void handlePrevious() {
 
-		scoreTiles[iterator.index()].getStyleClass().remove(SELECTED);
 		if (iterator.hasPrevious()) {
+			scoreTiles[iterator.index()].getStyleClass().remove(SELECTED);
 			iterator.previous();
 			updateContent();
 		}
@@ -120,12 +124,14 @@ public class CardViewer extends Screen {
 	private void next(int score) {
 
 		scoreTiles[iterator.index()].setStyle(FX_BG_COLOR + score);
-		scoreTiles[iterator.index()].getStyleClass().remove(SELECTED);
 		iterator.element().setScore(score);
 		iterator.element().update();
 		if (iterator.hasNext()) {
+			scoreTiles[iterator.index()].getStyleClass().remove(SELECTED);
 			iterator.next();
 			updateContent();
+		} else if (!finished) {
+			finish();
 		}
 	}
 
@@ -137,6 +143,15 @@ public class CardViewer extends Screen {
 		questionLabel.setText(card.getQuestion());
 		solutionArea.setText(card.getSolution());
 		answerArea.setText("");
+	}
+
+	private void finish() {
+
+		finished = true;
+		ButtonType result = MainFrame.showAlert(getClass(), "finish", AlertType.CONFIRMATION);
+		if (result.getButtonData().equals(ButtonData.OK_DONE)) {
+			mainFrame.back();
+		}
 	}
 
 	@Override
