@@ -1,9 +1,0 @@
-@startuml LightStyle
-
-!define BG_COLOR #EEE
-!define FONT_COLOR #333
-!define BORDER_COLOR #111
-!define ARROW_COLOR #333
-
-!include general.puml
-@enduml

@@ -15,7 +15,3 @@
 
 # VsCode
 .vscode/
-
-# MkDocs
-site/
-out/
