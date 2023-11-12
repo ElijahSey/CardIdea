@@ -2,14 +2,13 @@ package presentation.dialog;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import entity.Card;
 import entity.CardSet;
 import entity.Repository;
+import entity.Topic;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -22,15 +21,17 @@ import presentation.basic.MainFrame;
 public class CardExport extends AbstractDialog {
 
 	private CardSet cardSet;
+	private Map<Topic, List<Card>> map;
 
 	private final ObservableList<CardParser> parsers;
 
 	@FXML
 	private ListView<CardParser> parserList;
 
-	public CardExport(CardSet cardSet) {
+	public CardExport(CardSet cardSet, Map<Topic, List<Card>> map) {
 
 		this.cardSet = cardSet;
+		this.map = map;
 		parsers = FXCollections.observableArrayList(Repository.getParsers());
 		parserList.setItems(parsers);
 		show(true);
@@ -51,16 +52,8 @@ public class CardExport extends AbstractDialog {
 		if (file == null) {
 			return;
 		}
-		Map<String, List<Card>> topics = new HashMap<>();
-		for (Card card : Card.ofSet(cardSet)) {
-			String name = card.getTopic().getName();
-			if (!topics.containsKey(name)) {
-				topics.put(name, new ArrayList<>());
-			}
-			topics.get(name).add(card);
-		}
 		try {
-			parser.write(file, cardSet, topics);
+			parser.write(file, cardSet, map);
 		} catch (IOException e) {
 			new ErrorDialog(e);
 		}

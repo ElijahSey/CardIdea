@@ -1,6 +1,11 @@
 package entity;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,29 +55,47 @@ public class CardSet implements Repository {
 		return Repository.findAll(CardSet.class);
 	}
 
-	public void persist(List<Topic> topics, List<Card> cards) {
+	private void persist(Collection<Topic> topics, Collection<Card> cards) {
 
-		this.persist();
+		setSize(cards.size());
+		persist();
 		Repository.persistAll(topics);
 		Repository.persistAll(cards);
 	}
 
-	public void update(List<Topic> topics, List<Card> cards) {
+	public void update(LinkedHashMap<Topic, List<Card>> map) {
 
-		setSize(cards.size());
+		Set<Topic> topics = map.keySet();
+		List<Card> cards = normalize(map);
 		if (!isContained()) {
 			persist(topics, cards);
 		} else {
+			setSize(cards.size());
 			List<Card> cardDB = Card.ofSet(this);
 			cardDB.removeAll(cards);
 			Repository.removeAll(cardDB);
 			List<Topic> topicsDB = Topic.ofSet(this);
 			topicsDB.removeAll(topics);
 			Repository.removeAll(topicsDB);
-			this.update();
+			update();
 			Repository.updateAll(topics);
 			Repository.updateAll(cards);
 		}
+	}
+
+	private List<Card> normalize(LinkedHashMap<Topic, List<Card>> map) {
+
+		List<Card> cardList = new LinkedList<>();
+		int topicPos = 0;
+		for (Entry<Topic, List<Card>> entry : map.entrySet()) {
+			entry.getKey().setPosition(topicPos++);
+			int cardPos = 0;
+			for (Card card : entry.getValue()) {
+				card.setPosition(cardPos++);
+				cardList.add(card);
+			}
+		}
+		return cardList;
 	}
 
 	@Override
@@ -80,7 +103,7 @@ public class CardSet implements Repository {
 
 		Repository.removeAll(Card.ofSet(this));
 		Repository.removeAll(Topic.ofSet(this));
-		remove();
+		Repository.super.remove();
 	}
 
 	// GETTERS AND SETTERS

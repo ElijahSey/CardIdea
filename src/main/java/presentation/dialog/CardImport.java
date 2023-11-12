@@ -3,6 +3,7 @@ package presentation.dialog;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import entity.Card;
 import entity.CardSet;
@@ -21,8 +22,7 @@ import presentation.basic.MainFrame;
 public class CardImport extends AbstractDialog {
 
 	private final CardSet cardSet;
-	private final List<Topic> topics;
-	private final List<Card> cards;
+	private final ImportAction action;
 	private final ObservableList<CardParser> parsers;
 
 	@FXML
@@ -31,11 +31,10 @@ public class CardImport extends AbstractDialog {
 	@FXML
 	private TextField pathField;
 
-	public CardImport(CardSet cardSet, List<Topic> topics, List<Card> cards) {
+	public CardImport(CardSet cardSet, ImportAction action) {
 
 		this.cardSet = cardSet;
-		this.topics = topics;
-		this.cards = cards;
+		this.action = action;
 
 		parsers = FXCollections.observableArrayList(Repository.getParsers());
 		parserList.setItems(parsers);
@@ -56,7 +55,8 @@ public class CardImport extends AbstractDialog {
 		File file = new File(pathField.getText());
 		if (file.exists() && file.isFile() && file.canRead()) {
 			try {
-				parser.read(file, cardSet, topics, cards);
+				Map<Topic, List<Card>> map = parser.read(file, cardSet);
+				action.execute(map);
 			} catch (IOException e) {
 				new ErrorDialog(e);
 			}
@@ -92,5 +92,10 @@ public class CardImport extends AbstractDialog {
 		if (browse()) {
 			super.show(modal);
 		}
+	}
+
+	public interface ImportAction {
+
+		void execute(Map<Topic, List<Card>> map);
 	}
 }

@@ -1,24 +1,19 @@
 package presentation.screens;
 
-import java.util.List;
 import java.util.Optional;
 
 import entity.Card;
 import entity.CardSet;
 import entity.Topic;
-import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.TreeItem;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -27,22 +22,28 @@ import presentation.basic.Screen;
 import presentation.dialog.CardExport;
 import presentation.dialog.CardImport;
 import presentation.menuBar.MenuBar;
+import presentation.util.CardTree;
+import presentation.util.Util;
 
 public class CardEditor extends Screen {
 
 	private CardSet cardSet;
-	private ObservableList<Card> cards;
-	private ObservableList<Topic> topics;
+	private boolean editMode;
 	private boolean changed;
 
-	@FXML
-	private ListView<Topic> topicList;
+	private static final Image CREATE_IMAGE = Util.loadImage("create.png");
+	private static final Image EDIT_IMAGE = Util.loadImage("edit.png");
+	private static final Image CONFIRM_IMAGE = Util.loadImage("tick.png");
+	private static final Image CANCEL_IMAGE = Util.loadImage("cross.png");
+	private static final Image DELETE_IMAGE = Util.loadImage("delete.png");
+
+	private static final double BUTTON_SIZE = 20;
 
 	@FXML
-	private Button deleteTopic, editTopic;
+	private Button deleteButton, editButton, addButton;
 
 	@FXML
-	private ListView<Card> cardList;
+	private CardTree cardTree;
 
 	@FXML
 	private TextField question;
@@ -51,118 +52,98 @@ public class CardEditor extends Screen {
 	private TextArea solution, hint;
 
 	@FXML
-	private Button deleteButton, addOrUpdateButton, saveButton;
+	private Button saveButton;
 
 	public CardEditor(CardSet set) {
 
-		cardSet = set;
-		topics = FXCollections.observableArrayList();
-		cards = FXCollections.observableArrayList();
+		if (set == null) {
+			cardSet = new CardSet();
+		} else {
+			cardSet = set;
+		}
+		editMode = false;
 	}
 
 	@Override
 	public void initialize() {
 
-		topicList.setItems(topics);
-		cardList.setItems(cards);
+		cardTree.init(cardSet, () -> setChanged(true));
 
-		topicList.getSelectionModel().selectedItemProperty()
-				.addListener((ChangeListener<Topic>) (observable, oldValue, newValue) -> {
-					boolean isEmpty = newValue == null;
-					deleteTopic.setDisable(isEmpty);
-					editTopic.setDisable(isEmpty);
-				});
-
-		cardList.getSelectionModel().selectedItemProperty()
-				.addListener((ChangeListener<Card>) (observable, oldValue, newValue) -> {
-					if (newValue != null) {
-						updateInputFields(newValue);
-					}
-				});
-		if (cardSet == null) {
-			cardSet = new CardSet();
-		} else {
-			topics.addAll(Topic.ofSet(cardSet));
-			cards.addAll(Card.ofSet(cardSet));
-		}
-		topics.addListener((ListChangeListener<Topic>) c -> setChanged(true));
-		cards.addListener((ListChangeListener<Card>) c -> setChanged(true));
-	}
-
-	@FXML
-	private void handleDeleteTopic() {
-
-		Topic topic = topicList.getSelectionModel().getSelectedItem();
-		List<Card> cardsOfTopic = Card.ofTopic(topic);
-		if (cards.size() > 0) {
-			ButtonType type = MainFrame.showAlert(getClass(), "deleteTopic", AlertType.WARNING, ButtonType.OK,
-					ButtonType.CANCEL);
-			if (!type.getButtonData().equals(ButtonData.OK_DONE)) {
-				return;
+		cardTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue != null) {
+				if (newValue.getValue() instanceof Topic) {
+					addButton.setDisable(false);
+					clearFields();
+				} else if (newValue.getValue() instanceof Card card) {
+					addButton.setDisable(true);
+					updateFields(card);
+				}
+				editButton.setDisable(false);
+			} else {
+				addButton.setDisable(true);
+				editButton.setDisable(true);
 			}
-		}
-		cards.removeAll(cardsOfTopic);
-		topics.remove(topic);
-	}
-
-	@FXML
-	private void handleEditTopic() {
-
-		Topic topic = topicList.getSelectionModel().getSelectedItem();
-		Optional<String> nameOpt = MainFrame.showDialog(new TextInputDialog(topic.getName()), getClass(), "addTopic");
-		nameOpt.ifPresent(name -> {
-			topic.setName(name);
-			topicList.refresh();
 		});
 	}
 
 	@FXML
-	private void handleAddTopic() {
+	private void handleAdd() {
 
-		Optional<String> nameOpt = MainFrame.showDialog(new TextInputDialog(), getClass(), "addTopic");
-		nameOpt.ifPresent(name -> topics.add(new Topic(name, cardSet)));
+		TreeItem<Object> selectedItem = cardTree.getSelectionModel().getSelectedItem();
+		if (editMode) {
+			cardTree.addCard(selectedItem, question.getText(), solution.getText(), hint.getText());
+			setChanged(true);
+			exitEditMode();
+		} else {
+			enterEditMode(true);
+		}
+	}
+
+	@FXML
+	private void handleEdit() {
+
+		boolean changed = false;
+		TreeItem<Object> selectedItem = cardTree.getSelectionModel().getSelectedItem();
+		if (editMode) {
+			changed = cardTree.editCard(selectedItem, question.getText(), solution.getText(), hint.getText());
+			exitEditMode();
+		} else if (selectedItem.getValue() instanceof Topic) {
+			changed = cardTree.editTopic(selectedItem);
+		} else {
+			enterEditMode(false);
+		}
+		setChanged(changed || this.changed);
 	}
 
 	@FXML
 	private void handleDelete() {
 
-		Card card = cardList.getSelectionModel().getSelectedItem();
-		cards.remove(card);
+		boolean changed = false;
+		TreeItem<Object> selectedItem = cardTree.getSelectionModel().getSelectedItem();
+		if (selectedItem == null) {
+			clearFields();
+		} else if (editMode) {
+			exitEditMode();
+			updateFields((Card) selectedItem.getValue());
+		} else if (selectedItem.getValue() instanceof Topic topic) {
+			changed = cardTree.deleteTopic(selectedItem);
+		} else if (selectedItem.getValue() instanceof Card card) {
+			changed = cardTree.deleteCard(selectedItem);
+		}
+		setChanged(changed || this.changed);
 	}
 
 	@FXML
-	private void handleClear() {
+	private void handleCreateTopic() {
 
-		deleteButton.setDisable(true);
-		addOrUpdateButton.setText(lm.getString(getClass(), "add"));
-		topicList.getSelectionModel().clearSelection();
-		cardList.getSelectionModel().clearSelection();
-		question.clear();
-		solution.clear();
-		hint.clear();
-	}
-
-	@FXML
-	private void handleAddOrUpdate() {
-
-		Topic topic = topicList.getSelectionModel().getSelectedItem();
-		if (topic == null) {
-			MainFrame.showAlert(getClass(), "notopic", AlertType.WARNING);
-			return;
-		}
-		Card card = cardList.getSelectionModel().getSelectedItem();
-		if (card == null) {
-			cards.add(new Card(topic, question.getText(), solution.getText(), hint.getText()));
-			cardList.getSelectionModel().select(card);
-		} else {
-			updateCard(topic, card);
-		}
+		boolean changed = cardTree.addTopic(cardSet);
+		setChanged(changed || this.changed);
 	}
 
 	@FXML
 	private void handleSave() {
 
-		cardSet.update(topics, cards);
+		cardSet.update(cardTree.getAll());
 		setChanged(false);
 	}
 
@@ -171,7 +152,10 @@ public class CardEditor extends Screen {
 
 		menuBar.addSeparator(MenuBar.FILE);
 		menuBar.addMenuItem(MenuBar.FILE, lm.getString("export"), null, e -> new CardExport(cardSet));
-		menuBar.addMenuItem(MenuBar.FILE, lm.getString("import"), null, e -> new CardImport(cardSet, topics, cards));
+		menuBar.addMenuItem(MenuBar.FILE, lm.getString("import"), null, e -> {
+			new CardImport(cardSet, map -> cardTree.addAll(map));
+			setChanged(true);
+		});
 		menuBar.addSeparator(MenuBar.FILE);
 		menuBar.addMenuItem(MenuBar.FILE, lm.getString("save"),
 				new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN), e -> handleSave());
@@ -216,23 +200,56 @@ public class CardEditor extends Screen {
 		return super.getHeader();
 	}
 
-	private void updateInputFields(Card card) {
+	private void enterEditMode(boolean add) {
 
-		deleteButton.setDisable(false);
-		addOrUpdateButton.setText(lm.getString(getClass(), "update"));
-		topicList.getSelectionModel().select(card.getTopic());
+		if (add) {
+			addButton.setGraphic(Util.imageViewOf(CONFIRM_IMAGE, BUTTON_SIZE, BUTTON_SIZE));
+			editButton.setDisable(true);
+			clearFields();
+		} else {
+			editButton.setGraphic(Util.imageViewOf(CONFIRM_IMAGE, BUTTON_SIZE, BUTTON_SIZE));
+			addButton.setDisable(true);
+		}
+		deleteButton.setGraphic(Util.imageViewOf(CANCEL_IMAGE, BUTTON_SIZE, BUTTON_SIZE));
+		enableFields(true);
+		cardTree.setDisable(true);
+		editMode = true;
+	}
+
+	private void exitEditMode() {
+
+		addButton.setGraphic(Util.imageViewOf(CREATE_IMAGE, BUTTON_SIZE, BUTTON_SIZE));
+		editButton.setGraphic(Util.imageViewOf(EDIT_IMAGE, BUTTON_SIZE, BUTTON_SIZE));
+		deleteButton.setGraphic(Util.imageViewOf(DELETE_IMAGE, BUTTON_SIZE, BUTTON_SIZE));
+		addButton.setDisable(false);
+		editButton.setDisable(false);
+
+		enableFields(false);
+		cardTree.setDisable(false);
+		editMode = false;
+		cardTree.getSelectionModel().clearAndSelect(cardTree.getSelectionModel().getSelectedIndex());
+	}
+
+	private void enableFields(boolean flag) {
+
+		question.setEditable(flag);
+		solution.setEditable(flag);
+		hint.setEditable(flag);
+	}
+
+	private void clearFields() {
+
+		question.clear();
+		solution.clear();
+		hint.clear();
+	}
+
+	private void updateFields(Card card) {
+
+		enableFields(false);
 		question.setText(card.getQuestion());
 		solution.setText(card.getSolution());
 		hint.setText(card.getHint());
-	}
-
-	private void updateCard(Topic topic, Card card) {
-
-		card.setTopic(topic);
-		card.setQuestion(question.getText());
-		card.setSolution(solution.getText());
-		card.setHint(hint.getText());
-		setChanged(true);
 	}
 
 	private boolean renameSet(String key) {
