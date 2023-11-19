@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
-
+    env: 
+      JAVAFX_VERSION: 21.0.1
     steps:
 
     - name: Checkout Project
@@ -43,7 +44,6 @@ jobs:
     - name: Download JavaFX
       env:
         BASE_PATH: https://download2.gluonhq.com/openjfx/${{env.JAVAFX_VERSION}}/
-        JAVAFX_VERSION: 21.0.1
         WINDOWS: openjfx-${{env.JAVAFX_VERSION}}_windows-x64_bin-jmods
         MACOS: openjfx-${{env.JAVAFX_VERSION}}osx-x64_bin-jmods
         LINUX: openjfx-${{env.JAVAFX_VERSION}}linux-x64_bin-jmods
