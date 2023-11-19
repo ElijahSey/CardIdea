@@ -59,19 +59,19 @@ jobs:
         wget ${{env.BASE_PATH}}${{env.LINUX}}.zip
         unzip ${{env.LINUX}}.zip -d ${{env.FX_LINUX}}
 
-    - name: Upload JavaFX
+    - name: Upload JavaFX Windows
       uses: actions/upload-artifact@v3
       with:
         name: ${{env.FX_WIN}}
         path: ${{env.FX_WIN}}
 
-    - name: Upload JavaFX
+    - name: Upload JavaFX MacOS
       uses: actions/upload-artifact@v3
       with:
         name: ${{env.FX_MAC}}
         path: ${{env.FX_MAC}}
 
-    - name: Upload JavaFX
+    - name: Upload JavaFX Linux
       uses: actions/upload-artifact@v3
       with:
         name: ${{env.FX_LINUX}}
@@ -147,7 +147,6 @@ jobs:
             --strip-debug\
             --module-path ${{env.JAVAFX_DIR}}/javafx \
             --add-modules javafx.base,javafx.controls,javafx.fxml \
-            --java-options '-splash:$APPDIR/splashscreen.png' \
             --output ${{env.RUNTIME_IMAGE}}
 
       - name: Create Package
@@ -157,6 +156,7 @@ jobs:
             --input ${{env.PACKAGE_DIR}} \
             --main-jar cardidea-${{ github.event.inputs.tag }}.jar \
             --runtime-image ${{env.RUNTIME_IMAGE}} \
+            --java-options '-splash:$APPDIR/splashscreen.png' \
             --type ${{matrix.var.type}} \
             --app-version ${{ github.event.inputs.tag }}\
             --icon cardidea.ico \
