@@ -1,13 +1,8 @@
 name: Continuous Deployment Workflow
 env:
   JAVA_VERSION: 21
-
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Version'
-        required: true
+  workflow_dispatch
 
 jobs:
   
@@ -18,6 +13,8 @@ jobs:
       packages: write
     env: 
       JAVAFX_VERSION: 21.0.1
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
     steps:
 
     - name: Checkout Project
@@ -28,13 +25,16 @@ jobs:
       with:
         java-version: '${{env.JAVA_VERSION}}'
         distribution: 'temurin'
-        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-        settings-path: ${{ github.workspace }} # location for the settings.xml file
+        server-id: github
+        settings-path: ${{ github.workspace }}
         cache: 'maven'
-        check-latest: true # Always download the latest java version
+        check-latest: true
 
-    - name: Setting Maven Version
-      run: mvn -B versions:set -DnewVersion=${{ github.event.inputs.tag }} -DgenerateBackupPoms=false
+    - name: Getting Maven Version
+      id: ver
+      run: |
+        PROJECT_VERSION=$(mvn help:evaluate -Dexpression='project.version' -q -DforceStdout)
+        echo "version=$PROJECT_VERSION" >> $GITHUB_OUTPUT
 
     - name: Publish to GitHub Packages Apache Maven
       run: mvn -B package -Dmaven.test.skip=true
@@ -53,26 +53,35 @@ jobs:
         echo "WINDOWS=${{env.WINDOWS}}" >> $GITHUB_ENV
         wget ${{env.BASE_PATH}}${{env.MACOS}}.zip
         unzip ${{env.MACOS}}.zip
-        "MACOS=${{env.MACOS}}" >> $GITHUB_ENV
+        echo "MACOS=${{env.MACOS}}" >> $GITHUB_ENV
         wget ${{env.BASE_PATH}}${{env.LINUX}}.zip
         unzip ${{env.LINUX}}.zip
-        "LINUX=${{env.LINUX}}" >> $GITHUB_ENV
+        echo "LINUX=${{env.LINUX}}" >> $GITHUB_ENV
 
     - name: Upload JavaFX
       uses: actions/upload-artifact@v3
       with:
-        name: javafx
-        path: |
-          $WINDOWS
-          $MACOS
-          $LINUX
+        name: javafx-win
+        path: $WINDOWS
+
+    - name: Upload JavaFX
+      uses: actions/upload-artifact@v3
+      with:
+        name: javafx-mac
+        path: $MACOS
+
+    - name: Upload JavaFX
+      uses: actions/upload-artifact@v3
+      with:
+        name: javafx-linux
+        path: $LINUX
         
     - name: Upload Jar
       uses: actions/upload-artifact@v3
       with:
         name: target
         path: |
-          ./target/cardidea-${{ github.event.inputs.tag }}.jar
+          ./target/cardidea-${{steps.ver.outputs.version}}.jar
           ./target/lib/
           ./cardidea.ico
           ./splashscreen.png
@@ -87,7 +96,7 @@ jobs:
           {os: ubuntu-latest, name: linux, type: deb, options: --linux-shortcut}
         ]
     env:
-      INST_NAME: cardidea-${{ github.event.inputs.tag }}-${{matrix.var.name}}.${{matrix.var.type}}
+      INST_NAME: cardidea-${{ needs.build.outputs.version }}-${{matrix.var.name}}.${{matrix.var.type}}
       PACKAGE_DIR: ./package-dir
       JAVAFX_DIR: ./javafx
       RUNTIME_IMAGE: jre
@@ -105,10 +114,10 @@ jobs:
         with:
           java-version: '${{env.JAVA_VERSION}}'
           distribution: 'temurin'
-          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-          settings-path: ${{ github.workspace }} # location of the settings.xml file
+          server-id: github
+          settings-path: ${{ github.workspace }}
           cache: 'maven'
-          check-latest: true # Always download the latest java version
+          check-latest: true
 
       - name: Download Jar
         uses: actions/download-artifact@v3
@@ -119,35 +128,36 @@ jobs:
       - name: Download JavaFX
         uses: actions/download-artifact@v3
         with:
-          name: javafx
+          name: javafx-${{matrix.var.name}}
           path: ${{env.JAVAFX_DIR}}
 
-      - name: Structure Folder
+      - name: Structure Folders
         run: |
           mv ${{env.PACKAGE_DIR}}/target/* ${{env.PACKAGE_DIR}}/
           rmdir ${{env.PACKAGE_DIR}}/target
+          mv ${{env.JAVAFX_DIR}}/* ${{env.JAVAFX_DIR}}/javafx
 
       - name: Create Runtime Image
         run: |
           jlink
           --no-header-files
-          --no-man-pages 
-          --compress=2 
+          --no-man-pages
+          --compress=2
           --strip-debug
-          --module-path ${{env.JAVAFX_DIR}}
-          --add-modules ALL-MODULE-PATH
+          --module-path ${{env.JAVAFX_DIR}}/javafx
+          --add-modules javafx.base,javafx.controls,javafx.fxml
           --java-options '-splash:$APPDIR/splashscreen.png'
           --output ${{env.RUNTIME_IMAGE}}
 
       - name: Create Package
-        run: jpackage 
-          --name cardIDEA 
-          --input ${{env.PACKAGE_DIR}} 
-          --main-jar cardidea-${{ github.event.inputs.tag }}.jar 
-          --runtime-image ${{env.RUNTIME_IMAGE}} 
-          --type ${{matrix.var.type}} 
-          --app-version ${{ github.event.inputs.tag }} 
-          --icon cardidea.ico 
+        run: jpackage
+          --name cardIDEA
+          --input ${{env.PACKAGE_DIR}}
+          --main-jar cardidea-${{ github.event.inputs.tag }}.jar
+          --runtime-image ${{env.RUNTIME_IMAGE}}
+          --type ${{matrix.var.type}}
+          --app-version ${{ github.event.inputs.tag }}
+          --icon cardidea.ico
           ${{matrix.var.options}} 
 
       - name: Rename Package
@@ -162,7 +172,7 @@ jobs:
   create-release:
 
     runs-on: ubuntu-latest
-    needs: [create-installers]
+    needs: [build, create-installers]
 
     permissions:
       contents: write
@@ -180,10 +190,10 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ github.event.inputs.tag }}
+          tag_name: v${{ needs.build.outputs.version }}
           body_path: CHANGELOG.md
           files: |
-            win-asset/cardidea-${{ github.event.inputs.tag }}-win.msi
-            mac-asset/cardidea-${{ github.event.inputs.tag }}-mac.dmg
-            linux-asset/cardidea-${{ github.event.inputs.tag }}-linux.deb
+            win-asset/cardidea-${{ needs.build.outputs.version }}-win.msi
+            mac-asset/cardidea-${{ needs.build.outputs.version }}-mac.dmg
+            linux-asset/cardidea-${{ needs.build.outputs.version }}-linux.deb
 
