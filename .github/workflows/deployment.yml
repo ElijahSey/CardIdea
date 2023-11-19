@@ -45,8 +45,8 @@ jobs:
       env:
         BASE_PATH: https://download2.gluonhq.com/openjfx/${{env.JAVAFX_VERSION}}/
         WINDOWS: openjfx-${{env.JAVAFX_VERSION}}_windows-x64_bin-jmods
-        MACOS: openjfx-${{env.JAVAFX_VERSION}}osx-x64_bin-jmods
-        LINUX: openjfx-${{env.JAVAFX_VERSION}}linux-x64_bin-jmods
+        MACOS: openjfx-${{env.JAVAFX_VERSION}}_osx-x64_bin-jmods
+        LINUX: openjfx-${{env.JAVAFX_VERSION}}_linux-x64_bin-jmods
       run: |
         wget ${{env.BASE_PATH}}${{env.WINDOWS}}.zip
         unzip ${{env.WINDOWS}}.zip
