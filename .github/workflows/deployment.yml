@@ -13,6 +13,10 @@ jobs:
       packages: write
     env: 
       JAVAFX_VERSION: 21.0.1
+      FX_WIN: javafx-win
+      FX_MAC: javafx-mac
+      FX_LINUX: javafx-linux
+
     outputs:
       version: ${{ steps.ver.outputs.version }}
     steps:
@@ -49,32 +53,29 @@ jobs:
         LINUX: openjfx-${{env.JAVAFX_VERSION}}_linux-x64_bin-jmods
       run: |
         wget ${{env.BASE_PATH}}${{env.WINDOWS}}.zip
-        unzip ${{env.WINDOWS}}.zip
-        echo "WINDOWS=${{env.WINDOWS}}" >> $GITHUB_ENV
+        unzip ${{env.WINDOWS}}.zip ${{env.FX_WIN}}
         wget ${{env.BASE_PATH}}${{env.MACOS}}.zip
-        unzip ${{env.MACOS}}.zip
-        echo "MACOS=${{env.MACOS}}" >> $GITHUB_ENV
+        unzip ${{env.MACOS}}.zip ${{env.FX_MAC}}
         wget ${{env.BASE_PATH}}${{env.LINUX}}.zip
-        unzip ${{env.LINUX}}.zip
-        echo "LINUX=${{env.LINUX}}" >> $GITHUB_ENV
+        unzip ${{env.LINUX}}.zip ${{env.FX_LINUX}}
 
     - name: Upload JavaFX
       uses: actions/upload-artifact@v3
       with:
-        name: javafx-win
-        path: $WINDOWS
+        name: ${{env.FX_WIN}}
+        path: ${{env.FX_WIN}}
 
     - name: Upload JavaFX
       uses: actions/upload-artifact@v3
       with:
-        name: javafx-mac
-        path: $MACOS
+        name: ${{env.FX_MAC}}
+        path: ${{env.FX_MAC}}
 
     - name: Upload JavaFX
       uses: actions/upload-artifact@v3
       with:
-        name: javafx-linux
-        path: $LINUX
+        name: ${{env.FX_LINUX}}
+        path: ${{env.FX_LINUX}}
         
     - name: Upload Jar
       uses: actions/upload-artifact@v3
