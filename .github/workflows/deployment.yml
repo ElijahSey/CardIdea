@@ -92,9 +92,9 @@ jobs:
     strategy:
       matrix:
         var: [
-          {os: windows-latest, name: win, type: msi, options: --win-dir-chooser --win-shortcut-prompt --win-menu, br: ^},
-          {os: macos-latest, name: mac, type: dmg, options: , br: \},
-          {os: ubuntu-latest, name: linux, type: deb, options: --linux-shortcut, br: \}
+          {os: windows-latest, name: win, type: msi, options: --win-dir-chooser --win-shortcut-prompt --win-menu},
+          {os: macos-latest, name: mac, type: dmg, options: },
+          {os: ubuntu-latest, name: linux, type: deb, options: --linux-shortcut}
         ]
     env:
       INST_NAME: cardidea-${{ needs.build.outputs.version }}-${{matrix.var.name}}.${{matrix.var.type}}
@@ -139,27 +139,29 @@ jobs:
           mv ${{env.JAVAFX_DIR}}/* ${{env.JAVAFX_DIR}}/javafx
 
       - name: Create Runtime Image
+        shell: bash
         run: |
-          jlink ${{matrix.var.br}}
-            --no-header-files ${{matrix.var.br}}
-            --no-man-pages ${{matrix.var.br}}
-            --compress=1 ${{matrix.var.br}}
-            --strip-debug ${{matrix.var.br}}
-            --module-path ${{env.JAVAFX_DIR}}/javafx ${{matrix.var.br}}
-            --add-modules javafx.base,javafx.controls,javafx.fxml ${{matrix.var.br}}
+          jlink \
+            --no-header-files \
+            --no-man-pages \
+            --compress=1 \
+            --strip-debug \
+            --module-path ${{env.JAVAFX_DIR}}/javafx \
+            --add-modules javafx.base,javafx.controls,javafx.fxml \
             --output ${{env.RUNTIME_IMAGE}}
 
       - name: Create Package
+        shell: bash
         run: |
-          jpackage ${{matrix.var.br}}
-            --name cardIDEA ${{matrix.var.br}}
-            --input ${{env.PACKAGE_DIR}} ${{matrix.var.br}}
-            --main-jar cardidea-${{ needs.build.outputs.version }}.jar ${{matrix.var.br}}
-            --runtime-image ${{env.RUNTIME_IMAGE}} ${{matrix.var.br}}
-            --java-options '-splash:$APPDIR/splashscreen.png' ${{matrix.var.br}}
-            --type ${{matrix.var.type}} ${{matrix.var.br}}
-            --app-version ${{ needs.build.outputs.version }} ${{matrix.var.br}}
-            --icon cardidea.ico ${{matrix.var.br}}
+          jpackage \
+            --name cardIDEA \
+            --input ${{env.PACKAGE_DIR}} \
+            --main-jar cardidea-${{ needs.build.outputs.version }}.jar \
+            --runtime-image ${{env.RUNTIME_IMAGE}} \
+            --java-options '-splash:$APPDIR/splashscreen.png' \
+            --type ${{matrix.var.type}} \
+            --app-version ${{ needs.build.outputs.version }} \
+            --icon cardidea.ico \
             ${{matrix.var.options}}
 
       - name: Rename Package
