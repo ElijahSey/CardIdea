@@ -154,13 +154,13 @@ jobs:
           jpackage \
             --name cardIDEA \
             --input ${{env.PACKAGE_DIR}} \
-            --main-jar cardidea-${{ github.event.inputs.tag }}.jar \
+            --main-jar cardidea-${{ needs.build.outputs.version }}.jar \
             --runtime-image ${{env.RUNTIME_IMAGE}} \
             --java-options '-splash:$APPDIR/splashscreen.png' \
             --type ${{matrix.var.type}} \
-            --app-version ${{ github.event.inputs.tag }}\
+            --app-version ${{ needs.build.outputs.version }} \
             --icon cardidea.ico \
-            ${{matrix.var.options}} 
+            ${{matrix.var.options}}
 
       - name: Rename Package
         run: mv card*.${{matrix.var.type}} ${{env.INST_NAME}}
