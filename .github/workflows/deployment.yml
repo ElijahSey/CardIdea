@@ -152,6 +152,7 @@ jobs:
             --type ${{matrix.var.type}} \
             --app-version ${{ needs.build.outputs.version }} \
             --icon cardidea.ico \
+            --verbose
             ${{matrix.var.options}}
 
       - name: Rename Package
