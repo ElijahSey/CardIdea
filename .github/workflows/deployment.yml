@@ -141,6 +141,7 @@ jobs:
       - name: Create Package (JPackage)
         shell: bash
         run: |
+          ls -la ${{env.JAVAFX_DIR}}/javafx
           jpackage \
             --name cardIDEA \
             --input ${{env.PACKAGE_DIR}} \
