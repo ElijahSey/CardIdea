@@ -110,7 +110,7 @@
 							<classpathPrefix>lib/</classpathPrefix>
 						</manifest>
 						<manifestEntries>
-							<SplashScreen-Image>images/card_logo.png</SplashScreen-Image>
+							<JavaFX-Preloader-Class>SplashScreenLoader</JavaFX-Preloader-Class>
 						</manifestEntries>
 					</archive>
 				</configuration>

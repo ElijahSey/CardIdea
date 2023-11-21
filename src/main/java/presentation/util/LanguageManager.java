@@ -3,8 +3,6 @@ package presentation.util;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import javax.swing.JOptionPane;
-
 public final class LanguageManager {
 
 	private Locale locale;
@@ -45,7 +43,6 @@ public final class LanguageManager {
 	public void setLocale(Locale locale) {
 
 		this.locale = locale;
-		JOptionPane.setDefaultLocale(locale);
 		Locale.setDefault(locale);
 	}
 

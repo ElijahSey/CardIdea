@@ -137,21 +137,32 @@ jobs:
           mv ${{env.PACKAGE_DIR}}/target/* ${{env.PACKAGE_DIR}}/
           rmdir ${{env.PACKAGE_DIR}}/target
           mv ${{env.JAVAFX_DIR}}/* ${{env.JAVAFX_DIR}}/javafx
+          mv ${{env.JAVAFX_DIR}}/javafx/* ${{env.JAVAFX_DIR}}/
+
+      - name: Create Custom Runtime (JLink)
+        shell: bash
+        run: |
+          jlink \
+            --no-header-files \
+            --no-man-pages \
+            --compress=0 \
+            --strip-debug \
+            --module-path ${{env.JAVAFX_DIR}} \
+            --add-modules javafx.controls,javafx.fxml \
+            --output ${{env.RUNTIME_IMAGE}}
 
       - name: Create Package (JPackage)
         shell: bash
         run: |
-          ls -la ${{env.JAVAFX_DIR}}/javafx
           jpackage \
             --name cardIDEA \
             --input ${{env.PACKAGE_DIR}} \
             --main-jar cardidea-${{ needs.build.outputs.version }}.jar \
-            --module-path ${{env.JAVAFX_DIR}}/javafx \
-            --add-modules javafx.controls,javafx.fxml \
-            --java-options '-splash:$APPDIR/splashscreen.png' \
+            --runtime-image ${{env.RUNTIME_IMAGE}}
             --type ${{matrix.var.type}} \
             --app-version ${{ needs.build.outputs.version }} \
             --icon cardidea.ico \
+            --vendor "ElijahSey" \
             --verbose \
             ${{matrix.var.options}}
 

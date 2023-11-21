@@ -1,12 +1,12 @@
 package presentation.basic;
 
-import java.awt.SplashScreen;
 import java.io.IOException;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import dataAccess.PropertyManager;
 import entity.Repository;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -38,30 +38,21 @@ public class MainFrame extends Application {
 	private static final String APP_NAME = "cardIDEA";
 
 	@Override
-	public void start(Stage primaryStage) {
+	public void init() {
 
 		instance = this;
-		SplashScreen splash = showSplashScreen();
-
-		stage = primaryStage;
+		PropertyManager.initializeProperties();
 		lm = LanguageManager.getInstance();
 		screens = new LinkedList<>();
 		cardImage = new Image(getClass().getResourceAsStream("/images/card_logo.png"));
-
-		createMainFrame();
-		primaryStage.show();
-		if (splash != null) {
-			splash.close();
-		}
 	}
 
-	private SplashScreen showSplashScreen() {
+	@Override
+	public void start(Stage primaryStage) {
 
-		SplashScreen splash = SplashScreen.getSplashScreen();
-		if (splash == null) {
-			System.err.println("Image for splashscreen not found");
-		}
-		return splash;
+		stage = primaryStage;
+		createMainFrame();
+		primaryStage.show();
 	}
 
 	private void createMainFrame() {
