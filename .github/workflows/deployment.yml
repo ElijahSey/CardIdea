@@ -81,7 +81,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '${{env.JAVA_VERSION}}'
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-package: 'jdk+fx'
           settings-path: ${{ github.workspace }}
           cache: 'maven'
