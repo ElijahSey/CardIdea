@@ -44,38 +44,6 @@ jobs:
       run: mvn -B package -Dmaven.test.skip=true
       env:
         GITHUB_TOKEN: ${{ github.token }}
-
-    - name: Download JavaFX
-      env:
-        BASE_PATH: https://download2.gluonhq.com/openjfx/${{env.JAVAFX_VERSION}}/
-        WINDOWS: openjfx-${{env.JAVAFX_VERSION}}_windows-x64_bin-jmods
-        MACOS: openjfx-${{env.JAVAFX_VERSION}}_osx-x64_bin-jmods
-        LINUX: openjfx-${{env.JAVAFX_VERSION}}_linux-x64_bin-jmods
-      run: |
-        wget ${{env.BASE_PATH}}${{env.WINDOWS}}.zip
-        unzip ${{env.WINDOWS}}.zip -d ${{env.FX_WIN}}
-        wget ${{env.BASE_PATH}}${{env.MACOS}}.zip
-        unzip ${{env.MACOS}}.zip -d ${{env.FX_MAC}}
-        wget ${{env.BASE_PATH}}${{env.LINUX}}.zip
-        unzip ${{env.LINUX}}.zip -d ${{env.FX_LINUX}}
-
-    - name: Upload JavaFX Windows
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{env.FX_WIN}}
-        path: ${{env.FX_WIN}}
-
-    - name: Upload JavaFX MacOS
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{env.FX_MAC}}
-        path: ${{env.FX_MAC}}
-
-    - name: Upload JavaFX Linux
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{env.FX_LINUX}}
-        path: ${{env.FX_LINUX}}
         
     - name: Upload Jar
       uses: actions/upload-artifact@v3
@@ -99,8 +67,7 @@ jobs:
     env:
       INST_NAME: cardidea-${{ needs.build.outputs.version }}-${{matrix.var.name}}.${{matrix.var.type}}
       PACKAGE_DIR: ./package-dir
-      JAVAFX_DIR: ./javafx
-      RUNTIME_IMAGE: jre
+      RUNTIME_IMAGE: custom-jre
 
     runs-on: ${{matrix.var.os}}
     needs: [build]
@@ -115,7 +82,7 @@ jobs:
         with:
           java-version: '${{env.JAVA_VERSION}}'
           distribution: 'temurin'
-          server-id: github
+          java-package: 'jdk+fx'
           settings-path: ${{ github.workspace }}
           cache: 'maven'
           check-latest: true
@@ -126,18 +93,10 @@ jobs:
           name: target
           path: ${{env.PACKAGE_DIR}}
 
-      - name: Download JavaFX
-        uses: actions/download-artifact@v3
-        with:
-          name: javafx-${{matrix.var.name}}
-          path: ${{env.JAVAFX_DIR}}
-
       - name: Structure Folders
         run: |
           mv ${{env.PACKAGE_DIR}}/target/* ${{env.PACKAGE_DIR}}/
           rmdir ${{env.PACKAGE_DIR}}/target
-          mv ${{env.JAVAFX_DIR}}/* ${{env.JAVAFX_DIR}}/javafx
-          mv ${{env.JAVAFX_DIR}}/javafx/* ${{env.JAVAFX_DIR}}/
 
       - name: Create Custom Runtime (JLink)
         shell: bash
@@ -147,7 +106,6 @@ jobs:
             --no-man-pages \
             --compress=0 \
             --strip-debug \
-            --module-path ${{env.JAVAFX_DIR}} \
             --add-modules java.logging,java.sql,java.naming,javafx.controls,javafx.fxml \
             --output ${{env.RUNTIME_IMAGE}}
 
