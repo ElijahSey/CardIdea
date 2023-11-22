@@ -148,7 +148,7 @@ jobs:
             --compress=0 \
             --strip-debug \
             --module-path ${{env.JAVAFX_DIR}} \
-            --add-modules javafx.controls,javafx.fxml \
+            --add-modules java.logging,java.sql,java.naming,javafx.controls,javafx.fxml \
             --output ${{env.RUNTIME_IMAGE}}
 
       - name: Create Package (JPackage)
